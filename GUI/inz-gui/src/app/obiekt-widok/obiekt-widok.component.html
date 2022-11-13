@@ -1,0 +1,18 @@
+<div class="text-center">
+  <h4>Transmitancja obiektu:</h4>
+  <p>{{pierwszeRownanie}}</p>
+  <h5>Wprowadź wartości transmitancji:</h5>
+  <ul class="ZmienneObiektu">
+    <form>
+    <li *ngFor="let zmienna of zmienne" class="text-cente">
+      
+      <div class="form-outline">
+        <label class="form-label font-bold" for="typeNumber"> {{zmienna.nazwa}} </label>
+        <span><input type="number" class="form-control " id="{{zmienna.id}}" placeholder="{{zmienna.nazwa}}"> </span>
+        
+        
+      </div>
+    </li>
+  </form>
+  </ul>
+</div>
