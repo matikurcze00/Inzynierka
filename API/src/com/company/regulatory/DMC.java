@@ -24,7 +24,9 @@ public class DMC extends Regulator{
         policzS(obiekt);
         policzM();
     }
+    public void zmienWartosci(double[] wartosci){
 
+    }
     private void policzS(Obiekt obiekt)
     {
         S = new double[D];

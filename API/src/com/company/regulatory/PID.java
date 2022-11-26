@@ -37,12 +37,7 @@ public class PID extends Regulator{
             du=duMax;
         else if (du<-duMax)
             du=-duMax;
-        double U=aktualna+du;
-        if (U>uMax)
-            U=uMax;
-        else if (U<uMin)
-            U=uMin;
-        return U;
+        return du;
     }
 
     public PID(double P, double I, double D, double Ts, double cel, double duMax, double uMax, double uMin)
@@ -56,6 +51,7 @@ public class PID extends Regulator{
         this.uMax = uMax;
         this.uMin = uMin;
         policzWartosci();
+        E = Arrays.asList(0.0,0.0,0.0);
     }
     public void zmienWartosci(double[] wartosci)
     {

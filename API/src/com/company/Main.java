@@ -1,26 +1,39 @@
 package com.company;
 
+import com.company.EA.AlgorytmEwolucyjny;
 import com.company.regulatory.PID;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class Main {
 
     public static void main(String[] args) {
-
-        Obiekt obiekt = new Obiekt(0.6,2,0.7,0.2);
+        Obiekt obiekt = new Obiekt(0.6,-2,0.07,0.02, 0.6,100,0);
         List<Double> Y = new ArrayList<>();
 
-        PID pid = new PID(-0.1212,-0.196,-0.3265,0.5,29.0, 3, 100, -100);
-        AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny();
-        for (int i = 0; i<40; i++)
+        PID pid = new PID(0.0,0.0,0.0,0.5,29.0, 3, 100, 0);
+
+        AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(1000, 400, 100, 0.3,0.2);
+        double[] tempD = GA.dobierzWartosci(3,pid,obiekt);
+        Y.clear();
+        pid.zmienWartosci(tempD);
+        pid.setCel(obiekt.getYMax()/3);
+        for (int i = 0; i<100; i++)
         {
+
             Y.add(obiekt.obliczKrok(pid.policzOutput(obiekt.getAktualna())));
         }
-        double[] tempD = {1.0,10000.0,0.0};
-        System.out.println(Y);
-        System.out.println((GA.dobierzWartosci(3,pid))[0]);
+        double blad = 0.0;
+        for(int i = 0; i<50; i++)
+        {
+            blad+=Math.pow(Y.get(i)-pid.getCel(),2);
+        }
+        blad=blad/Y.size();
+        System.out.println("BLAD:" + blad);
+        System.out.println("Wartosci pid" + pid.getK() +"| " + pid.getTi() + " | "+pid.getTi());
+        System.out.println("Y : " + Y);
+        System.out.println("CEL: " + pid.getCel());
     }
 }
