@@ -11,4 +11,5 @@ abstract public class Regulator {
     double Error;
     abstract public double policzOutput(double aktualna);
     abstract public void zmienWartosci(double[] wartosci);
+    abstract public void resetujRegulator();
 }

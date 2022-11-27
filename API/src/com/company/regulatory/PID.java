@@ -51,14 +51,20 @@ public class PID extends Regulator{
         this.uMax = uMax;
         this.uMin = uMin;
         policzWartosci();
-        E = Arrays.asList(0.0,0.0,0.0);
+        resetujRegulator();
     }
+    @Override
     public void zmienWartosci(double[] wartosci)
     {
         this.K = wartosci[0];
         this.Ti = wartosci[1];
         this.Td = wartosci[2];
         policzWartosci();
+    }
+    @Override
+    public void resetujRegulator()
+    {
+        E = Arrays.asList(0.0,0.0,0.0);
     }
     private void policzWartosci()
     {

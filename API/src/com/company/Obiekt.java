@@ -35,8 +35,8 @@ public class Obiekt {
         this.setK(K);
         this.setUMax(uMax);
         this.setUMin(uMin);
-        this.Ypp = Ypp;
-        this.Upp = Upp;
+        this.Ypp = 0;
+        this.Upp = 0;
         this.YMax = obliczYMax();
     }
 
