@@ -11,12 +11,14 @@ import java.util.Optional;
 public class Main {
 
     public static void main(String[] args) {
-        Obiekt obiekt = new Obiekt(0.6,-2,0.07,0.02, 0.6,100,0);
+        double[] b = {1.0,2.0};
+        double[] z = {3.0,4.0,5.0};
+        Obiekt obiekt = new Obiekt(b,z,10, 100,0,1);
         List<Double> Y = new ArrayList<>();
 
 //        PID pid = new PID(0.0,0.0,0.0,0.5,29.0, 3, 100, 0);
 //        AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(1000, 400, 100, 0.3,0.2);
-        DMC dmc = new DMC(2,0.01,obiekt, 29.0, 3);
+        DMC dmc = new DMC(2,0.1,obiekt, 29.0, 3);
 //        double[] tempD = GA.dobierzWartosci(3,pid,obiekt);
         Y.clear();
         obiekt.resetObiektu();

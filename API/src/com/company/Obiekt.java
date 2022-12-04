@@ -3,36 +3,32 @@ package com.company;
 import com.company.regulatory.Regulator;
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Data
 public class Obiekt {
 
-    private double z1;
-    private double z2;
-    private double b1;
-    private double b2;
+    private double[] z;
+    private double[] b;
     private double K;
     private double uMax;
     private double uMin;
-    private List<Double> U = Arrays.asList(0.0,0.0);
-    private List<Double> Y = Arrays.asList(0.0,0.0);
+    private List<Double> U ;
+    private List<Double> Y ;
     private double Ypp;
     private double Upp;
     private double YMax;
+    private double Ts;
     public Obiekt() {
     }
 
-    public Obiekt(double z1, double z2, double b1, double b2, double K, double uMax, double uMin)
+    public Obiekt(double[] z,double[] b, double K, double uMax, double uMin, double Ts)
     {
-        this.setZ1(z1);
-        this.setZ2(z2);
-        this.setB1(b1);
-        this.setB2(b2);
+        this.Ts = Ts;
         this.setK(K);
+        if(z.length==2&&b.length==3)
+            obiekt2b3z(z,b);
+
         this.setUMax(uMax);
         this.setUMin(uMin);
         this.Ypp = 0;
@@ -47,12 +43,19 @@ public class Obiekt {
             Uakt=uMax;
         else if (Uakt<uMin)
             Uakt=uMin;
+        for(int i = U.size()-1; i>0 ;i--)
+            U.set(i,U.get(i-1));
+        U.set(0,Uakt);
 
         double Yakt ;
-        Yakt = K * Uakt - K * (z1+z2) * U.get(0) + K * z1 * z2 * U.get(1)  + (b1 + b2) * Y.get(0) - b1 * b2 * Y.get(1);
-        U.set(1, U.get(0));
-        U.set(0,Uakt);
-        Y.set(1, Y.get(0));
+        Yakt = 0.0 ;
+        for(int i = 0; i<z.length; i++)
+            Yakt+=U.get(i)*z[i];
+        for(int i = 0; i<b.length; i++)
+            Yakt+=Y.get(i)*b[i];
+
+        for(int i = Y.size()-1; i>0 ;i--)
+            Y.set(i,Y.get(i-1));
         Y.set(0,Yakt);
         return Yakt;
     }
@@ -68,8 +71,8 @@ public class Obiekt {
 
     public void resetObiektu()
     {
-        setU(Arrays.asList(Upp,Upp));
-        setY(Arrays.asList(Ypp,Ypp));
+        setU(new ArrayList<Double>(Collections.nCopies(U.size(), Upp)));
+        setY(new ArrayList<Double>(Collections.nCopies(Y.size(), Ypp)));
     }
     public double obliczPraceObiektu(Regulator regulator, double cel)
     {
@@ -103,5 +106,35 @@ public class Obiekt {
         Ytemp = getAktualna();
         resetObiektu();
         return Ytemp;
+    }
+    private void obiekt2b3z(double[] z, double[] b)
+    {
+        double z1 = z[0];
+        double z2 = z[1];
+        double b1 = b[0];
+        double b2 = b[1];
+        double b3 = b[2];
+        this.U = Arrays.asList(0.0,0.0,0.0);
+        this.Y = Arrays.asList(0.0,0.0,0.0);
+        this.z = new double[3];
+        this.b = new double[3];
+
+        double k = (b1*b1+(-(z1+z2)*b1)+z1*z2)/((b2-b1)*b3- b1*b2+b1*b1)/b1;
+        double l = -(b2*b2+(-(z1+z2)*b2 + z1*z2))/((b2-b1)*b3-b2*b2+b1*b2)/b2;
+        double m = (b3*b3+(-(z1+z2)*b3+z1*z2))/(b3*b3-(b1+b2)*b3+b1*b2)/b3;
+        double ap = ePotega(b1);
+        double bp = ePotega(b2);
+        double cp = ePotega(b3);
+        this.z[0] = this.K*(-k*ap + k - l*bp + l - m*cp + m);
+        this.z[1] = this.K*(k*ap*cp + k*ap*bp - k*cp - k*bp + l*bp*cp + l*bp*ap -l*cp - l*ap + m*bp*cp + m*ap*cp - m*bp - m*ap);
+        this.z[2] = this.K*(-k*ap*bp*cp + k*bp*cp - l*ap*bp*cp + l*ap*cp - m*ap*bp*cp +m*ap*bp);
+
+        this.b[0] = ap+bp+cp;
+        this.b[1] = ap*bp + ap*cp + bp*cp;
+        this.b[2] = ap*bp*cp;
+    }
+    private double ePotega(double x)
+    {
+        return Math.exp(-x*this.Ts);
     }
 }
