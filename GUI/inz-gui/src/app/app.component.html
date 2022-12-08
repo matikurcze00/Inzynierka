@@ -1,9 +1,28 @@
 <div>
-<app-naglowek class="mt-5"></app-naglowek>
-<app-obiekt-widok class="mt-5"></app-obiekt-widok>
-<app-regulator-widok class="mt-5"></app-regulator-widok>
+  <app-naglowek class="mt-5"></app-naglowek>
+<form (ngSubmit)="onSubmit()" novalidate>
+  <div class="dane">
+    <app-obiekt-widok (updateEvent)="updateObiekt($event)" ></app-obiekt-widok>
+    <app-regulator-widok (updateEvent)="updateRegulator($event)"></app-regulator-widok>
+  </div>
+  <div class="text-center mt-5">
+    <h4>Dobierz Strojenie regulatora</h4>
+    <button class="btn btn-success" type="submit" >Dobierz Strojenie</button>
+  </div>
+</form>
 </div>
-<div class="text-center mt-5">
-  <h4>Dobierz Strojenie regulatora</h4>
-<button class="btn btn-success">Dobeirz Strojenie</button>
+<div class="wykres-odp">
+
+  <div *ngIf="odpowiedz">
+    <div *ngIf="odpowiedz.typRegulatora=='pid'">
+      <p><b>P</b> = {{odpowiedz.wspolczynniki[0]}}</p>
+      <p><b>I</b> = {{odpowiedz.wspolczynniki[1]}}</p>
+      <p><b>D</b> = {{odpowiedz.wspolczynniki[2]}}</p>
+    </div>
+    <div *ngIf="odpowiedz.typRegulatora=='dmc'">
+      <p><b>Lambda</b> = {{odpowiedz.wspolczynniki[0]}}</p>
+
+    </div>
+  </div>
+  <canvas  id='myChart'>{{this.myChart}}</canvas>
 </div>

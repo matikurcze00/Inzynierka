@@ -1,0 +1,12 @@
+.dane{
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  width: calc(100%-15rem);
+  padding: 1rem;
+}
+.wykres-odp{
+  width: 60%;
+  text-align: center;
+  margin: auto;
+}
