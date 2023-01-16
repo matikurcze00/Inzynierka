@@ -1,7 +1,7 @@
 package com.example.inzynierka.regulatory;
 
 import Jama.Matrix;
-import com.example.inzynierka.Obiekt;
+import com.example.inzynierka.obiekty.SISO;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -42,17 +42,19 @@ public class DMC extends Regulator{
         return Utemp.get(0,0);
     }
 
-    public DMC(int Nu, double lambda, Obiekt obiekt, double cel, double duMax)
+    public DMC(int Nu, double lambda, SISO SISO, double cel, double duMax, int N)
     {
         this.Lambda = lambda;
         this.Nu = Nu;
+        this.N = N;
         this.cel = cel;
         this.duMax = duMax;
-        policzWartosci(obiekt);
+        policzWartosci(SISO);
+
     }
-    private void policzWartosci(Obiekt obiekt)
+    private void policzWartosci(SISO SISO)
     {
-        policzS(obiekt);
+        policzS(SISO);
         policzMp();
         policzM();
         policzK();
@@ -72,21 +74,21 @@ public class DMC extends Regulator{
         Arrays.fill(uTemp,0);
         dU = new Matrix(uTemp,1);
     }
-    private void policzS(Obiekt obiekt)
+    private void policzS(SISO SISO)
     {
-        double U = obiekt.getUMax()/2;
+        double U = SISO.getUMax()/2;
         int i = 2;
         S = new ArrayList<Double>();
-        S.add((obiekt.obliczKrok(U)- obiekt.getYpp())/U);
-        S.add((obiekt.obliczKrok(U)- obiekt.getYpp())/U);
-        while(Math.abs(S.get(i-1)-S.get(i-2))>Math.abs(obiekt.getYMax()/500)||S.get(i-2)==0.0)
+        S.add((SISO.obliczKrok(U)- SISO.getYpp())/U);
+        S.add((SISO.obliczKrok(U)- SISO.getYpp())/U);
+        while((!(S.get(i-1)==S.get(i-2))||S.get(i-2)==0.0)&&i<11)
         {
-            S.add((obiekt.obliczKrok(U)- obiekt.getYpp())/U);
+            S.add((SISO.obliczKrok(U)- SISO.getYpp())/U);
             i++;
         }
 
         this.D = S.size();
-        this.N = S.size();
+
     }
     private void policzMp()
     {

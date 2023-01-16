@@ -12,6 +12,7 @@ import { StrojenieService } from './service/strojenie.service';
 })
 
 export class AppComponent {
+  zakladka = "model"
   constructor(private strojenieService: StrojenieService) 
   {Chart.register(...registerables)}
   odpowiedz?: Odpowiedz;

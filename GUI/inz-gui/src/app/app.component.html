@@ -1,19 +1,85 @@
 <div>
   <app-naglowek class="mt-5"></app-naglowek>
-<form (ngSubmit)="onSubmit()" novalidate>
-  <div class="dane">
-    <app-obiekt-widok (updateEvent)="updateObiekt($event)" ></app-obiekt-widok>
-    <app-regulator-widok (updateEvent)="updateRegulator($event)"></app-regulator-widok>
+<form (ngSubmit)="onSubmit()" class="text-center" novalidate>
+  <div class="btn-group  mt-5">
+    <input
+    mdbRadio
+    type="radio"
+    class="btn-check"
+    name="options"
+    id="option1"
+    autocomplete="off"
+    [checked]="true"
+    (change)="zakladka='model'"
+  />
+  <label class="btn btn-secondary" for="option1" >Model</label>
+  <input
+    mdbRadio
+    type="radio"
+    class="btn-check"
+    name="options"
+    id="option2"
+    autocomplete="off"
+    (change)="zakladka='regulator'"
+  />
+  <label class="btn btn-secondary" for="option2">Regulator</label>
+  <input
+    mdbRadio
+    type="radio"
+    class="btn-check"
+    name="options"
+    id="option3"
+    autocomplete="off"
+    (change)="zakladka='wizualizacja'"
+  />
+  <label class="btn btn-secondary" for="option3">Wizualizacja</label>
   </div>
-  <div class="text-center mt-5">
-    <h4>Dobierz Strojenie regulatora</h4>
-    <button class="btn btn-success" type="submit" >Dobierz Strojenie</button>
+  <div class="dane">
+    <app-obiekt-widok (updateEvent)="updateObiekt($event)" *ngIf="zakladka=='model'"></app-obiekt-widok>
+    <app-regulator-widok (updateEvent)="updateRegulator($event)" *ngIf="zakladka=='regulator'"></app-regulator-widok>
+  </div>
+
+  <div class="text-center" *ngIf="zakladka=='wizualizacja'">
+    <h4>Wybierz sposób liczenia błędu</h4>
+    <div class="btn-group  mt-5">
+      <input
+      mdbRadio
+      type="radio"
+      class="btn-check"
+      name="options-wizualizacja"
+      id="option1-wizualizacja"
+      autocomplete="off"
+      [checked]="true"
+    />
+    <label class="btn btn-secondary" for="option1-wizualizacja" >Średniokwadratowy</label>
+    <input
+      mdbRadio
+      type="radio"
+      class="btn-check"
+      name="options-wizualizacja"
+      id="option2-wizualizacja"
+      autocomplete="off"
+    />
+    <label class="btn btn-secondary" for="option2-wizualizacja">Absolutny</label>
+    <input
+      mdbRadio
+      type="radio"
+      class="btn-check"
+      name="options-wizualizacja"
+      id="option3-wizualizacja"
+      autocomplete="off"
+    />
+    <label class="btn btn-secondary" for="option3-wizualizacja">Mediana błędu</label>
+    </div>
+    <div class="mt-5">
+      <button class="btn btn-success" type="submit">Dobierz Strojenie</button>
+    </div>
   </div>
 </form>
 </div>
-<div class="wykres-odp">
+<div class="wykres-odp" >
 
-  <div *ngIf="odpowiedz">
+  <div *ngIf="odpowiedz &&zakladka=='wizualizacja'">
     <div *ngIf="odpowiedz.typRegulatora=='pid'">
       <p><b>P</b> = {{odpowiedz.wspolczynniki[0]}}</p>
       <p><b>I</b> = {{odpowiedz.wspolczynniki[1]}}</p>

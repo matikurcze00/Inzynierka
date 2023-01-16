@@ -1,6 +1,6 @@
 package com.example.inzynierka.EA;
 
-import com.example.inzynierka.Obiekt;
+import com.example.inzynierka.obiekty.SISO;
 import com.example.inzynierka.regulatory.Regulator;
 import lombok.Data;
 
@@ -32,34 +32,34 @@ public class AlgorytmEwolucyjny {
     public AlgorytmEwolucyjny() {
     }
 
-    public double[] dobierzWartosci(int liczbaArgumentow, Regulator regulator, Obiekt obiekt)
+    public double[] dobierzWartosci(int liczbaArgumentow, Regulator regulator, SISO SISO)
     {
         populacja = new ArrayList<Osobnik>();
         Random r = new Random();
-        double YMax = obiekt.getYMax();
+        double YMax = SISO.getYMax();
         regulator.setCel(YMax/2);
         for (int i = 0; i<rozmiarPopulacji; i++)
         {
             Osobnik osobnikTemp = new Osobnik(liczbaArgumentow);
             for(int j = 0; j<liczbaArgumentow; j++)
             {
-                osobnikTemp.setParametryIndex(j,r.nextDouble(1.0));
+                osobnikTemp.setParametryIndex(j,r.nextDouble(5.0));
             }
             regulator.zmienWartosci(osobnikTemp.getParametry());
-            obiekt.resetObiektu();
-            osobnikTemp.setWartosc(obiekt.obliczPraceObiektu(regulator, YMax/2));
+            SISO.resetObiektu();
+            osobnikTemp.setWartosc(SISO.obliczPraceObiektu(regulator, YMax/2));
             populacja.add(osobnikTemp);
         }
         Collections.sort(populacja);
         for(int k = 0; k<liczbaIteracji; k++)
         {
-         mutacje(liczbaArgumentow,regulator, obiekt, YMax);
+         mutacje(liczbaArgumentow,regulator, SISO, YMax);
         }
         Collections.sort(populacja);
         return populacja.get(0).getParametry();
     }
 
-    private void mutacje (int liczbaArgumentow, Regulator regulator, Obiekt obiekt, double YMax)
+    private void mutacje (int liczbaArgumentow, Regulator regulator, SISO SISO, double YMax)
     {
         Random r = new Random();
         List<Osobnik> reprodukcja = new ArrayList<Osobnik>();
@@ -70,16 +70,16 @@ public class AlgorytmEwolucyjny {
         }
         for(int i = 0; i<iloscKrzyzowania; i++)
         {
-            int osobnik1 = r.nextInt(rozmiarElity);
-            int osobnik2 = r.nextInt(rozmiarElity);
+            int osobnik1 = r.nextInt(rozmiarPopulacji);
+            int osobnik2 = r.nextInt(rozmiarPopulacji);
             Osobnik osobnikTemp = new Osobnik(liczbaArgumentow);
             for(int j = 0; j<liczbaArgumentow; j++)
             {
                 osobnikTemp.getParametry()[j]= (r.nextBoolean())? populacja.get(osobnik1).getParametry()[j] : populacja.get(osobnik2).getParametry()[j];
             }
             regulator.zmienWartosci(osobnikTemp.getParametry());
-            obiekt.resetObiektu();
-            osobnikTemp.setWartosc(obiekt.obliczPraceObiektu(regulator, YMax/2));
+            SISO.resetObiektu();
+            osobnikTemp.setWartosc(SISO.obliczPraceObiektu(regulator, YMax/2));
             reprodukcja.add(osobnikTemp);
         }
         for(int i = 0; i<iloscMutacji; i++)
@@ -88,11 +88,11 @@ public class AlgorytmEwolucyjny {
             Osobnik osobnikTemp = new Osobnik(liczbaArgumentow);
             for(int j = 0; j<liczbaArgumentow; j++)
             {
-                osobnikTemp.getParametry()[j]= (r.nextDouble()<getPrawdopodobienstwoMutacji())? r.nextGaussian(populacja.get(rodzic).getParametry()[j],0.4) : populacja.get(rodzic).getParametry()[j];
+                osobnikTemp.getParametry()[j]= (r.nextDouble()<getPrawdopodobienstwoMutacji())? Math.abs(r.nextGaussian(populacja.get(rodzic).getParametry()[j],0.4)) : populacja.get(rodzic).getParametry()[j];
             }
             regulator.zmienWartosci(osobnikTemp.getParametry());
-            obiekt.resetObiektu();
-            osobnikTemp.setWartosc(obiekt.obliczPraceObiektu(regulator, YMax/2));
+            SISO.resetObiektu();
+            osobnikTemp.setWartosc(SISO.obliczPraceObiektu(regulator, YMax/2));
             reprodukcja.add(osobnikTemp);
         }
         populacja = reprodukcja;

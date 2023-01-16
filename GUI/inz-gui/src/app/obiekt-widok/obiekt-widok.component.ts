@@ -8,6 +8,7 @@ import { FormArray, FormControl, FormGroup } from '@angular/forms';
   styleUrls: ['./obiekt-widok.component.css']
 })
 export class ObiektWidokComponent implements OnInit {
+  typ='SISO'
   @Output() updateEvent = new EventEmitter<FormArray>()
   obiektForm = new FormGroup({
     obiekt: new FormArray([
@@ -24,7 +25,8 @@ export class ObiektWidokComponent implements OnInit {
       })
     ])
   })
-  pierwszeRownanie = " G(s) = $ \\large K * \\frac{(s-z1)(s-z2)}{(s-b1)(s-b2)(s-b3)}$";
+  pierwszeRownanie = " $ \\large G(s) = K * \\frac{(s-z1)(s-z2)}{(s-b1)(s-b2)(s-b3)}$";
+  drugieRownanie =  " $ \\large G(s) = K * \\frac{(s-z1)}{(s-b1)(s-b2)(s-b3)}$";
   zmienne = [{id: 1, nazwa: "K"},
             {id: 2, nazwa: "z1"},
             {id: 3, nazwa: "z2"},

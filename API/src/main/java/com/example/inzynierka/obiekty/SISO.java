@@ -1,15 +1,14 @@
-package com.example.inzynierka;
+package com.example.inzynierka.obiekty;
 
 import com.example.inzynierka.regulatory.Regulator;
 import lombok.Data;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 @Data
-public class Obiekt {
+public class SISO {
 
     private double[] z;
     private double[] b;
@@ -24,10 +23,9 @@ public class Obiekt {
     private double Ts;
     private int opoznienie;
     private double szum;
-    public Obiekt() {
-    }
+    public SISO() {}
 
-    public Obiekt(Double[] z, Double[] b, double K, double uMax, double Ts, int opoznienie, double szum)
+    public SISO(Double[] z, Double[] b, double K, double uMax, double Ts, int opoznienie, double szum)
     {
         this.Ts = Ts;
         this.setK(K);
@@ -36,7 +34,9 @@ public class Obiekt {
         this.Upp = 0;
         this.opoznienie = opoznienie;
         if(z.length==2&&b.length==3)
-            obiekt2b3z(z,b);
+            obiekt3b2z(z,b);
+        else if(z.length==1&&b.length==3)
+            obiekt3b1z(z,b);
         this.YMax = obliczYMax();
     }
 
@@ -80,15 +80,17 @@ public class Obiekt {
     }
     public double obliczPraceObiektu(Regulator regulator, double cel)
     {
-        int dlugoscBadania = 100;
+        int dlugoscBadania = 50;
         resetObiektu();
         double blad = 0.0;
         regulator.setCel(cel);
         for (int i = 0; i<dlugoscBadania; i++)
         {
-            blad+=Math.pow(obliczKrok(regulator.policzOutput(getAktualna()))-cel,2);
+            if(i==25)
+                blad = Math.abs(obliczKrok(regulator.policzOutput(getAktualna()))-cel);
+//            blad+=Math.pow(obliczKrok(regulator.policzOutput(getAktualna()))-cel,2);
         }
-        blad=blad/dlugoscBadania;
+//        blad=blad/dlugoscBadania;
         resetObiektu();
         return blad;
     }
@@ -103,7 +105,7 @@ public class Obiekt {
         resetObiektu();
         return Ytemp;
     }
-    private void obiekt2b3z(Double[] z, Double[] b)
+    private void obiekt3b2z(Double[] z, Double[] b)
     {
         double z1 = z[0];
         double z2 = z[1];
@@ -115,9 +117,9 @@ public class Obiekt {
         this.z = new double[3];
         this.b = new double[3];
 
-        double k = (b1*b1+(-(z1+z2)*b1)+z1*z2)/((b2-b1)*b3- b1*b2+b1*b1)/b1;
-        double l = -(b2*b2+(-(z1+z2)*b2 + z1*z2))/((b2-b1)*b3-b2*b2+b1*b2)/b2;
-        double m = (b3*b3+(-(z1+z2)*b3+z1*z2))/(b3*b3-(b1+b2)*b3+b1*b2)/b3;
+        double k = (b1*b1 + (-(z1 + z2)*b1)+z1*z2)/((b2 - b1)*b3 - b1*b2 + b1*b1)/b1;
+        double l = -(b2*b2+(-(z1 + z2)*b2 + z1*z2))/((b2 - b1)*b3 - b2*b2 + b1*b2)/b2;
+        double m = (b3*b3+(-(z1 + z2)*b3 + z1*z2))/(b3*b3 - (b1 + b2)*b3 + b1*b2)/b3;
         double ap = ePotega(b1);
         double bp = ePotega(b2);
         double cp = ePotega(b3);
@@ -128,6 +130,31 @@ public class Obiekt {
         this.b[0] = ap+bp+cp;
         this.b[1] = ap*bp + ap*cp + bp*cp;
         this.b[2] = ap*bp*cp;
+    }
+    private void obiekt3b1z(Double[] z, Double[] b)
+    {
+        double z1 = z[0];
+        double b1 = b[0];
+        double b2 = b[1];
+        double b3 = b[2];
+        this.U = new ArrayList(Collections.nCopies(3+opoznienie, Upp));
+        this.Y = new ArrayList(Collections.nCopies(3, Ypp));;
+        this.z = new double[3];
+        this.b = new double[3];
+        double k = (z1 - b1)/(b1*b1 - b1*b2 + b3*(b2-b1))/b1;
+        double l = (z1 - b2)/(b2*b2 - b1*b2 + b3*(b2-b1))/b2;
+        double m = (b3 - z1)/(b3*b3 + b1*b2 - b3*(b1+b2))/b3;
+        double ap = ePotega(b1);
+        double bp = ePotega(b2);
+        double cp = ePotega(b3);
+        this.z[0] = this.K*(-k*ap + k - l*bp + l - m*cp + m);
+        this.z[1] = this.K*(k*ap*cp + k*ap*bp - k*cp - k*bp + l*bp*cp + l*bp*ap -l*cp - l*ap + m*bp*cp + m*ap*cp - m*bp - m*ap);
+        this.z[2] = this.K*(-k*ap*bp*cp + k*bp*cp - l*ap*bp*cp + l*ap*cp - m*ap*bp*cp +m*ap*bp);
+
+        this.b[0] = ap+bp+cp;
+        this.b[1] = ap*bp + ap*cp + bp*cp;
+        this.b[2] = ap*bp*cp;
+
     }
     private double ePotega(double x)
     {

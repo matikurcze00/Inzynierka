@@ -1,7 +1,7 @@
 package com.example.inzynierka.controller;
 
 import com.example.inzynierka.EA.AlgorytmEwolucyjny;
-import com.example.inzynierka.Obiekt;
+import com.example.inzynierka.obiekty.SISO;
 import com.example.inzynierka.modele.Odpowiedz;
 import com.example.inzynierka.modele.ParObiekt;
 import com.example.inzynierka.modele.ParRegulator;
@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.spring.web.readers.parameter.ParameterRequiredReader;
 
 @RestController
 public class Controller {
@@ -33,6 +32,9 @@ public class Controller {
         try {
             ParObiekt parObiekt = parStrojenie.getParObiekt();
             ParRegulator parRegulator = parStrojenie.getParRegulator();
+            parRegulator.setTyp("pid");
+            parRegulator.setUMax(100.0);
+            parRegulator.setDuMax(3.0);
             Double[] z;
             if (parObiekt.getZ2() != null)
                 z = new Double[]{parObiekt.getZ1(), parObiekt.getZ2()};
@@ -48,33 +50,32 @@ public class Controller {
                 b = new Double[]{parObiekt.getZ1(), parObiekt.getB2()};
             else
                 b = new Double[]{parObiekt.getZ1()};
-
-            Obiekt obiekt = new Obiekt(z, b, parObiekt.getK(), parRegulator.getUMax(), parObiekt.getTs(), parObiekt.getOpoznienie(), parObiekt.getSzum());
+            b[2]=b[2]+9.0;
+            SISO SISO = new SISO(z, b, parObiekt.getK(), parRegulator.getUMax(), parObiekt.getTs(), parObiekt.getOpoznienie(), parObiekt.getSzum());
             Regulator regulator;
             if (parRegulator.getTyp().equals("pid"))
-                regulator = new PID(0.0, 0.0, 0.0, parObiekt.getTs(), obiekt.getYMax() / 2, parRegulator.getDuMax(), parRegulator.getUMax());
+                regulator = new PID(0.0, 0.0, 0.0, parObiekt.getTs(), SISO.getYMax() / 2, parRegulator.getDuMax(), parRegulator.getUMax());
             else if (parRegulator.getTyp().equals("dmc"))
-                regulator = new DMC(2+parObiekt.getOpoznienie(), 0.1, obiekt, obiekt.getYMax() / 2, parRegulator.getDuMax());
+                regulator = new DMC(5, 0.1, SISO, SISO.getYMax() / 2, parRegulator.getDuMax(), 11);
             else
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(100, 50, 10, 0.3, 0.2);
             Odpowiedz odpowiedz = new Odpowiedz();
-            odpowiedz.setWspolczynniki(GA.dobierzWartosci(regulator.liczbaZmiennych(), regulator, obiekt));
+            odpowiedz.setWspolczynniki(GA.dobierzWartosci(regulator.liczbaZmiennych(), regulator, SISO));
             regulator.zmienWartosci(odpowiedz.getWspolczynniki());
-            regulator.setCel(obiekt.getYMax() / 3);
+            regulator.setCel(SISO.getYMax() / 3);
             odpowiedz.setCel(regulator.getCel());
-            double[] Y = new double[100];
-            double[] tempL = {0.001};
-            double[] tempL2 = {0.4};
+            double[] Y = new double[50];
 
-            obiekt.resetObiektu();
-            for (int i = 0; i < 100; i++) {
-                Y[i] = obiekt.obliczKrok(regulator.policzOutput(obiekt.getAktualna()));
+            SISO.resetObiektu();
+            Y[0]=SISO.getYpp();
+            for (int i = 1; i < 50; i++) {
+                Y[i] = SISO.obliczKrok(regulator.policzOutput(SISO.getAktualna()));
             }
             System.out.println("strojenie::OK");
             odpowiedz.setWykres(Y);
             double blad = 0.0;
-            for(int i = 0; i<100; i++)
+            for(int i = 0; i<50; i++)
             {
                 blad+=Math.pow(Y[i]-regulator.getCel(),2);
             }
