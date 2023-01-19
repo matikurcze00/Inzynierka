@@ -4,8 +4,6 @@ import lombok.Data;
 
 @Data
 public class ParObiekt {
-
-
     private Double z1;
     private Double z2;
     private Double b1;

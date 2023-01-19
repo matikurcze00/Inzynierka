@@ -32,9 +32,9 @@ public class Controller {
         try {
             ParObiekt parObiekt = parStrojenie.getParObiekt();
             ParRegulator parRegulator = parStrojenie.getParRegulator();
-            parRegulator.setTyp("pid");
-            parRegulator.setUMax(100.0);
-            parRegulator.setDuMax(3.0);
+//            parRegulator.setTyp("pid");
+//            parRegulator.setUMax(100.0);
+//            parRegulator.setDuMax(3.0);
             Double[] z;
             if (parObiekt.getZ2() != null)
                 z = new Double[]{parObiekt.getZ1(), parObiekt.getZ2()};
@@ -47,10 +47,12 @@ public class Controller {
             if (parObiekt.getB3() != null)
                 b = new Double[]{parObiekt.getB1(), parObiekt.getB2(), parObiekt.getB3()};
             else if (parObiekt.getB2() != null)
-                b = new Double[]{parObiekt.getZ1(), parObiekt.getB2()};
+                b = new Double[]{parObiekt.getB1(), parObiekt.getB2()};
+            else if (parObiekt.getB1() != null)
+                b = new Double[]{parObiekt.getB1()};
             else
-                b = new Double[]{parObiekt.getZ1()};
-            b[2]=b[2]+9.0;
+                b = new Double[]{};
+//            b[2]=b[2]+9.0;
             SISO SISO = new SISO(z, b, parObiekt.getK(), parRegulator.getUMax(), parObiekt.getTs(), parObiekt.getOpoznienie(), parObiekt.getSzum());
             Regulator regulator;
             if (parRegulator.getTyp().equals("pid"))
