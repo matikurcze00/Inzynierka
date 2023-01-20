@@ -11,9 +11,9 @@ import java.util.Collections;
 import java.util.List;
 
 @Data
-public class MIMO extends SISO {
+public class MIMO {
 
-    private List<List<Transmitancja>> transmitancje;
+    private List<List<Transmitancja>> transmitancje; //LIST<LIST-IN<OUT>>
     @ Getter(AccessLevel.NONE)
     private List<List<Double>> U;
     private List<List<Double>> Y;
@@ -49,32 +49,38 @@ public class MIMO extends SISO {
             double YaktIN = 0.0;
             for (int j = 0; j<liczbaOUT; j++)
             {
-                for(int k = 0; k< transmitancje.get(j).get(i).getZ().length; k++)
-                    YaktIN+= U.get(i).get(k+ transmitancje.get(j).get(i).getOpoznienie())* transmitancje.get(j).get(i).getZ()[k];
-                for(int k = 0; k< transmitancje.get(j).get(i).getB().length; k++)
-                    YaktIN+= Y.get(i).get(k)* transmitancje.get(j).get(i).getB()[k];
+                for(int k = 0; k< transmitancje.get(i).get(j).getZ().length; k++)
+                    YaktIN+= U.get(i).get(k+ transmitancje.get(i).get(j).getOpoznienie())* transmitancje.get(i).get(j).getZ()[k];
+                for(int k = 0; k< transmitancje.get(i).get(j).getB().length; k++)
+                    YaktIN+= Y.get(i).get(k)* transmitancje.get(i).get(j).getB()[k];
             }
 
             Yakt[i] = YaktIN;
         }
+        for(int i = 0; i<liczbaOUT; i++) {
+            List<Double> Ytemp = Y.get(i);
+            for (int j = Y.size() - 1; j > 0; j--)
+                Ytemp.set(j, Ytemp.get(j));
+            Ytemp.set(i, Yakt[i]);
+            Y.set(i,Ytemp);
+        }
         return Yakt;
     }
-//    public double[] obliczPraceObiektu(Regulator[] regulator, double[] cel)
-//    {
-//        int dlugoscBadania = 50;
-//        resetObiektu();
-//        double blad = 0.0;
-//        regulator.setCel(cel);
-//        for (int i = 0; i<dlugoscBadania; i++)
-//        {
-//            if(i==25)
-//                blad = Math.abs(obliczKrok(regulator.policzOutput(getAktualna()))-cel);
-////            blad+=Math.pow(obliczKrok(regulator.policzOutput(getAktualna()))-cel,2);
-//        }
-////        blad=blad/dlugoscBadania;
-//        resetObiektu();
-//        return blad;
-//    }
+
+    public double obliczKrok(double du, int IN, int OUT)
+    {
+
+        obliczU(du, IN);
+        double YaktIN = 0.0;
+
+        for(int k = 0; k< transmitancje.get(IN).get(OUT).getZ().length; k++)
+            YaktIN+= U.get(IN).get(k+ transmitancje.get(IN).get(OUT).getOpoznienie())* transmitancje.get(IN).get(OUT).getZ()[k];
+        for(int k = 0; k< transmitancje.get(IN).get(OUT).getB().length; k++)
+            YaktIN+= Y.get(OUT).get(k)* transmitancje.get(IN).get(OUT).getB()[k];
+
+        return YaktIN;
+    }
+
     public void stworzTransmitancje(ParObiektMIMO[] parObiektMIMOS)
     {
         this.transmitancje = new ArrayList();
@@ -122,6 +128,21 @@ public class MIMO extends SISO {
             U.get(j).set(0,Uakt);
         }
     }
+    public void obliczU(double du, int IN)
+    {
+
+        double Uakt = U.get(IN).get(0) + du;
+        if(Uakt>transmitancje.get(IN).get(0).getUMax()) {
+            Uakt=transmitancje.get(IN).get(0).getUMax();
+        }
+        else if (Uakt<transmitancje.get(IN).get(0).getUMin()) {
+            Uakt=transmitancje.get(IN).get(0).getUMin();
+        }
+        for(int i = U.get(IN).size()-1; i>0 ;i--)
+            U.get(IN).set(i,U.get(IN).get(i-1));
+        U.get(IN).set(0,Uakt);
+
+    }
 
 
 
@@ -141,12 +162,19 @@ public class MIMO extends SISO {
     {
         this.Y = noweY;
     }
-    @Override
+
     public double[] getYMax()
     {
         return YMax;
     }
-
+    public double getUMax(int IN)
+    {
+        return transmitancje.get(IN).get(0).getUMax();
+    }
+    public double getYpp(int IN)
+    {
+        return transmitancje.get(IN).get(0).getYpp();
+    }
     private void obliczYMax()
     {
         double[] Ytemp;
@@ -162,6 +190,115 @@ public class MIMO extends SISO {
         Ytemp = getAktualne();
         resetObiektu();
         this.YMax = Ytemp;
+    }
+
+    public void resetObiektu()
+    {
+        for (int i = 0; i < this.liczbaOUT; i++)
+        {
+            Y.set(i, new ArrayList(Collections.nCopies(3, transmitancje.get(i).get(0).getYpp())));
+        }
+        for (int i = 0; i < this.liczbaIN; i++)
+        {
+            U.set(i, new ArrayList(Collections.nCopies(3+transmitancje.get(i).get(0).getOpoznienie(), transmitancje.get(i).get(0).getUpp())));
+        }
+    }
+
+    @Data
+    class Transmitancja {
+
+        private double[] z;
+        private double[] b;
+        private double K;
+        private double uMax;
+        private double uMin = 0;
+
+        private double Ypp;
+        private double Upp;
+
+        private double Ts;
+        private int opoznienie;
+        private double szum;
+
+
+        public Transmitancja(Double[] z, Double[] b, double K, double uMax, double Ts, int opoznienie, double szum)
+        {
+            this.Ts = Ts;
+            this.setK(K);
+            this.setUMax(uMax);
+            this.Ypp = 0;
+            this.Upp = 0;
+            this.opoznienie = opoznienie;
+            if(z.length==2&&b.length==3)
+                obiekt3b2z(z,b);
+            else if(z.length==1&&b.length==3)
+                obiekt3b1z(z,b);
+            else
+                obiektProsty();
+
+        }
+
+
+
+        private void obiekt3b2z(Double[] z, Double[] b)
+        {
+            double z1 = z[0];
+            double z2 = z[1];
+            double b1 = b[0];
+            double b2 = b[1];
+            double b3 = b[2];
+            this.z = new double[3];
+            this.b = new double[3];
+
+            double k = (b1*b1 + (-(z1 + z2)*b1)+z1*z2)/((b2 - b1)*b3 - b1*b2 + b1*b1)/b1;
+            double l = -(b2*b2+(-(z1 + z2)*b2 + z1*z2))/((b2 - b1)*b3 - b2*b2 + b1*b2)/b2;
+            double m = (b3*b3+(-(z1 + z2)*b3 + z1*z2))/(b3*b3 - (b1 + b2)*b3 + b1*b2)/b3;
+            double ap = ePotega(b1);
+            double bp = ePotega(b2);
+            double cp = ePotega(b3);
+            this.z[0] = this.K*(-k*ap + k - l*bp + l - m*cp + m);
+            this.z[1] = this.K*(k*ap*cp + k*ap*bp - k*cp - k*bp + l*bp*cp + l*bp*ap -l*cp - l*ap + m*bp*cp + m*ap*cp - m*bp - m*ap);
+            this.z[2] = this.K*(-k*ap*bp*cp + k*bp*cp - l*ap*bp*cp + l*ap*cp - m*ap*bp*cp +m*ap*bp);
+
+            this.b[0] = ap+bp+cp;
+            this.b[1] = ap*bp + ap*cp + bp*cp;
+            this.b[2] = ap*bp*cp;
+        }
+        private void obiekt3b1z(Double[] z, Double[] b)
+        {
+            double z1 = z[0];
+            double b1 = b[0];
+            double b2 = b[1];
+            double b3 = b[2];
+            this.z = new double[3];
+            this.b = new double[3];
+            double k = (z1 - b1)/(b1*b1 - b1*b2 + b3*(b2-b1))/b1;
+            double l = (z1 - b2)/(b2*b2 - b1*b2 + b3*(b2-b1))/b2;
+            double m = (b3 - z1)/(b3*b3 + b1*b2 - b3*(b1+b2))/b3;
+            double ap = ePotega(b1);
+            double bp = ePotega(b2);
+            double cp = ePotega(b3);
+            this.z[0] = this.K*(-k*ap + k - l*bp + l - m*cp + m);
+            this.z[1] = this.K*(k*ap*cp + k*ap*bp - k*cp - k*bp + l*bp*cp + l*bp*ap -l*cp - l*ap + m*bp*cp + m*ap*cp - m*bp - m*ap);
+            this.z[2] = this.K*(-k*ap*bp*cp + k*bp*cp - l*ap*bp*cp + l*ap*cp - m*ap*bp*cp +m*ap*bp);
+
+            this.b[0] = ap+bp+cp;
+            this.b[1] = ap*bp + ap*cp + bp*cp;
+            this.b[2] = ap*bp*cp;
+
+        }
+        private void obiektProsty()
+        {
+            this.z = new double[1];
+            this.b = new double[0];
+            this.z[0]=this.K;
+        }
+
+        private double ePotega(double x)
+        {
+            return Math.exp(-x*this.getTs());
+        }
+
     }
 
 }

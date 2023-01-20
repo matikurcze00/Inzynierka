@@ -42,7 +42,10 @@ public class SISO {
 
     public void resetObiektu()
     {
-        this.transmitancja.resetObiektu();
+
+            setU(new ArrayList<Double>(Collections.nCopies(U.size(), transmitancja.getUpp())));
+            setY(new ArrayList<Double>(Collections.nCopies(Y.size(), transmitancja.getYpp())));
+
     }
     public double obliczPraceObiektu(Regulator regulator, double cel)
     {
@@ -208,11 +211,7 @@ public class SISO {
         }
 
 
-        public void resetObiektu()
-        {
-            setU(new ArrayList<Double>(Collections.nCopies(U.size(), Upp)));
-            setY(new ArrayList<Double>(Collections.nCopies(Y.size(), Ypp)));
-        }
+
 
         private double ePotega(double x)
         {

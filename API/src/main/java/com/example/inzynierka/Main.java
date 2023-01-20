@@ -28,10 +28,11 @@ public class Main {
         Y.add(obiekt.obliczKrok(du));
         Y.add(obiekt.obliczKrok(du));
         Y.add(obiekt.obliczKrok(du));
-
+        double[] tempLambda = {0.1,0.1};
+        DMC regulator = new DMC(4, tempLambda, obiekt, obiekt.getYMax(), 3, 3);
         for(int k = 0; k<40; k++)
         {
-                Y.add(obiekt.obliczKrok(zero));
+                Y.add(obiekt.obliczKrok(regulator.policzOutput(obiekt.getAktualne())));
 
         }
         System.out.println(Y);
