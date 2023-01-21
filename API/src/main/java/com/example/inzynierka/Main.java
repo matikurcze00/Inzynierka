@@ -16,26 +16,29 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        ////MIMO
+//        ////MIMO
         ObjectMapper objectMapper = new ObjectMapper();
         ParObiektMIMO[] Obiekty = objectMapper.readValue(new File("src/main/java/com/example/inzynierka/ObiektMIMO.json"), ParObiektMIMO[].class);
         System.out.println(Obiekty[0]);
         System.out.println(Obiekty[1]);
         MIMO obiekt  = new MIMO(Obiekty);
-        double[] du = {2.0,8.0};
-        double[] zero = {0.0, 0.0};
+//        double[] du = {0.0,8.0};
+//        double[] zero = {0.0, 0.0};
+        double[] celTemp = {550.0,100.0};
         List<double[]> Y = new ArrayList<>();
-        Y.add(obiekt.obliczKrok(du));
-        Y.add(obiekt.obliczKrok(du));
-        Y.add(obiekt.obliczKrok(du));
         double[] tempLambda = {0.1,0.1};
-        DMC regulator = new DMC(4, tempLambda, obiekt, obiekt.getYMax(), 3, 3);
+        DMC regulator = new DMC(3, tempLambda, obiekt, celTemp, 3, 10);
+        obiekt.resetObiektu();
         for(int k = 0; k<40; k++)
         {
                 Y.add(obiekt.obliczKrok(regulator.policzOutput(obiekt.getAktualne())));
 
         }
-        System.out.println(Y);
+        System.out.println(Y.get(30)[0]);
+        System.out.println(Y.get(30)[1]);
+
+        System.out.println(regulator.getCel()[0]);
+        System.out.println(regulator.getCel()[1]);
         //300;1500
         ////SISO
 //        Double[] b = {1.0, 4.0, 5.0};
@@ -43,14 +46,13 @@ public class Main {
 //        SISO siso = new SISO(z,b,5, 100, 1.0, 0, 0);
 //        List<Double> Y = new ArrayList<>();
 //        double[] resetD = {0};
-//        AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(100, 400, 10, 0.3,0.2);
+////        AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(100, 400, 10, 0.3,0.2);
 //        DMC dmc = new DMC(4,0.1, siso, siso.getYMax()/2, 3, 10);
 //
 //        Double srednia = 0.0;
-//        for(int k = 0; k<3; k++) {
-//            dmc.zmienWartosci(resetD);
-//            double[] tempD = GA.dobierzWartosci(dmc.liczbaZmiennych(), dmc, siso);
-//            dmc.zmienWartosci(tempD);
+////            dmc.zmienWartosci(resetD);
+////            double[] tempD = GA.dobierzWartosci(dmc.liczbaZmiennych(), dmc, siso);
+////            dmc.zmienWartosci(tempD);
 //            Y.clear();
 //            siso.resetObiektu();
 //            for (int i = 0; i < 100; i++) {
@@ -58,13 +60,13 @@ public class Main {
 //            }
 //            double blad = 0.0;
 //            for (int i = 0; i < 50; i++) {
-//                blad += Math.pow(Y.get(i) - dmc.getCel(), 2);
+//                blad += Math.pow(Y.get(i) - dmc.getCel()[0], 2);
 //            }
 //            blad = blad / Y.size();
 //            System.out.println("BLAD:" + blad);
 //            System.out.println("Y : " + Y);
 //            System.out.println("DMC : " + dmc.getLambda());
-//            System.out.println("Zadane : " + dmc.getCel());
+//            System.out.println("Zadane : " + dmc.getCel()[0]);
 //            srednia +=blad;
 //        }
 //        srednia=srednia/3;

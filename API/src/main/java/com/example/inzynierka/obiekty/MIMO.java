@@ -59,9 +59,9 @@ public class MIMO {
         }
         for(int i = 0; i<liczbaOUT; i++) {
             List<Double> Ytemp = Y.get(i);
-            for (int j = Y.size() - 1; j > 0; j--)
-                Ytemp.set(j, Ytemp.get(j));
-            Ytemp.set(i, Yakt[i]);
+            for (int j = Y.get(i).size() - 1; j > 0; j--)
+                Ytemp.set(j, Ytemp.get(j-1));
+            Ytemp.set(0, Yakt[i]);
             Y.set(i,Ytemp);
         }
         return Yakt;
@@ -77,6 +77,12 @@ public class MIMO {
             YaktIN+= U.get(IN).get(k+ transmitancje.get(IN).get(OUT).getOpoznienie())* transmitancje.get(IN).get(OUT).getZ()[k];
         for(int k = 0; k< transmitancje.get(IN).get(OUT).getB().length; k++)
             YaktIN+= Y.get(OUT).get(k)* transmitancje.get(IN).get(OUT).getB()[k];
+
+        List<Double> Ytemp = Y.get(OUT);
+        for (int j = Y.get(OUT).size() - 1; j > 0; j--)
+            Ytemp.set(j, Ytemp.get(j - 1));
+        Ytemp.set(0, YaktIN);
+        Y.set(OUT, Ytemp);
 
         return YaktIN;
     }
@@ -178,6 +184,10 @@ public class MIMO {
     private void obliczYMax()
     {
         double[] Ytemp;
+
+        this.YMax = new double[liczbaOUT];
+        for(int i = 0; i<liczbaOUT; i++)
+            this.YMax[i] = 0.0;
         double[] uMax = new double[liczbaIN];
         for(int i = 0; i < liczbaIN; i ++)
         {
@@ -189,7 +199,9 @@ public class MIMO {
         }
         Ytemp = getAktualne();
         resetObiektu();
-        this.YMax = Ytemp;
+        for(int i = 0; i<this.YMax.length; i++)
+            if(this.YMax[i]<Ytemp[i])
+                this.YMax[i] = Ytemp[i];
     }
 
     public void resetObiektu()

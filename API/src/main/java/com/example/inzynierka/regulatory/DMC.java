@@ -34,10 +34,10 @@ public class DMC { //extends Regulator
             Arrays.fill(tempCel,cel[i]);
             yZadTemp.add(tempCel);
         }
-        Matrix yZad = new Matrix(N,cel.length);
+        Matrix yZad = new Matrix(cel.length, N);
         for(int i = 0; i<cel.length; i++)
             for(int j = 0; j<N; j++)
-                yZad.set(j,i,cel[i]);
+                yZad.set(i,j,cel[i]);
         double[] yTemp = new double[N];
         Arrays.fill(yTemp,aktualna);
         Matrix y = new Matrix(yTemp,1);
@@ -72,6 +72,7 @@ public class DMC { //extends Regulator
             yTemp[i] = aktualna[i%OUT];
         }
         Matrix y = new Matrix(yTemp,1);
+        //UTEMP wychodzi odwrócone
         Matrix Utemp = K.times(yZad.transpose().minus(y.transpose()).minus(Mp.times(dU.transpose())));
         double[] tempdU = new double[aktualna.length];
         for(int i = 0; i<aktualna.length; i++) {
@@ -82,6 +83,12 @@ public class DMC { //extends Regulator
                 Utemp.set(i, 0, -duMax);
             }
             tempdU[i] = Utemp.get(i,0);
+        }
+        for(int i = 0; i < Math.floor(aktualna.length/2); i++)
+        {
+            double temp = tempdU[i];
+            tempdU[i] = tempdU[tempdU.length-i-1];
+            tempdU[tempdU.length-i-1] = temp;
         }
         dodajdU(tempdU);
         return tempdU;
@@ -156,11 +163,12 @@ public class DMC { //extends Regulator
         double U = SISO.getUMax()/2;
         int i = 2;
         List<Double> Stemp = new ArrayList<Double>();
+        double Utemp = 0;
         Stemp.add((SISO.obliczKrok(U)- SISO.getYpp())/U);
-        Stemp.add((SISO.obliczKrok(U)- SISO.getYpp())/U);
+        Stemp.add((SISO.obliczKrok(Utemp)- SISO.getYpp())/U);
         while((!(Stemp.get(i-1)==Stemp.get(i-2)) || Stemp.get(i-2)==0.0) && i<11)
         {
-            Stemp.add((SISO.obliczKrok(U)- SISO.getYpp())/U);
+            Stemp.add((SISO.obliczKrok(Utemp)- SISO.getYpp())/U);
             i++;
         }
         this.S.add(Stemp);
@@ -175,13 +183,15 @@ public class DMC { //extends Regulator
            {
             obiekt.resetObiektu();
             double U = obiekt.getUMax(j)/2;
-            int k = 2;
+            double Utemp = 0;
+
+               int k = 2;
             List<Double> Stemp = new ArrayList<Double>();
             Stemp.add((obiekt.obliczKrok(U, j, i)- obiekt.getYpp(i))/U);
-            Stemp.add((obiekt.obliczKrok(U, j, i)- obiekt.getYpp(i))/U);
+            Stemp.add((obiekt.obliczKrok(Utemp, j, i)- obiekt.getYpp(i))/U);
             while((!(Stemp.get(k-1)==Stemp.get(k-2)) || Stemp.get(k-2)==0.0) && k<11)
             {
-                Stemp.add((obiekt.obliczKrok(U,j, i )- obiekt.getYpp(i))/U);
+                Stemp.add((obiekt.obliczKrok(Utemp,j, i )- obiekt.getYpp(i))/U);
                 k++;
             }
             this.S.add(Stemp);
@@ -222,8 +232,6 @@ public class DMC { //extends Regulator
                     for(int k = 0; k<OUT; k++)
                         for(int m = 0; m<IN; m++)
                             M.set(j*OUT+k,i*IN+m,S.get(k*IN+m).get(j-i));
-                else
-                    M.set(j,i,0);
             }
         }
         this.M = M;
@@ -244,7 +252,7 @@ public class DMC { //extends Regulator
     }
     private void policzMp(int IN, int OUT)
     {
-        Mp = new Matrix(N*IN,(D-1)*OUT);
+        Mp = new Matrix(N*OUT,(D-1)*IN);
         for (int i = 0; i<D-1; i++)
         {
             for (int j = 0; j<N; j++)
@@ -252,9 +260,9 @@ public class DMC { //extends Regulator
                 for(int k = 0; k<OUT; k++) {
                     for (int m = 0; m < IN; m++) {
                         if ((j + i + 1) < D) {
-                            Mp.set(j*OUT+k, i*IN+m, S.get(k*OUT+m).get(j + i + 1) - S.get(k*OUT+m).get(i));
+                            Mp.set(j*OUT+k, i*IN+m, S.get(k*IN+m).get(j + i + 1) - S.get(k*IN+m).get(i));
                         } else
-                            Mp.set(j+k, i+m, S.get(k*IN+m).get(D - 1) - S.get(k*IN+m).get(i));
+                            Mp.set(j*OUT+k, i*IN+m, S.get(k*IN+m).get(D - 1) - S.get(k*IN+m).get(i));
                     }
                 }
             }
