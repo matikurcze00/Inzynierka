@@ -42,17 +42,13 @@ export class AppComponent {
   updateObiekt(updatedObiekt: FormArray) {
     if(updatedObiekt.controls['0']!=undefined){
         this.strojenie.controls.parObiekt.patchValue(updatedObiekt.controls['0'].value)
-    }
-    else{
-      this.strojenie.controls.parObiekt.reset();
-    }
+        console.log("update Obiekt")
+      }
+    
   }
   updateRegulator(updatedRegulator: FormArray) {
     if(updatedRegulator.controls['0']!=undefined){
         this.strojenie.controls.parRegulator.patchValue(updatedRegulator.controls['0'].value)
-    }
-    else{
-      this.strojenie.controls.parRegulator.reset();
     }
   }
   onSubmit(){

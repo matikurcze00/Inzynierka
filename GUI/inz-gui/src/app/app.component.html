@@ -35,8 +35,8 @@
   <label class="btn btn-secondary" for="option3">Wizualizacja</label>
   </div>
   <div class="dane">
-    <app-obiekt-widok (updateEvent)="updateObiekt($event)" *ngIf="zakladka=='model'"></app-obiekt-widok>
-    <app-regulator-widok (updateEvent)="updateRegulator($event)" *ngIf="zakladka=='regulator'"></app-regulator-widok>
+    <app-obiekt-widok (updateEvent)="updateObiekt($event)" [hidden]="zakladka!=='model'"></app-obiekt-widok>
+    <app-regulator-widok (updateEvent)="updateRegulator($event)" [hidden]="zakladka!=='regulator'"></app-regulator-widok>
   </div>
 
   <div class="text-center" *ngIf="zakladka=='wizualizacja'">

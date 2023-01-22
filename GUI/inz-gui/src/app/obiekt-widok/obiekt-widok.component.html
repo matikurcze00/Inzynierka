@@ -26,8 +26,19 @@
     </div>
   </div>
 
-  <div class="mt-5">
-    <input type="file" class="file-upload" onchange="console.log(event.target.files)" *ngIf="typ=='MIMO'">
+  <div class="mt-5" *ngIf="typ=='MIMO'">
+    <input type="file" class="file-input"
+       (change)="onFileSelected($event)" #fileUpload>
+
+  <div class="file-upload">
+
+    {{fileName || "No file uploaded yet."}}
+
+      <button mat-mini-fab color="primary" class="upload-btn"
+        (click)="fileUpload.click()">
+          <mat-icon>attach_file</mat-icon>
+      </button>
+  </div>
   </div>
   <div class="mt-5" *ngIf="typ=='SISO'">
     {{pierwszeRownanie}}

@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { outputAst } from '@angular/compiler';
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
@@ -36,7 +37,7 @@ export class ObiektWidokComponent implements OnInit {
             {id: 7, nazwa: "Ts"},
             {id: 8, nazwa: "Opoznienie"},
             {id: 9, nazwa: "Szum"}];
-  constructor() { }
+  constructor(private http: HttpClient) { }
 
   ngOnInit(): void {
     this.updateEvent.emit(this.obiektForm.controls.obiekt);
@@ -45,5 +46,25 @@ export class ObiektWidokComponent implements OnInit {
       console.log(value)
     })
   }
+  fileName = '';
 
+  onFileSelected(event: any) {
+    if(event.target!=null)
+    {
+      const file:File = event.target.files[0];
+    
+      if (file) {
+
+          this.fileName = file.name;
+
+          const formData = new FormData();
+
+          formData.append("thumbnail", file);
+
+          const upload$ = this.http.post("/api/thumbnail-upload", formData);
+
+          upload$.subscribe();
+      }
+  }
+  }
 }
