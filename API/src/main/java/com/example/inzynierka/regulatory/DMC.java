@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Data
-public class DMC { //extends Regulator
+public class DMC extends Regulator{
     private Integer D;
     private Integer N;
     private Integer Nu;
@@ -21,7 +21,6 @@ public class DMC { //extends Regulator
     private Matrix dU;
     private Matrix M;
     private double duMax;
-
     private double[] cel;
 
     public double policzOutput(double aktualna)
@@ -143,8 +142,8 @@ public class DMC { //extends Regulator
             tempLambda.add(wartosc);
         }
         setLambda(tempLambda);
-        policzK();
-        resetujRegulator();
+        policzK(wartosci.length);
+        resetujRegulator(wartosci.length);
     }
     public void resetujRegulator()
     {
@@ -324,6 +323,6 @@ public class DMC { //extends Regulator
     }
     public int liczbaZmiennych()
     {
-        return 1;
+        return cel.length;
     }
 }

@@ -18,7 +18,7 @@ public class MIMO {
     private List<List<Double>> U;
     private List<List<Double>> Y;
     private double[] YMax;
-
+    private String blad;
     private int liczbaOUT;
     private int liczbaIN;
     public MIMO() {}
@@ -150,7 +150,10 @@ public class MIMO {
 
     }
 
-
+    public double getTs(int IN)
+    {
+        return transmitancje.get(IN).get(0).getTs();
+    }
 
     public double[] getAktualne(){
         double[] YAkt = new double[liczbaIN];
@@ -159,6 +162,36 @@ public class MIMO {
 
         return YAkt;
     }
+    public double obliczPraceObiektu(Regulator regulator, double[] cel)
+    {
+        int dlugoscBadania = 50;
+        resetObiektu();
+        double blad = 0.0;
+        double[] tempCel = new double[liczbaOUT];
+
+
+        for(int k = 0; k < liczbaOUT; k++)
+        {
+            for(int i = 0; i < liczbaOUT; i++)
+                tempCel[i] = 0;
+            tempCel[k] = cel[k];
+            regulator.setCel(tempCel);
+            resetObiektu();
+            regulator.resetujRegulator();
+            for (int i = 0; i<dlugoscBadania; i++)
+            {
+                double[] Ytepm = obliczKrok(regulator.policzOutput(getAktualne()));
+                for(int j = 0; j < Ytepm.length; j++)
+                {
+                    blad+=Math.pow(Ytepm[j]-tempCel[j],2);
+                }
+            }
+        }
+        blad=blad/dlugoscBadania*liczbaOUT*liczbaOUT;
+        resetObiektu();
+        return blad;
+    }
+
     public void SetU (List<List<Double>> noweU)
     {
         this.U = noweU;
@@ -180,6 +213,28 @@ public class MIMO {
     public double getYpp(int IN)
     {
         return transmitancje.get(IN).get(0).getYpp();
+    }
+    public double obliczBlad(int dlugosc, List<double[]> wyjscie, double[] cel) {
+        double blad = 0.0;
+        switch (this.blad) {
+            case "mediana":
+                for (int i = 0; i < cel.length; i++)
+                    blad += wyjscie.get(0)[(int) Math.floor(dlugosc / cel.length)] - cel[i];
+                break;
+            case "srednio":
+                for(int i = 0; i < dlugosc; i++)
+                    for(int j = 0; j < cel.length; j++)
+                        blad+=Math.pow(wyjscie.get(j)[i]-cel[j],2);
+                break;
+            case "absolutny":
+                for(int i = 0; i < dlugosc; i++)
+                    for(int j = 0; j < cel.length; j++)
+                        blad+=Math.abs(wyjscie.get(j)[i]-cel[j]);
+                break;
+            default:
+                break;
+            }
+        return blad;
     }
     private void obliczYMax()
     {

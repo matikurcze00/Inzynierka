@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
-import { outputAst } from '@angular/compiler';
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { FormArray, FormControl, FormGroup } from '@angular/forms';
+import { Component, EventEmitter, HostListener, OnInit, Output } from '@angular/core';
+import { ControlContainer, FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-obiekt-widok',
@@ -9,6 +8,7 @@ import { FormArray, FormControl, FormGroup } from '@angular/forms';
   styleUrls: ['./obiekt-widok.component.css']
 })
 export class ObiektWidokComponent implements OnInit {
+  file: File | null = null;
   typ='SISO'
   @Output() updateEvent = new EventEmitter<FormArray>()
   obiektForm = new FormGroup({
@@ -23,9 +23,23 @@ export class ObiektWidokComponent implements OnInit {
         ts: new FormControl(1.0),
         opoznienie: new FormControl(0),
         szum: new FormControl(0.0),
-      })
+      }),
+      new FormGroup({
+        plik: new FormControl(this.file),
+        }),
     ])
   })
+  
+  @HostListener('change', ['$event.target.files']) emitFiles( event: FileList ) {
+    const file = event && event.item(0);
+    if(file)
+    {
+      this.file = file;
+      this.obiektForm.get('obiekt')?.get([1])?.patchValue({ plik: this.file });
+      console.log(this.obiektForm.controls.obiekt.controls[1])
+    }
+  }
+
   pierwszeRownanie = " $ \\large G(s) = K * \\frac{(s-z1)(s-z2)}{(s-b1)(s-b2)(s-b3)}$";
   drugieRownanie =  " $ \\large G(s) = K * \\frac{(s-z1)}{(s-b1)(s-b2)(s-b3)}$";
   zmienne = [{id: 1, nazwa: "K"},
@@ -46,25 +60,5 @@ export class ObiektWidokComponent implements OnInit {
       console.log(value)
     })
   }
-  fileName = '';
 
-  onFileSelected(event: any) {
-    if(event.target!=null)
-    {
-      const file:File = event.target.files[0];
-    
-      if (file) {
-
-          this.fileName = file.name;
-
-          const formData = new FormData();
-
-          formData.append("thumbnail", file);
-
-          const upload$ = this.http.post("/api/thumbnail-upload", formData);
-
-          upload$.subscribe();
-      }
-  }
-  }
 }

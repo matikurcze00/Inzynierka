@@ -10,7 +10,6 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
-import { MatIconModule } from '@angular/material/icon';
 @NgModule({
   declarations: [
     AppComponent,
@@ -26,7 +25,6 @@ import { MatIconModule } from '@angular/material/icon';
     FormsModule, 
     ReactiveFormsModule,
     HttpClientModule,
-    MatIconModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

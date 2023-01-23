@@ -13,7 +13,6 @@ public class PID extends Regulator{
     private double Td;
     private double Ts;
     private List<Double> E = Arrays.asList(0.0,0.0,0.0);
-    private double cel;
     private double r0;
     private double r1;
     private double r2;
@@ -27,8 +26,8 @@ public class PID extends Regulator{
         //Wyliczanie błędu
         E.set(2, E.get(1));
         E.set(1,E.get(0));
-        E.set(0,cel-aktualna);
-        Error += cel-aktualna;
+        E.set(0,cel[0]-aktualna);
+        Error += cel[0]-aktualna;
 
         //
         double du = r0 * E.get(0) + r1 * E.get(1) + r2 * E.get(2);
@@ -39,7 +38,12 @@ public class PID extends Regulator{
         return du;
     }
 
-    public PID(double P, double I, double D, double Ts, double cel, double duMax, double uMax)
+    @Override
+    public double[] policzOutput(double[] aktualna) {
+        return new double[0];
+    }
+
+    public PID(double P, double I, double D, double Ts, double[] cel, double duMax, double uMax)
     {
         this.K = P;
         this.Ti = I;

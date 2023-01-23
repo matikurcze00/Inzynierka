@@ -50,6 +50,7 @@
       id="option1-wizualizacja"
       autocomplete="off"
       [checked]="true"
+      (change)="setBlad('srednio')"
     />
     <label class="btn btn-secondary" for="option1-wizualizacja" >Średniokwadratowy</label>
     <input
@@ -59,6 +60,7 @@
       name="options-wizualizacja"
       id="option2-wizualizacja"
       autocomplete="off"
+      (change)="setBlad('absolutny')"
     />
     <label class="btn btn-secondary" for="option2-wizualizacja">Absolutny</label>
     <input
@@ -68,8 +70,10 @@
       name="options-wizualizacja"
       id="option3-wizualizacja"
       autocomplete="off"
+      (change)="setBlad('mediana')"
     />
     <label class="btn btn-secondary" for="option3-wizualizacja">Mediana błędu</label>
+    
     </div>
     <div class="mt-5">
       <button class="btn btn-success" type="submit">Dobierz Strojenie</button>

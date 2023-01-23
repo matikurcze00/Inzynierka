@@ -47,7 +47,7 @@ public class SISO {
             setY(new ArrayList<Double>(Collections.nCopies(Y.size(), transmitancja.getYpp())));
 
     }
-    public double obliczPraceObiektu(Regulator regulator, double cel)
+    public double obliczPraceObiektu(Regulator regulator, double[] cel)
     {
         int dlugoscBadania = 50;
         resetObiektu();
@@ -55,11 +55,11 @@ public class SISO {
         regulator.setCel(cel);
         for (int i = 0; i<dlugoscBadania; i++)
         {
-            if(i==25)
-                blad = Math.abs(obliczKrok(regulator.policzOutput(getAktualna()))-cel);
-//            blad+=Math.pow(obliczKrok(regulator.policzOutput(getAktualna()))-cel,2);
+//            if(i==25)
+//                blad = Math.abs(obliczKrok(regulator.policzOutput(getAktualna()))-cel[0]);
+            blad+=Math.pow(obliczKrok(regulator.policzOutput(getAktualna()))-cel[0],2);
         }
-//        blad=blad/dlugoscBadania;
+        blad=blad/dlugoscBadania;
         resetObiektu();
         return blad;
     }
@@ -129,10 +129,8 @@ public class SISO {
         private double K;
         private double uMax;
         private double uMin = 0;
-
         private double Ypp;
         private double Upp;
-
         private double Ts;
         private int opoznienie;
         private double szum;
@@ -151,10 +149,7 @@ public class SISO {
                 obiekt3b1z(z,b);
             else
                 obiektProsty();
-
         }
-
-
 
         private void obiekt3b2z(Double[] z, Double[] b)
         {
@@ -209,10 +204,6 @@ public class SISO {
             this.b = new double[0];
             this.z[0]=this.K;
         }
-
-
-
-
         private double ePotega(double x)
         {
             return Math.exp(-x*this.getTs());
