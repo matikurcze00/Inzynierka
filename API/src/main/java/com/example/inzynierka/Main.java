@@ -44,9 +44,9 @@ public class Main {
         System.out.println(Obiekty[0]);
         System.out.println(Obiekty[1]);
         MIMO obiekt  = new MIMO(Obiekty);
-//        ZbiorPID zbior = new ZbiorPID(obiekt,PV, 3.0);
-//        AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(1000, 400, 20, 0.5,0.8);
-//        zbior.zmienWartosci(GA.dobierzWartosci(zbior.liczbaZmiennych(), zbior, obiekt));
+        ZbiorPID regulator = new ZbiorPID(obiekt,PV, 3.0);
+        AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(1000, 400, 20, 0.5,0.8);
+        regulator.zmienWartosci(GA.dobierzWartosci(regulator.liczbaZmiennych(), regulator, obiekt));
 //        double[] celTemp = {200.0,0.0};
 //        zbior.setCel(celTemp);
 //        List<double[]> Y = new ArrayList<>();
@@ -60,7 +60,8 @@ public class Main {
         double[] celTemp = {550.0,0.0};
         List<double[]> Y = new ArrayList<>();
         double[] tempLambda = {0.05,0.05};
-        DMC regulator = new DMC(3, tempLambda, obiekt, celTemp, 3, 10);
+//        DMC regulator = new DMC(3, tempLambda, obiekt, celTemp, 3, 10);
+        regulator.setCel(celTemp);
         obiekt.resetObiektu();
         for(int k = 0; k<40; k++)
         {

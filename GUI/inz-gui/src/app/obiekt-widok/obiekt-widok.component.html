@@ -43,25 +43,27 @@
         <div class="form-row align-items-center" [formGroupName]="0">
           <div class="input-group col">
             <label class="input-group-text"> {{zmienne[0].nazwa}} &nbsp; </label>
-            <input class="form-control" type="number" placeholder="1.0" formControlName="k"/>
+            <input class="form-control" type="number" placeholder="1.0" formControlName="Gain"/>
             <label class="input-group-text">{{zmienne[1].nazwa}}</label>
-            <input class="form-control" type="number" placeholder="1.0" formControlName="z1"/>
+            <input class="form-control" type="number" placeholder="1.0" formControlName="R1"/>
             <label class="input-group-text">{{zmienne[2].nazwa}}</label>
-            <input class="form-control" type="number" placeholder="1.0" formControlName="z2"/>
+            <input class="form-control" type="number" placeholder="1.0" formControlName="Q1"/>
             <label class="input-group-text">{{zmienne[3].nazwa}}</label>
-            <input class="form-control" type="number" placeholder="1.0" formControlName="b1"/>
+            <input class="form-control" type="number" placeholder="1.0" formControlName="R2"/>
             <label class="input-group-text">{{zmienne[4].nazwa}}</label>
-            <input class="form-control" type="number" placeholder="1.0" formControlName="b2"/>
-            <label class="input-group-text">{{zmienne[5].nazwa}}</label>
-            <input class="form-control" type="number" placeholder="1.0" formControlName="b3"/>
+            <input class="form-control" type="number" placeholder="1.0" formControlName="Q2"/>
           </div>
           <div class="input-group col-3">
+            <label class="input-group-text">{{zmienne[5].nazwa}}</label>
+            <input class="form-control" type="number" placeholder="1.0" formControlName="T1"/>
             <label class="input-group-text">{{zmienne[6].nazwa}}</label>
-            <input class="form-control" type="number" placeholder="1.0" formControlName="ts"/>
+            <input class="form-control" type="number" placeholder="1.0" formControlName="T2"/>
             <label class="input-group-text">{{zmienne[7].nazwa}}</label>
-            <input class="form-control" type="number" placeholder="1.0" formControlName="opoznienie"/>
+            <input class="form-control" type="number" placeholder="1.0" formControlName="T3"/>
             <label class="input-group-text">{{zmienne[8].nazwa}}</label>
-            <input class="form-control" type="number" placeholder="1.0" formControlName="szum"/>
+            <input class="form-control" type="number" placeholder="1.0" formControlName="Delay"/>
+            <label class="input-group-text">{{zmienne[9].nazwa}}</label>
+            <input class="form-control" type="number" placeholder="1.0" formControlName="Tp"/>
           </div>
         </div>      
       </div>

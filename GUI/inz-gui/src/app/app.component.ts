@@ -26,15 +26,16 @@ export class AppComponent {
   chartData?: WykresDane;
   strojenie = new FormGroup({
     parObiekt: new FormGroup({
-        k: new FormControl(),
-        z1: new FormControl(),
-        z2: new FormControl(),
-        b1: new FormControl(),
-        b2: new FormControl(),
-        b3: new FormControl(),
-        ts: new FormControl(),
-        opoznienie: new FormControl(),
-        szum: new FormControl(),
+      gain: new FormControl(1.0),
+      r1: new FormControl(1.0),
+      q1: new FormControl(1.0),
+      r2: new FormControl(1.1),
+      q2: new FormControl(1.0),
+      t1: new FormControl(1.0),
+      t2: new FormControl(1.0),
+      t3: new FormControl(1.0),
+      tp: new FormControl(1.0),
+      delay: new FormControl(0),
       }),
     MIMO: new FormGroup({
           plik: new FormControl(this.file),
@@ -194,12 +195,12 @@ export class AppComponent {
       for(let i = 1; i<this.odpowiedzMIMO.cel.length+1; i++)
       {
         chartDataSet.push({
-          label: "Cel wyjscia " + i,
+          label: "Wartość zadana wyjścia " + i,
           data: arrCel[i-1],
           backgroundColor: this.randomRGB() 
         });
         chartDataSet.push({
-          label: "Wyjscie " + i,
+          label: "Wartość wyjścia " + i,
           data: this.odpowiedzMIMO.wykres[i-1],
           backgroundColor: this.randomRGB() 
         });
