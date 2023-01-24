@@ -41,29 +41,13 @@ public class Controller {
 //            parRegulator.setTyp("pid");
 //            parRegulator.setUMax(100.0);
 //            parRegulator.setDuMax(3.0);
-            Double[] z;
-            if (parObiekt.getZ2() != null)
-                z = new Double[]{parObiekt.getZ1(), parObiekt.getZ2()};
-            else if (parObiekt.getZ1() != null)
-                z = new Double[]{parObiekt.getZ1()};
-            else
-                z = new Double[]{};
 
-            Double[] b;
-            if (parObiekt.getB3() != null)
-                b = new Double[]{parObiekt.getB1(), parObiekt.getB2(), parObiekt.getB3()};
-            else if (parObiekt.getB2() != null)
-                b = new Double[]{parObiekt.getB1(), parObiekt.getB2()};
-            else if (parObiekt.getB1() != null)
-                b = new Double[]{parObiekt.getB1()};
-            else
-                b = new Double[]{};
 //            b[2]=b[2]+9.0;
-            SISO SISO = new SISO(z, b, parObiekt.getK(), parRegulator.getUMax(), parObiekt.getTs(), parObiekt.getOpoznienie(), parObiekt.getSzum());
+            SISO SISO = new SISO(parObiekt, parRegulator.getUMax());
             Regulator regulator;
 
             if (parRegulator.getTyp().equals("pid"))
-                regulator = new PID(0.0, 0.0, 0.0, parObiekt.getTs(),new double[]{SISO.getYMax()} , parRegulator.getDuMax(), parRegulator.getUMax());
+                regulator = new PID(0.0, 0.0, 0.0, parObiekt.getTp(),new double[]{SISO.getYMax()} , parRegulator.getDuMax(), parRegulator.getUMax());
             else if (parRegulator.getTyp().equals("dmc"))
                 regulator = new DMC(5, 0.1, SISO, SISO.getYMax() / 2, parRegulator.getDuMax(), 11);
             else
@@ -113,7 +97,7 @@ public class Controller {
             if(parRegulator.getTyp().equals("pid"))
             {
                 Integer[] PV = objectMapper.treeToValue(root.path("PV"), Integer[].class);
-                regulator = new ZbiorPID(obiekt,PV, parRegulator.getDuMax(), parRegulator.getUMax());
+                regulator = new ZbiorPID(obiekt,PV, parRegulator.getDuMax());
             }else if (parRegulator.getTyp().equals("dmc"))
             {
                 double[] tempLambda = {0.5,0.5};

@@ -4,13 +4,15 @@ import lombok.Data;
 
 @Data
 public class ParObiekt {
-    private Double z1;
-    private Double z2;
-    private Double b1;
-    private Double b2;
-    private Double b3;
-    private double K;
-    private double Ts;
-    private int opoznienie;
-    private double szum;
+    private double gain;
+    private double R1;
+    private double R2;
+    private int Q1;
+    private int Q2;
+    private double T1;
+    private double T2;
+    private double T3;
+    private int delay;
+    private double Tp;
+    private double uMax;
 }

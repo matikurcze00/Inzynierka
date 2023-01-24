@@ -3,6 +3,8 @@ package com.example.inzynierka.obiekty;
 
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 public class TransmitancjaCiagla {
     private double gain;
@@ -15,14 +17,16 @@ public class TransmitancjaCiagla {
     private double T3;
     private int delay;
     private double Tp;
-
+    private double Upp = 0;
+    private double Ypp = 0;
     private double const1; //(-R1/T1+Q1)
     private double const2; //(-R2/T2+Q2)
     private Lag lag1;
     private Lag lag2;
     private Lag lag3;
 
-    public TransmitancjaCiagla(double gain, double R1, int Q1, double R2, int Q2, double T1,
+    public TransmitancjaCiagla(double gain, double R1, int Q1, double R2,
+                               int Q2, double T1,
                                double T2, double T3, int delay, double Tp) {
         this.gain = gain;
         this.R1 = R1;
@@ -43,11 +47,10 @@ public class TransmitancjaCiagla {
         lag3 = new Lag();
     }
 
-    public double[] obliczKrok(Integer i, double[][] u, double[][] y, boolean withNoise) {
-        if (i - 1 - delay < 0)
-            return new double[]{y[0][0]};
+    public double obliczKrok(List<Double> u) {
 
-        double in = u[0][i - 1 - delay];
+
+        double in = u.get(delay);
         double leadLag1;
         double leadLag2;
         double out;
@@ -72,7 +75,7 @@ public class TransmitancjaCiagla {
         else
             out = gain * leadLag2;
 
-        return new double[]{out};
+        return out;
     }
 
 

@@ -83,12 +83,12 @@ public class DMC extends Regulator{
             }
             tempdU[i] = Utemp.get(i,0);
         }
-        for(int i = 0; i < Math.floor(aktualna.length/2); i++)
-        {
-            double temp = tempdU[i];
-            tempdU[i] = tempdU[tempdU.length-i-1];
-            tempdU[tempdU.length-i-1] = temp;
-        }
+//        for(int i = 0; i < Math.floor(aktualna.length/2); i++)
+//        {
+//            double temp = tempdU[i];
+//            tempdU[i] = tempdU[tempdU.length-i-1];
+//            tempdU[tempdU.length-i-1] = temp;
+//        }
         dodajdU(tempdU);
         return tempdU;
     }

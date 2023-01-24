@@ -7,15 +7,16 @@ import java.util.List;
 
 public class ZbiorPID extends Regulator{
 
-    List<PID> PIDy;
-    Integer[] PV;
-
-    public ZbiorPID(MIMO obiekt, Integer[] PV, double duMax, double uMax)
+    private List<PID> PIDy;
+    private Integer[] PV;
+    private double[] uMax;
+    public ZbiorPID(MIMO obiekt, Integer[] PV, double duMax)
     {
         PIDy = new ArrayList<>(PV.length);
+        uMax= obiekt.getUMax();
         for(int i = 0; i<PV.length; i++) {
             double[] yMaxTemp = new double[]{obiekt.getYMax()[i] / 2};
-            PIDy.add(new PID(0.0, 0.0, 0.0, obiekt.getTs(PV[i]), yMaxTemp, duMax, uMax));
+            PIDy.add(new PID(1.0, 1.0, 1.0, obiekt.getTp(PV[i]), yMaxTemp, duMax, uMax[PV[i]]));
         }
         this.PV = PV;
 
@@ -31,9 +32,18 @@ public class ZbiorPID extends Regulator{
         double[] output = new double[PV.length];
         for(int i = 0; i<PV.length; i++)
         {
-            output[PV[i]] = PIDy.get(i).policzOutput(aktualne[PV[i]]);
+            output[PV[i]] = PIDy.get(i).policzOutput(aktualne[i]);
         }
         return output;
+    }
+    @Override
+    public void setCel(double[] cel)
+    {
+        this.cel = cel;
+        for(int i = 0; i < cel.length; i++)
+        {
+            PIDy.get(i).setCel(new double[]{cel[i]});
+        }
     }
     @Override
     public void resetujRegulator()
