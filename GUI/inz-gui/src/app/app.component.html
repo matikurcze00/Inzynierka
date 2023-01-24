@@ -82,17 +82,44 @@
 </form>
 </div>
 <div class="wykres-odp" >
+  <div *ngIf="zakladka=='wizualizacja' && liczbaRegulatorow">
+    <div *ngIf="odpowiedz">
+      <div *ngIf="odpowiedz.typRegulatora=='pid'">
+        <div *ngFor="let regulator of this.liczbaRegulatorow">
+          <p *ngIf="this.strojenie.controls.MIMO.controls['plik'].value!=null">Wartości parametrów regulatora powiązanego do wyjścia nr: {{regulator+1}}</p>
+          <p *ngIf="this.strojenie.controls.MIMO.controls['plik'].value==null">Wartości parametrów regulatora</p>
 
-  <div *ngIf="odpowiedz &&zakladka=='wizualizacja'">
-    <div *ngIf="odpowiedz.typRegulatora=='pid'">
-      <p><b>P</b> = {{odpowiedz.wspolczynniki[0]}}</p>
-      <p><b>I</b> = {{odpowiedz.wspolczynniki[1]}}</p>
-      <p><b>D</b> = {{odpowiedz.wspolczynniki[2]}}</p>
+          <p><b>P</b> = {{odpowiedz.wspolczynniki[regulator*3+0]}}</p>
+          <p><b>I</b> = {{odpowiedz.wspolczynniki[regulator*3+1]}}</p>
+          <p><b>D</b> = {{odpowiedz.wspolczynniki[regulator*3+2]}}</p>
+        </div>
+      </div>
+      <div *ngIf="odpowiedz.typRegulatora=='dmc'">
+        <b>Wartoś Lambda:</b>
+        <div *gFor="let regulator of liczbaRegulatorow">
+        <p> <b>Lambda</b>= {{odpowiedz.wspolczynniki[regulator]}}</p>
+        </div>
+      </div>
     </div>
-    <div *ngIf="odpowiedz.typRegulatora=='dmc'">
-      <p><b>Lambda</b> = {{odpowiedz.wspolczynniki[0]}}</p>
+    <div *ngIf="odpowiedzMIMO">
+      <div *ngIf="odpowiedzMIMO.typRegulatora=='pid'">
+        <div *ngFor="let regulator of this.liczbaRegulatorow">
+          <p *ngIf="this.strojenie.controls.MIMO.controls['plik'].value!=null">Wartości parametrów regulatora powiązanego z wyjściem nr: {{regulator+1}}</p>
+          <p *ngIf="this.strojenie.controls.MIMO.controls['plik'].value==null">Wartości parametrów regulatora</p>
+  
+          <p><b>P</b> = {{odpowiedzMIMO.wspolczynniki[regulator*3+0]}}</p>
+          <p><b>I</b> = {{odpowiedzMIMO.wspolczynniki[regulator*3+1]}}</p>
+          <p><b>D</b> = {{odpowiedzMIMO.wspolczynniki[regulator*3+2]}}</p>
+        </div>
+      </div>
+      <div *ngIf="odpowiedzMIMO.typRegulatora=='dmc'">
+        <b>Wartości Lambda:</b>
+        <div *ngFor="let regulator of this.liczbaRegulatorow">
+          <p><b>Lambda {{regulator+1}}</b> = {{odpowiedzMIMO.wspolczynniki[regulator]}}</p>
+        </div>
+      </div>
+  </div>
 
-    </div>
   </div>
   <canvas  id='myChart' [hidden]="zakladka!=='wizualizacja'">{{this.myChart}}</canvas>
 </div>

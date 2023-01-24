@@ -20,6 +20,7 @@ export class AppComponent {
   odpowiedz?: Odpowiedz|null;
   odpowiedzMIMO?: OdpowiedzMIMO|null;
   myChart?: any;
+  liczbaRegulatorow?: any;
   file: File | null = null;
   primaryXAxis = {valueType: 'krok'}
   title = 'Symulacje obiektu regulowanego'
@@ -78,6 +79,8 @@ export class AppComponent {
     {
     this.strojenieService.dobierzStrojenieSISO(this.strojenie).subscribe({next: response =>{
       this.odpowiedz=response
+      this.liczbaRegulatorow = [0];
+      console.log(this.liczbaRegulatorow)
       if(this.odpowiedz!=null)
         this.odpowiedz.typRegulatora=this.strojenie.controls.parRegulator.value['typ']
       console.log("odpowiedz")
@@ -100,7 +103,8 @@ export class AppComponent {
         this.odpowiedzMIMO.typRegulatora=this.strojenie.controls.parRegulator.value['typ']
       console.log("odpowiedz")
       console.log(this.odpowiedzMIMO)
-
+      this.liczbaRegulatorow = Array.from({length: this.odpowiedzMIMO.cel.length}, (_, i) => i);
+      console.log(this.liczbaRegulatorow)
       this.createChartDataMIMO()
     },
     error: error => {
@@ -133,7 +137,6 @@ export class AppComponent {
       console.log(this.chartData)
       if(this.chartData)
       {
-        // var context = document.getElementById('myChart').getContext("2d");
       if(this.myChart)
         this.myChart.destroy()
       this.myChart = new Chart('myChart', {
@@ -142,12 +145,12 @@ export class AppComponent {
         labels: this.chartData?.kroki,
         datasets : [
           {
-            label: "Cel" + "1",
+            label: "Wartość zadana wyjścia obiektu",
             data: this.chartData.cel,
             backgroundColor: 'blue'
           },
           {
-            label: "Strojony obiekt",
+            label: "Wyjście obiektu",
             data: this.chartData.obiekt,
             backgroundColor: 'Lime'
           }

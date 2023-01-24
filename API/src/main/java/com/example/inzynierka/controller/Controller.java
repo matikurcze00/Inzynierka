@@ -105,7 +105,7 @@ public class Controller {
             }
             else
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-            AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(400, 100, 20, 0.3, 0.4);
+            AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(40, 10, 2, 0.3, 0.4);
             OdpowiedzMIMO odpowiedz = new OdpowiedzMIMO();
             odpowiedz.setWspolczynniki(GA.dobierzWartosci(regulator.liczbaZmiennych(), regulator, obiekt));
             regulator.zmienWartosci(odpowiedz.getWspolczynniki());
