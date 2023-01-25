@@ -16,23 +16,25 @@ public class SISO {
     private TransmitancjaCiagla transmitancja;
     private List<Double> U ;
     private List<Double> Y ;
+    private double uMin;
     private double uMax;
     private double YMax;
     public SISO() {}
 
-    public SISO(ParObiekt parObiekt, double uMax)
+    public SISO(ParObiekt parObiekt, double uMax, double uMin)
     {
         this(parObiekt.getGain(), parObiekt.getR1(), parObiekt.getQ1(), parObiekt.getR2(),
                 parObiekt.getQ2(), parObiekt.getT1(), parObiekt.getT2(), parObiekt.getT3()
-        ,parObiekt.getDelay(), parObiekt.getTp(), uMax);
+        ,parObiekt.getDelay(), parObiekt.getTp(), uMax, uMin);
     }
     public SISO(double gain, double R1, int Q1, double R2, int Q2, double T1,
-                double T2, double T3, int delay, double Tp, double uMax)
+                double T2, double T3, int delay, double Tp, double uMax, double uMin)
     {
         this.transmitancja = new TransmitancjaCiagla(gain, R1, Q1, R2, Q2, T1, T2, T3, delay, Tp);
         U = new ArrayList(Collections.nCopies(3+delay, transmitancja.getUpp()));
         Y = new ArrayList(Collections.nCopies(3, transmitancja.getYpp()));
         this.uMax = uMax;
+        this.uMin = uMin;
         obliczYMax();
     }
 
@@ -84,8 +86,8 @@ public class SISO {
         double Uakt = U.get(0) + du;
         if(Uakt>uMax)
             Uakt=uMax;
-        else if (Uakt<0)
-            Uakt=0;
+        else if (Uakt<uMin)
+            Uakt=uMin;
         for(int i = U.size()-1; i>0 ;i--)
             U.set(i,U.get(i-1));
         U.set(0,Uakt);

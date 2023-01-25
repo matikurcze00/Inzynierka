@@ -14,10 +14,10 @@ import java.util.List;
 public class MIMO {
 
     private List<List<TransmitancjaCiagla>> transmitancja; //LIST<LIST-IN<OUT>>
-    @ Getter(AccessLevel.NONE)
     private List<List<Double>> U;
     private List<List<Double>> Y;
     private double[] YMax;
+    private double[] uMin;
     private double[] uMax;
     private String blad;
     private int liczbaOUT;
@@ -108,31 +108,22 @@ public class MIMO {
     private void obliczUMax(ParObiektMIMO[] obiektyMIMO)
     {
         this.uMax= new double[obiektyMIMO.length];
+        this.uMin= new double[obiektyMIMO.length];
         for(int i = 0; i<obiektyMIMO.length; i++)
+        {
             this.uMax[i]=obiektyMIMO[i].getUMax();
-
+            this.uMin[i]=obiektyMIMO[i].getUMin();
+        }
     }
     public void obliczU(double[] du)
     {
         for(int j = 0; j<du.length; j++)
         {
             double Uakt = U.get(j).get(0) + du[j];
-            if(uMax[j]>0.0)
-            {
                 if(Uakt>uMax[j])
                     Uakt=uMax[j];
-                else if (Uakt<0.0)
-                    Uakt=0.0;
-            }
-            else
-            {
-                if(Uakt<uMax[j])
-                    Uakt=uMax[j];
-
-                else if (Uakt>0.0)
-                    Uakt=0.0;
-
-            }
+                else if (Uakt<uMin[j])
+                    Uakt=uMin[j];
 
             for(int i = U.get(j).size()-1; i>0 ;i--)
                 U.get(j).set(i,U.get(j).get(i-1));
@@ -142,24 +133,12 @@ public class MIMO {
     public void obliczU(double du, int IN)
     {
         double Uakt = U.get(IN).get(0) + du;
-        if(uMax[IN]>0)
-        {
             if(Uakt>uMax[IN]) {
                 Uakt=uMax[IN];
             }
-            else if (Uakt<0.0) {
-                Uakt=0.0;
+            else if (Uakt<uMin[IN]) {
+                Uakt=uMin[IN];
             }
-        }
-        else
-        {
-            if(Uakt<uMax[IN]) {
-                Uakt=uMax[IN];
-            }
-            else if (Uakt>0.0) {
-                Uakt=0.0;
-            }
-        }
         for(int i = U.get(IN).size()-1; i>0 ;i--)
             U.get(IN).set(i,U.get(IN).get(i-1));
         U.get(IN).set(0,Uakt);

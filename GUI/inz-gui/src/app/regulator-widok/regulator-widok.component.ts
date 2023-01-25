@@ -15,6 +15,7 @@ export class RegulatorWidokComponent implements OnInit {
     regulator: new FormArray([
       new FormGroup({
         typ: new FormControl("pid"),
+        uMin: new FormControl(0.0),
         uMax: new FormControl(100.0),
         duMax: new FormControl(3.0),
       })

@@ -16,9 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 public class Controller {
@@ -32,18 +32,14 @@ public class Controller {
 
     @RequestMapping(value="/strojenie/SISO",  method = RequestMethod.POST)
     @ResponseBody
-    public static ResponseEntity<Odpowiedz> strojenieSISO(@RequestBody ParStrojenie parStrojenie)
+    public static ResponseEntity<OdpowiedzStrojenie> strojenieSISO(@RequestBody ParStrojenie parStrojenie)
     {
         System.out.println("strojenieSISO::start ");
         try {
             ParObiekt parObiekt = parStrojenie.getParObiekt();
             ParRegulator parRegulator = parStrojenie.getParRegulator();
-//            parRegulator.setTyp("pid");
-//            parRegulator.setUMax(100.0);
-//            parRegulator.setDuMax(3.0);
-
-//            b[2]=b[2]+9.0;
-            SISO SISO = new SISO(parObiekt, parRegulator.getUMax());
+            ParWizualizacja parWizualizacja = parStrojenie.getParWizualizacja();
+            SISO SISO = new SISO(parObiekt, parRegulator.getUMax(), parRegulator.getUMin());
             Regulator regulator;
 
             if (parRegulator.getTyp().equals("pid"))
@@ -53,28 +49,48 @@ public class Controller {
             else
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(300, 40, 6, 0.3, 0.2);
-            Odpowiedz odpowiedz = new Odpowiedz();
-            odpowiedz.setWspolczynniki(GA.dobierzWartosci(regulator.liczbaZmiennych(), regulator, SISO));
-            regulator.zmienWartosci(odpowiedz.getWspolczynniki());
-            regulator.setCel(new double[]{SISO.getYMax() / 3});
-            odpowiedz.setCel(regulator.getCel()[0]);
-            double[] Y = new double[50];
+            OdpowiedzStrojenie odpowiedzStrojenie = new OdpowiedzStrojenie();
+            odpowiedzStrojenie.setWspolczynniki(GA.dobierzWartosci(regulator.liczbaZmiennych(), regulator, SISO));
+            regulator.zmienWartosci(odpowiedzStrojenie.getWspolczynniki());
+            regulator.setCel(new double[]{parWizualizacja.getYZad()[0]});
+            double[] celTemp = new double[parWizualizacja.getDlugosc()];
+            for(int i = 0; i< parWizualizacja.getDlugosc(); i++)
+            {
+                if(i<parWizualizacja.getSkok()[0])
+                    celTemp[i] = parWizualizacja.getYPP()[0];
+                else
+                    celTemp[i] = parWizualizacja.getYZad()[0];
 
+            }
+            odpowiedzStrojenie.setCel(celTemp);
+
+            double[] Y = new double[parWizualizacja.getDlugosc()];
+            double[] U = new double[parWizualizacja.getDlugosc()];
             SISO.resetObiektu();
             Y[0]=SISO.getYpp();
-            for (int i = 1; i < 50; i++) {
-                Y[i] = SISO.obliczKrok(regulator.policzOutput(SISO.getAktualna()));
+            U[0]=parWizualizacja.getUPP()[0];
+            for(int i = 0; i<parWizualizacja.getSkok()[0]; i++)
+            {
+                U[i] = parWizualizacja.getUPP()[0];
+                Y[i] = SISO.obliczKrok(parWizualizacja.getUPP()[0]);
+            }
+            for (int i = parWizualizacja.getSkok()[0]; i < parWizualizacja.getDlugosc(); i++) {
+                {
+                    Y[i] = SISO.obliczKrok(regulator.policzOutput(SISO.getAktualna()));
+                    U[i] = SISO.getU().get(0);
+                }
             }
             System.out.println("strojenie::OK");
-            odpowiedz.setWykres(Y);
+            odpowiedzStrojenie.setWykres(Y);
+            odpowiedzStrojenie.setSterowanie(U);
             double blad = 0.0;
-            for(int i = 0; i<50; i++)
+            for(int i = parWizualizacja.getSkok()[0]; i<parWizualizacja.getDlugosc(); i++)
             {
                 blad+=Math.pow(Y[i]-regulator.getCel()[0],2);
             }
-            blad=blad/Y.length;
+            blad=blad/(parWizualizacja.getDlugosc()-parWizualizacja.getSkok()[0]);
             System.out.println("BLAD:" + blad);
-            return ResponseEntity.ok(odpowiedz);
+            return ResponseEntity.ok(odpowiedzStrojenie);
         }
         catch (Exception ex)
         {
@@ -86,7 +102,7 @@ public class Controller {
 
     @RequestMapping(value="/strojenie/MIMO", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, method = RequestMethod.POST)
     @ResponseBody
-    public static ResponseEntity<OdpowiedzMIMO> strojenieMIMO(@RequestPart("file") MultipartFile file, @ModelAttribute ParRegulator parRegulator) {
+    public static ResponseEntity<OdpowiedzStrojenieMIMO> strojenieMIMO(@RequestPart("file") MultipartFile file, @ModelAttribute ParRegulator parRegulator, @ModelAttribute ParWizualizacja parWizualizacja) {
         System.out.println("strojenieMIMO::start ");
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -106,36 +122,45 @@ public class Controller {
             else
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(40, 10, 2, 0.3, 0.4);
-            OdpowiedzMIMO odpowiedz = new OdpowiedzMIMO();
+            OdpowiedzStrojenieMIMO odpowiedz = new OdpowiedzStrojenieMIMO();
             odpowiedz.setWspolczynniki(GA.dobierzWartosci(regulator.liczbaZmiennych(), regulator, obiekt));
             regulator.zmienWartosci(odpowiedz.getWspolczynniki());
-            int dlugoscSymulacji = 50;
-            double[][] Y = new double[obiekt.getLiczbaOUT()][dlugoscSymulacji*obiekt.getLiczbaOUT()+1];
-            double[] celTemp = new double[obiekt.getLiczbaOUT()];
-            for(int i = 0; i <obiekt.getLiczbaOUT(); i++)
-                celTemp[i] = 0;
+            int dlugoscSymulacji = parWizualizacja.getDlugosc();
+            double[][] Y = new double[obiekt.getLiczbaOUT()][dlugoscSymulacji];
+            double[][] U = new double[obiekt.getLiczbaIN()][dlugoscSymulacji];
+
+            double[][] celTemp = new double[obiekt.getLiczbaOUT()][dlugoscSymulacji];
+            for(int i = 0; i < obiekt.getLiczbaOUT(); i++)
+            {
+                for(int j = 0; j < dlugoscSymulacji; j++)
+                {
+                    if(j<parWizualizacja.getSkok()[i])
+                        celTemp[i][j] = parWizualizacja.getYPP()[i];
+                    else
+                        celTemp[i][j] = parWizualizacja.getYZad()[i];
+                }
+            }
+            odpowiedz.setCel(celTemp);
 
             obiekt.resetObiektu();
-            for(int i = 0; i<obiekt.getLiczbaOUT(); i++)
-                Y[i][0]=obiekt.getYpp(i);
-            double[] tempY = new double[obiekt.getLiczbaOUT()];
-            for(int k = 0; k<obiekt.getLiczbaOUT(); k++)
-            {
-                for(int i = 0; i<=k; i++)
+            for (int i = 0; i < dlugoscSymulacji; i++) {
+                double[] temp = new double[obiekt.getLiczbaOUT()];
+                for(int m = 0; m < obiekt.getLiczbaOUT(); m++)
                 {
-                    celTemp[i]=obiekt.getYMax()[i]/3;
-                    regulator.setCel(celTemp);
+                    temp[m] = celTemp[m][i];
                 }
-                for (int i = 0; i < dlugoscSymulacji; i++) {
-                    tempY = obiekt.obliczKrok(regulator.policzOutput(obiekt.getAktualne()));
-                    for(int j = 0; j < obiekt.getLiczbaOUT(); j++)
-                        Y[j][k*dlugoscSymulacji+i+1]=tempY[j];
-                }
+                regulator.setCel(temp);
+                double [] tempY = obiekt.obliczKrok(regulator.policzOutput(obiekt.getAktualne()));
+                for(int j = 0; j < obiekt.getLiczbaOUT(); j++)
+                    Y[j][i]=tempY[j];
+                for(int j = 0; j<obiekt.getLiczbaIN(); j++)
+                    U[j][i]=obiekt.getU().get(j).get(0);
             }
 
             System.out.println("strojenie::OK");
-            odpowiedz.setCel(celTemp);
+
             odpowiedz.setWykres(Y);
+            odpowiedz.setSterowanie(U);
             double blad = 0.0;
             for(int i = 0; i<50*obiekt.getLiczbaOUT(); i++)
             {
@@ -146,7 +171,61 @@ public class Controller {
             return ResponseEntity.ok(odpowiedz);
         } catch (IOException e) {
             e.printStackTrace();
-            return new ResponseEntity<OdpowiedzMIMO>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<OdpowiedzStrojenieMIMO>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @RequestMapping(value="/odpowiedz/SISO",  method = RequestMethod.POST)
+    @ResponseBody
+    public static ResponseEntity<OdpowiedzSkokowa> odpowiedzSISO(@RequestBody ParStrojenie parStrojenie)
+    {
+        ParObiekt parObiekt = parStrojenie.getParObiekt();
+        ParRegulator parRegulator = parStrojenie.getParRegulator();
+        ParWizualizacja parWizualizacja = parStrojenie.getParWizualizacja();
+        SISO SISO = new SISO(parObiekt, parRegulator.getUMax(), parRegulator.getUMin());
+
+        double U = 1;
+
+        double[][] odpSkokowa = new double[1][parWizualizacja.getDlugosc()];
+        double Utemp = 0;
+        odpSkokowa[0][0]=SISO.obliczKrok(Utemp);
+        odpSkokowa[0][1]=SISO.obliczKrok(U);
+        for(int i = 2; i < parWizualizacja.getDlugosc(); i++)
+            odpSkokowa[0][i] = SISO.obliczKrok(Utemp);
+       return ResponseEntity.ok(new OdpowiedzSkokowa(odpSkokowa));
+    }
+
+    @RequestMapping(value="/odpowiedz/MIMO", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, method = RequestMethod.POST)
+    @ResponseBody
+    public static ResponseEntity<OdpowiedzSkokowa> odpowiedzMIMO(@RequestPart("file") MultipartFile file, @ModelAttribute ParRegulator parRegulator, @ModelAttribute ParWizualizacja parWizualizacja)
+    {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode root = objectMapper.readTree(file.getInputStream());
+            ParObiektMIMO[] obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektMIMO[].class);
+            MIMO obiekt  = new MIMO(obiekty);
+
+            double U = 1;
+            double Utemp = 0;
+            double[][] odpSkokowa = new double[obiekt.getLiczbaIN()*obiekt.getLiczbaOUT()][parWizualizacja.getDlugosc()];
+            for(int k = 0; k<obiekt.getLiczbaIN(); k++)
+            {
+                for(int j = 0; j < obiekt.getLiczbaOUT(); j++)
+                {
+                    obiekt.resetObiektu();
+                    odpSkokowa[k*obiekt.getLiczbaIN()+j][0]=obiekt.obliczKrok(Utemp,k,j);
+                    odpSkokowa[k*obiekt.getLiczbaIN()+j][1]=obiekt.obliczKrok(U,k,j);
+                    for(int i = 2; i < parWizualizacja.getDlugosc(); i++)
+                        odpSkokowa[k*obiekt.getLiczbaIN()+j][i] = obiekt.obliczKrok(Utemp,k,j);
+                }
+            }
+            return ResponseEntity.ok(new OdpowiedzSkokowa(odpSkokowa));
+            }
+            catch (Exception ex)
+            {
+                System.out.println(ex.getMessage());
+                System.out.println(ex.getCause());
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
     }
 }

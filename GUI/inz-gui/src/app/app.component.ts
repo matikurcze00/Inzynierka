@@ -6,6 +6,8 @@ import { OdpowiedzMIMO } from './model/odpowiedzMIMO';
 import { WykresDane } from './model/wykresDane';
 import { datasetsMIMO } from './model/datasetsMIMO';
 import { StrojenieService } from './service/strojenie.service';
+import { OdpowiedzSkokowaService } from './service/odpowiedz-skokowa.service';
+import { OdpowiedzSkokowa } from './model/odpowiedzSkokowa';
  
 @Component({
   selector: 'app-root',
@@ -15,11 +17,14 @@ import { StrojenieService } from './service/strojenie.service';
 
 export class AppComponent {
   zakladka = "model"
-  constructor(private strojenieService: StrojenieService) 
+  constructor(private strojenieService: StrojenieService, private odpowiedzSkokowaService: OdpowiedzSkokowaService) 
   {Chart.register(...registerables)}
   odpowiedz?: Odpowiedz|null;
+  OdpowiedzSkokowa?: OdpowiedzSkokowa|null;
   odpowiedzMIMO?: OdpowiedzMIMO|null;
   myChart?: any;
+  odpSkokowaChart?: any;
+  sterowanieChart?: any;
   liczbaRegulatorow?: any;
   file: File | null = null;
   primaryXAxis = {valueType: 'krok'}
@@ -40,16 +45,32 @@ export class AppComponent {
       }),
     MIMO: new FormGroup({
           plik: new FormControl(this.file),
+          liczbaWejsc: new FormControl(1),
+          liczbaWyjsc: new FormControl(1)
         }),
     parRegulator: new FormGroup({
       typ: new FormControl(),
+      uMin: new FormControl(),
       uMax: new FormControl(),
       duMax: new FormControl(),
       blad: new FormControl("srednio")
+    }),
+    parWizualizacja: new FormGroup({
+      yZad: new FormControl([10.0]),
+      yPP: new FormControl([0.0]),
+      uPP: new FormControl([0.0]),
+      skok: new FormControl([0.0]),
+      dlugosc: new FormControl(100.0)
     })
     })
 
-  updateObiekt(updatedObiekt: FormArray) {
+    yZadTemp = this.strojenie.get('parWizualizacja.yZad')?.value
+    yPPTemp = this.strojenie.get('parWizualizacja.yPP')?.value
+    uPPTemp = this.strojenie.get('parWizualizacja.uPP')?.value
+    skokTemp = this.strojenie.get('parWizualizacja.skok')?.value
+    dlugoscTemp = this.strojenie.get('parWizualizacja.dlugosc')?.value
+    zakladkaWizualizacja : String = "strojenie"
+    updateObiekt(updatedObiekt: FormArray) {
     console.log("updateObiekt")
     if(updatedObiekt.controls['0']!=undefined){
         console.log(updatedObiekt.controls['0'])
@@ -58,7 +79,17 @@ export class AppComponent {
         console.log("update Obiekt")
         this.file=updatedObiekt.controls['1'].value;
         this.strojenie.controls.MIMO.patchValue(updatedObiekt.controls['1'].value)
+        this.strojenie.controls.parWizualizacja.controls.yZad.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value).fill(0) as number[]); 
+        this.strojenie.controls.parWizualizacja.controls.yPP.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value).fill(0) as number[]); 
+        this.strojenie.controls.parWizualizacja.controls.uPP.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWejsc.value).fill(0) as number[]); 
+        this.strojenie.controls.parWizualizacja.controls.skok.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value).fill(0) as number[]); 
+        
         console.log(this.strojenie.controls)
+        this.yZadTemp = this.strojenie.get('parWizualizacja.yZad')?.value;
+        this.yPPTemp = this.strojenie.get('parWizualizacja.yPP')?.value;
+        this.uPPTemp = this.strojenie.get('parWizualizacja.uPP')?.value;
+        this.skokTemp = this.strojenie.get('parWizualizacja.skok')?.value;
+
       }
     
   }
@@ -70,6 +101,41 @@ export class AppComponent {
   setBlad(nazwa: string)
   {
     (<FormControl>this.strojenie.get('parRegulator.blad')).setValue(nazwa)
+  }
+  onYZadChange(index: number, value: any) {
+    let yZad = this.strojenie.get('parWizualizacja.yZad')?.value;
+    if(value && yZad)
+    { 
+      yZad[index] = value
+      this.strojenie.get('parWizualizacja.yZad')!.setValue(yZad)
+    }
+  }
+  onYPPChange(index: number, value: any) {
+    let yPP = this.strojenie.get('parWizualizacja.yPP')?.value;
+    if(value && yPP)
+    { 
+      yPP[index] = value
+      this.strojenie.get('parWizualizacja.yPP')!.setValue(yPP)
+    }
+  }
+  onUPPChange(index: number, value: any) {
+    let uPP = this.strojenie.get('parWizualizacja.uPP')?.value;
+    if(value && uPP)
+    { 
+      uPP[index] = value
+      this.strojenie.get('parWizualizacja.uPP')!.setValue(uPP)
+    }
+  }
+  onSkokChange(index: number, value: any) {
+    let skok = this.strojenie.get('parWizualizacja.skok')?.value;
+    if(value && skok)
+    { 
+      skok[index] = value
+      this.strojenie.get('parWizualizacja.skok')!.setValue(skok)
+    }
+  }
+  updateDlugosc(value: number) {
+    this.strojenie.get('parWizualizacja.dlugosc')!.setValue(value);
   }
   onSubmit(){
     console.log("click")
@@ -88,6 +154,7 @@ export class AppComponent {
 
       this.createChartData()
       this.createChart()
+      this.createChartSterowania()
     },
     error: error => {
       console.log(error.message)
@@ -106,6 +173,7 @@ export class AppComponent {
       this.liczbaRegulatorow = Array.from({length: this.odpowiedzMIMO.cel.length}, (_, i) => i);
       console.log(this.liczbaRegulatorow)
       this.createChartDataMIMO()
+      this.createChartSterowaniaMIMO()
     },
     error: error => {
       console.log(error.message)
@@ -118,15 +186,13 @@ export class AppComponent {
       if(this.odpowiedz)
       {
       var arrKroki: number[] = new Array(this.odpowiedz.wykres.length)
-      var arrCel: number[] = new Array(this.odpowiedz.wykres.length)
       for(var i = 0; i<this.odpowiedz.wykres.length; i++)
       {
         arrKroki[i] = i;
-        arrCel[i] = this.odpowiedz.cel;
       }
       this.chartData = {
         kroki: arrKroki,
-        cel: arrCel,
+        cel: this.odpowiedz.cel,
         obiekt: this.odpowiedz.wykres
       }
       console.log(this.chartData)
@@ -163,33 +229,12 @@ export class AppComponent {
       if(this.odpowiedzMIMO)
       {
       var arrKroki: number[] = new Array(this.odpowiedzMIMO.wykres[0].length)
-      var arrCel: number[][] = new Array(this.odpowiedzMIMO.cel.length)
-      for(var i = 0; i < this.odpowiedzMIMO.cel.length; i++)
-      {
-        arrCel[i] = new Array(this.odpowiedzMIMO.wykres.length)
-      }
-      const zmiana:number = this.odpowiedzMIMO.wykres[0].length/this.odpowiedzMIMO.cel.length;
       for(var i = 0; i<this.odpowiedzMIMO.wykres[0].length; i++)
       {
         arrKroki[i] = i;
       }
-      console.log("arrCel")
-      console.log(arrCel);
-      console.log(zmiana)
-      for(var j = 0; j<this.odpowiedzMIMO.cel.length; j++)
-        {
-          for(var i = 0; i<this.odpowiedzMIMO.wykres[0].length; i++)
-            {
-              if(i>=zmiana*j)
-              {
-                arrCel[j][i] = this.odpowiedzMIMO.cel[j];
-              }
-              else
-              {
-                arrCel[j][i] = 0.0;
-              }
-          }
-        }
+
+
       console.log("createChart")
 
       if(this.myChart)
@@ -199,7 +244,7 @@ export class AppComponent {
       {
         chartDataSet.push({
           label: "Wartość zadana wyjścia " + i,
-          data: arrCel[i-1],
+          data: this.odpowiedzMIMO.cel[i-1],
           backgroundColor: this.randomRGB() 
         });
         chartDataSet.push({
@@ -220,5 +265,158 @@ export class AppComponent {
     }}
     randomNum = () => Math.floor(Math.random() * (235 - 52 + 1) + 52);
     randomRGB = () => `rgb(${this.randomNum()}, ${this.randomNum()}, ${this.randomNum()})`;
-
+    WyznaczOdpowiedz()
+    {
+      console.log("click")
+      if(this.strojenie.controls.MIMO.controls['plik'].value==null)
+      {
+        this.odpowiedzSkokowaService.wyznaczOdpowiedzSISO(this.strojenie).subscribe({next: response =>{
+          this.OdpowiedzSkokowa=response
+          this.createChartOdpSkok()
+        },
+        error: error => {
+          console.log(error.message)
+          console.error('There was an error!', error);
+          console.log(error)
+        }})
+      }
+      else
+      {
+        this.odpowiedzSkokowaService.wyznaczOdpowiedzMIMO(this.strojenie).subscribe({next: response =>{
+          this.OdpowiedzSkokowa=response
+          console.log(this.OdpowiedzSkokowa)
+          this.createChartOdpSkokMIMO()
+        },
+        error: error => {
+          console.log(error.message)
+          console.error('There was an error!', error);
+          console.log(error)
+        }})
+      }
+    }
+    createChartSterowania()
+    {
+      console.log("sterowanieSISOChart")
+      if(this.odpowiedz)
+      {
+        var arrKroki: number[] = new Array(this.odpowiedz.sterowanie.length)
+        for(var i = 0; i<this.odpowiedz.sterowanie.length; i++)
+        {
+          arrKroki[i] = i;
+        }
+      if(this.sterowanieChart)
+        this.sterowanieChart.destroy()
+      this.sterowanieChart = new Chart('sterowanieChart', {
+      type: 'line',
+      data : {
+        labels: arrKroki,
+        datasets : [
+          {
+            label: "Wejście obiektu",
+            data: this.odpowiedz.sterowanie,
+            backgroundColor: 'blue'
+          }
+        ]
+      }
+    });}
   }
+  createChartSterowaniaMIMO()
+    {
+    console.log("createChartSterowaniaMIMO")
+      if(this.odpowiedzMIMO)
+      {
+        var arrKroki: number[] = new Array(this.odpowiedzMIMO.sterowanie[0].length)
+        for(var i = 0; i<this.odpowiedzMIMO.sterowanie[0].length; i++)
+        {
+          arrKroki[i] = i;
+        }
+      if(this.sterowanieChart)
+        this.sterowanieChart.destroy()
+      
+      let liczbaWyjsc = this.strojenie.controls.MIMO.controls.liczbaWyjsc.value
+      let liczbaWejsc = this.strojenie.controls.MIMO.controls.liczbaWejsc.value
+      var chartDataSet : datasetsMIMO[] = new Array();
+      if(liczbaWejsc!=null)   
+        if(liczbaWyjsc!=null)
+          for(let i = 1; i < liczbaWejsc+1; i++)
+              {chartDataSet.push({
+                label: "Wejscie " +i,
+                data: this.odpowiedzMIMO.sterowanie[i-1],
+                backgroundColor: this.randomRGB()
+              });
+            }
+      console.log(chartDataSet);
+      let chartData = {
+        labels: arrKroki,
+        datasets: chartDataSet
+      };
+      
+      this.sterowanieChart = new Chart('sterowanieChart', {
+      type: 'line',
+      data : chartData
+    });
+  }}
+  createChartOdpSkok()
+    {
+      console.log("OdpSkokChart")
+      if(this.OdpowiedzSkokowa)
+      {
+        var arrKroki: number[] = new Array(this.OdpowiedzSkokowa.przebieg[0].length)
+        for(var i = 0; i<this.OdpowiedzSkokowa.przebieg[0].length; i++)
+        {
+          arrKroki[i] = i;
+        }
+      if(this.odpSkokowaChart)
+        this.odpSkokowaChart.destroy()
+      this.odpSkokowaChart = new Chart('odpSkokowaChart', {
+      type: 'line',
+      data : {
+        labels: arrKroki,
+        datasets : [
+          {
+            label: "Wyjście obiektu",
+            data: this.OdpowiedzSkokowa.przebieg[0],
+            backgroundColor: 'blue'
+          }
+        ]
+      }
+    });}
+  }
+  createChartOdpSkokMIMO()
+    {
+      console.log("OdpSkokMIMOChart")
+      if(this.OdpowiedzSkokowa)
+      {
+        var arrKroki: number[] = new Array(this.OdpowiedzSkokowa.przebieg[0].length)
+        for(var i = 0; i<this.OdpowiedzSkokowa.przebieg[0].length; i++)
+        {
+          arrKroki[i] = i;
+        }
+      if(this.odpSkokowaChart)
+        this.odpSkokowaChart.destroy()
+      
+      let liczbaWyjsc = this.strojenie.controls.MIMO.controls.liczbaWyjsc.value
+      let liczbaWejsc = this.strojenie.controls.MIMO.controls.liczbaWejsc.value
+      var chartDataSet : datasetsMIMO[] = new Array();
+      if(liczbaWejsc!=null)   
+        if(liczbaWyjsc!=null)
+          for(let i = 1; i < liczbaWejsc+1; i++)
+            for(let j = 1; j<liczbaWyjsc+1; j++)
+              {chartDataSet.push({
+                label: "IN-"+i+" OUT-" + j,
+                data: this.OdpowiedzSkokowa.przebieg[(i-1)*liczbaWejsc+j-1],
+                backgroundColor: this.randomRGB()
+              });
+            }
+      console.log(chartDataSet);
+      let chartData = {
+        labels: arrKroki,
+        datasets: chartDataSet
+      };
+      
+      this.odpSkokowaChart = new Chart('odpSkokowaChart', {
+      type: 'line',
+      data : chartData
+    });
+  }}
+}

@@ -10,7 +10,7 @@
       id="option1-model"
       autocomplete="off"
       [checked]="true"
-      (change)="typ='SISO'; this.obiektForm.get('obiekt')?.get([1])?.patchValue({ plik: null }); this.file=null" 
+      (change)="typ='SISO'; resetMIMO()" 
     />
     <label class="btn btn-secondary" for="option1-model" >SISO</label>
     <input
@@ -30,8 +30,21 @@
       <div class="form-row align-items-center mb-3" >
 
         <span class="p-3">{{file ? 'Wybrany plik to: ' +file.name : 'Wybierz plik lub go tu przyciągnij i upuść ' }}</span>
-        
         <input class="file-input" type="file">
+        <form [formGroup]="obiektForm" >
+          <div class="container ml-0 mr-0 mx-auto">
+            <div class="form-group mb-3" formArrayName="obiekt">
+              <div class="form-row align-items-center" [formGroupName]="1">
+                <div class="input-group col">
+                  <label class="input-group-text"> Liczba wejść:  </label>
+                  <input class="form-control" type="number" placeholder="1" formControlName="liczbaWejsc"/>
+                  <label class="input-group-text"> Liczba wyjść:   </label>
+                  <input class="form-control" type="number" placeholder="1" formControlName="liczbaWyjsc"/>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
       </div>
   </div>
   <div class="mt-5" *ngIf="typ=='SISO'">

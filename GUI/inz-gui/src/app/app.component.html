@@ -39,50 +39,158 @@
     <app-regulator-widok (updateEvent)="updateRegulator($event)" [hidden]="zakladka!=='regulator'"></app-regulator-widok>
   </div>
 
-  <div class="text-center" *ngIf="zakladka=='wizualizacja'">
-    <h4>Wybierz sposób liczenia błędu</h4>
-    <div class="btn-group  mt-5">
+  <div *ngIf="zakladka=='wizualizacja'">
+    <!--<h4>Wybierz sposób liczenia błędu</h4>
+     <div class="btn-group mt-5">
+        <input
+        mdbRadio
+        type="radio"
+        class="btn-check"
+        name="options-wizualizacja"
+        id="option1-wizualizacja"
+        autocomplete="off"
+        [checked]="true"
+        (change)="setBlad('srednio')"
+      />
+      <label class="btn btn-secondary" for="option1-wizualizacja" >Średniokwadratowy</label>
+      <input
+        mdbRadio
+        type="radio"
+        class="btn-check"
+        name="options-wizualizacja"
+        id="option2-wizualizacja"
+        autocomplete="off"
+        (change)="setBlad('absolutny')"
+      />
+      <label class="btn btn-secondary" for="option2-wizualizacja">Absolutny</label>
+      <input
+        mdbRadio
+        type="radio"
+        class="btn-check"
+        name="options-wizualizacja"
+        id="option3-wizualizacja"
+        autocomplete="off"
+        (change)="setBlad('mediana')"
+      />
+      <label class="btn btn-secondary" for="option3-wizualizacja">Mediana błędu</label>
+    </div> -->
+    <div class="mt-5">
+      <div class="btn-group">
+        <input
+        mdbRadio
+        type="radio"
+        class="btn-check"
+        name="options-obiekt"
+        id="option2-wizualizacja"
+        autocomplete="off"
+        [checked]="zakladkaWizualizacja=='odpowiedz'"
+        (change)="zakladkaWizualizacja='odpowiedz'"
+      />
+      <label class="btn btn-secondary" for="option2-wizualizacja" >Odpowiedź skokowa</label>
       <input
       mdbRadio
       type="radio"
       class="btn-check"
-      name="options-wizualizacja"
+      name="options-obiekt"
       id="option1-wizualizacja"
       autocomplete="off"
-      [checked]="true"
-      (change)="setBlad('srednio')"
+      [checked]="zakladkaWizualizacja=='strojenie'"
+      (change)="zakladkaWizualizacja='strojenie'" 
     />
-    <label class="btn btn-secondary" for="option1-wizualizacja" >Średniokwadratowy</label>
-    <input
-      mdbRadio
-      type="radio"
-      class="btn-check"
-      name="options-wizualizacja"
-      id="option2-wizualizacja"
-      autocomplete="off"
-      (change)="setBlad('absolutny')"
-    />
-    <label class="btn btn-secondary" for="option2-wizualizacja">Absolutny</label>
-    <input
-      mdbRadio
-      type="radio"
-      class="btn-check"
-      name="options-wizualizacja"
-      id="option3-wizualizacja"
-      autocomplete="off"
-      (change)="setBlad('mediana')"
-    />
-    <label class="btn btn-secondary" for="option3-wizualizacja">Mediana błędu</label>
-    
+    <label class="btn btn-secondary" for="option1-wizualizacja" >Dobór strojenia</label>
+      
+    </div>
+    </div>
+    <div class="parametry" [hidden]="this.zakladkaWizualizacja=='odpowiedz'">
+    <div class="text-center mt-5">
+      <b>Ustaw proszę wartość początkową wyjść: </b>
+      <div *ngIf="yPPTemp">
+        <div class="form-row d-flex align-items-center mb-3">
+          <div class="input-group col align-items-center" >
+            <div *ngFor="let y of yPPTemp; let i = index"  class="mx-auto" style="margin-left: 20%; margin-right: 20%;">
+              <label class="input-group-text mx-auto d-block text-center"> Wyjście {{i+1}} </label>
+              <input class="form-control mx-auto d-block text-center" [(ngModel)]="yPPTemp[i]" name="yPPTemp" (ngModelChange)="onYPPChange(i, $event)">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="text-center mt-5">
+      <b>Ustaw proszę wartość zadaną wyjść: </b>
+      <div *ngIf="yZadTemp">
+        <div class="form-row align-items-center mb-3">
+          <div class="input-group col align-items-center">
+            <div *ngFor="let y of yZadTemp; let i = index" class="mx-auto" style="margin-left: 20%; margin-right: 20%;">
+              <label class="input-group-text mx-auto d-block text-center"> Wyjście {{i+1}}  </label>
+              <input class="form-control mx-auto d-block text-center" [(ngModel)]="yZadTemp[i]" name="yZadTemp" (ngModelChange)="onYZadChange(i, $event)">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="text-center mt-5">
+      <b>Ustaw proszę w którym kroku ustawić wartość zadaną wyjścia: </b>
+      <div *ngIf="skokTemp">
+        <div class="form-row align-items-center mb-3">
+          <div class="input-group col align-items-center" >
+            <div *ngFor="let y of skokTemp; let i = index" class="mx-auto" style="margin-left: 20%; margin-right: 20%;">
+              <label class="input-group-text d-block text-center"> Wyjście {{i+1}}  </label>
+              <input class="form-control d-block text-center" [(ngModel)]="skokTemp[i]" name="skokTemp" (ngModelChange)="onSkokChange(i, $event)">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="text-center mt-5">
+      <b>Ustaw proszę wartość początkową wejścia:</b>
+      <div *ngIf="uPPTemp">
+        <div class="form-row align-items-center mb-3">
+          <div class="input-group col align-items-center" >
+            <div *ngFor="let y of uPPTemp; let i = index" class="mx-auto" style="margin-left: 20%; margin-right: 20%;">
+              <label class="input-group-text d-block text-center"> Wejście {{i+1}} </label>
+              <input class="form-control d-block text-center" [(ngModel)]="uPPTemp[i]" name="uPPTemp" (ngModelChange)="onUPPChange(i, $event)">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="text-center mt-5 mx-auto" style="margin-left: 20%; margin-right: 20%;">
+      <b>Ustaw proszę długość symulacji: </b>
+      <div class="row mx-auto">
+        <div class="col-2 mx-auto">
+          <label class="input-group-text col-12 d-block text-center"> Długość </label>
+          <input class="form-control col-12 d-block text-center" [(ngModel)]="dlugoscTemp" name="dlugoscTemp" (ngModelChange)="updateDlugosc($event)">
+        </div>
+      </div>
     </div>
     <div class="mt-5">
       <button class="btn btn-success" type="submit">Dobierz Strojenie</button>
     </div>
   </div>
+  </div>
 </form>
 </div>
+<div class="odpowiedz" [hidden]="this.zakladkaWizualizacja=='strojenie' || zakladka!=='wizualizacja'">
+  <div class="text-center"><b>Wyznacz przebieg odpowiedzi skokowej na model:</b>
+    <div class="text-center mt-5 mx-auto" style="margin-left: 20%; margin-right: 20%;">
+      <b>Ustaw proszę długość przebiegu: </b>
+      <div class="row mx-auto">
+        <div class="col-2 mx-auto">
+          <label class="input-group-text col-12 d-block text-center"> Długość </label>
+          <input class="form-control col-12 d-block text-center" [(ngModel)]="dlugoscTemp" name="dlugoscTemp" (ngModelChange)="updateDlugosc($event)">
+        </div>
+      </div>
+    </div>
+    <div class="mt-5">
+      <button class="btn btn-success" (click)="WyznaczOdpowiedz()">Wyznacz odpowiedź skokową</button>
+    </div>
+    <div class="odp-skokowa-wykres">
+      <canvas  id='odpSkokowaChart' [hidden]="zakladka!=='wizualizacja' || zakladkaWizualizacja!='odpowiedz'">{{this.odpSkokowaChart}}</canvas>
+    </div>
+  </div>
+</div>
 <div class="wykres-odp" >
-  <div *ngIf="zakladka=='wizualizacja' && liczbaRegulatorow">
+  <div *ngIf="zakladka=='wizualizacja' && liczbaRegulatorow" [hidden]="this.zakladkaWizualizacja!='strojenie'">
     <div *ngIf="odpowiedz">
       <div *ngIf="odpowiedz.typRegulatora=='pid'">
         <div *ngFor="let regulator of this.liczbaRegulatorow">
@@ -121,5 +229,9 @@
   </div>
 
   </div>
-  <canvas  id='myChart' [hidden]="zakladka!=='wizualizacja'">{{this.myChart}}</canvas>
+  <div [hidden]="zakladka!='wizualizacja' || zakladkaWizualizacja!='strojenie'">
+    <b *ngIf="odpowiedz">Przebieg symulacji regulowanego obiektu</b>
+    <canvas  id='myChart' >{{this.myChart}}</canvas>
+    <canvas id="sterowanieChart">{{this.sterowanieChart}}</canvas>
+  </div>
 </div>

@@ -1,6 +1,7 @@
 export interface OdpowiedzMIMO{
   wspolczynniki: number[];
   wykres: number[][];
-  cel: number[];
+  cel: number[][];
   typRegulatora: string;
+  sterowanie: number[][];
 }

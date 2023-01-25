@@ -16,4 +16,5 @@ public class ParObiektMIMO {
     private int[] delay;
     private double Tp;
     private double UMax;
+    private double UMin;
 }

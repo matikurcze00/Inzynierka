@@ -27,6 +27,8 @@ export class ObiektWidokComponent implements OnInit {
       }),
       new FormGroup({
         plik: new FormControl(this.file),
+        liczbaWejsc: new FormControl(),
+        liczbaWyjsc: new FormControl()
         }),
     ])
   })
@@ -41,7 +43,7 @@ export class ObiektWidokComponent implements OnInit {
     }
   }
 
-  pierwszeRownanie = " $ \\large G(s) = Gain * \\frac{(R1*s - Q1)(R2*s - Q2)}{(T1*s+1)(T2*s+1)(T3+3)}*e^{Delay}$  ";
+  pierwszeRownanie = " $ \\large G(s) = Gain * \\frac{(R1*s + Q1)(R2*s + Q2)}{(T1*s+1)(T2*s+1)(T3+3)}*e^{Delay}$  ";
   drugieRownanie =  " $ \\large G(s) = K * \\frac{(s-z1)}{(s-b1)(s-b2)(s-b3)}$";
   zmienne = [{id: 1, nazwa: "Gain"},
             {id: 2, nazwa: "R1"},
@@ -54,7 +56,10 @@ export class ObiektWidokComponent implements OnInit {
             {id: 9, nazwa: "Delay"},
             {id: 10, nazwa: "Tp"}];
   constructor(private http: HttpClient) { }
-
+  resetMIMO(): void{
+    this.obiektForm.get('obiekt')?.get([1])?.patchValue({ plik: null, liczbaWejsc: 1, liczbaWyjsc: 1 }); 
+    this.file=null
+  }
   ngOnInit(): void {
     this.updateEvent.emit(this.obiektForm.controls.obiekt);
     this.obiektForm.valueChanges.subscribe( value =>{
@@ -62,5 +67,4 @@ export class ObiektWidokComponent implements OnInit {
       console.log(value)
     })
   }
-
 }
