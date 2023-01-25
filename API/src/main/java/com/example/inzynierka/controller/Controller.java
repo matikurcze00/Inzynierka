@@ -43,14 +43,29 @@ public class Controller {
             Regulator regulator;
 
             if (parRegulator.getTyp().equals("pid"))
-                regulator = new PID(0.0, 0.0, 0.0, parObiekt.getTp(),new double[]{SISO.getYMax()} , parRegulator.getDuMax(), parRegulator.getUMax());
+                regulator = new PID(0.0, 0.0, 0.0, parObiekt.getTp(),new double[]{SISO.getYMax()} , parRegulator.getDuMax(), parRegulator.getUMax(), parWizualizacja.getStrojenie());
             else if (parRegulator.getTyp().equals("dmc"))
-                regulator = new DMC(5, 0.1, SISO, SISO.getYMax() / 2, parRegulator.getDuMax(), 11);
+                regulator = new DMC(5, 0.1, SISO, SISO.getYMax() / 2, parRegulator.getDuMax(), 11, parWizualizacja.getStrojenie());
             else
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(300, 40, 6, 0.3, 0.2);
             OdpowiedzStrojenie odpowiedzStrojenie = new OdpowiedzStrojenie();
-            odpowiedzStrojenie.setWspolczynniki(GA.dobierzWartosci(regulator.liczbaZmiennych(), regulator, SISO));
+            double[] tempWartosciGA = GA.dobierzWartosci(regulator.liczbaZmiennych(), regulator, SISO);
+            int iTemp = 0;
+            double[] tempStrojenie = new double[parWizualizacja.getStrojenie().length];
+            for(int i =0; i<parWizualizacja.getStrojenie().length; i++)
+            {
+                if(parWizualizacja.getStrojenie()[i]==null)
+                {
+                    tempStrojenie[i]=tempWartosciGA[iTemp];
+                    iTemp+=1;
+                }
+                else
+                {
+                    tempStrojenie[i]=parWizualizacja.getStrojenie()[i];
+                }
+            }
+            odpowiedzStrojenie.setWspolczynniki(tempStrojenie);
             regulator.zmienWartosci(odpowiedzStrojenie.getWspolczynniki());
             regulator.setCel(new double[]{parWizualizacja.getYZad()[0]});
             double[] celTemp = new double[parWizualizacja.getDlugosc()];
@@ -117,13 +132,28 @@ public class Controller {
             }else if (parRegulator.getTyp().equals("dmc"))
             {
                 double[] tempLambda = {0.5,0.5};
-                regulator = new DMC(5, tempLambda, obiekt, obiekt.getYMax(), parRegulator.getDuMax(), 11);
+                regulator = new DMC(5, tempLambda, obiekt, obiekt.getYMax(), parRegulator.getDuMax(), 11, parWizualizacja.getStrojenie());
             }
             else
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(40, 10, 2, 0.3, 0.4);
             OdpowiedzStrojenieMIMO odpowiedz = new OdpowiedzStrojenieMIMO();
-            odpowiedz.setWspolczynniki(GA.dobierzWartosci(regulator.liczbaZmiennych(), regulator, obiekt));
+            double[] tempWartosciGA =GA.dobierzWartosci(regulator.liczbaZmiennych(), regulator, obiekt);
+            int iTemp = 0;
+            double[] tempStrojenie = new double[parWizualizacja.getStrojenie().length];
+            for(int i =0; i<parWizualizacja.getStrojenie().length; i++)
+            {
+                if(parWizualizacja.getStrojenie()[i]==null)
+                {
+                    tempStrojenie[i]=tempWartosciGA[iTemp];
+                    iTemp+=1;
+                }
+                else
+                {
+                    tempStrojenie[i]=parWizualizacja.getStrojenie()[i];
+                }
+            }
+            odpowiedz.setWspolczynniki(tempStrojenie);
             regulator.zmienWartosci(odpowiedz.getWspolczynniki());
             int dlugoscSymulacji = parWizualizacja.getDlugosc();
             double[][] Y = new double[obiekt.getLiczbaOUT()][dlugoscSymulacji];

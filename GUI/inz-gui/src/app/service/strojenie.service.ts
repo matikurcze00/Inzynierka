@@ -41,6 +41,7 @@ export class StrojenieService {
     formData.append('uPP', form.controls.parWizualizacja.value.uPP);
     formData.append('skok', form.controls.parWizualizacja.value.skok);
     formData.append('dlugosc', form.controls.parWizualizacja.value.dlugosc);
+    formData.append('strojenie', form.controls.parWizualizacja.value.strojenie);
 
     const headers2 =  new HttpHeaders({'Content-Type' : 'application/json; charset=utf-8'});
 

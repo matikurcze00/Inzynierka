@@ -22,6 +22,58 @@ public class DMC extends Regulator{
     private Matrix M;
     private double duMax;
     private double[] cel;
+    private Double[] strojenieZadane;
+    private int liczbaStrojeniaZadanego;
+
+    public DMC(int Nu, double lambda, SISO SISO, double cel, double duMax, int N, Double[] strojenieZadane)
+    {
+        this(Nu, lambda, SISO, cel, duMax, N);
+        if(strojenieZadane[0]!=null)
+        {
+            liczbaStrojeniaZadanego=1;
+            this.strojenieZadane = strojenieZadane;
+            this.getLambda().set(0,strojenieZadane[0]);
+            this.policzWartosci(SISO);
+        }
+    }
+    public DMC(int Nu, double lambda, SISO SISO, double cel, double duMax, int N)
+    {
+        this.Lambda = Arrays.asList(lambda);
+        this.Nu = Nu;
+        this.N = N;
+        this.cel = new double[]{cel};
+        this.duMax = duMax;
+        policzWartosci(SISO);
+    }
+    public DMC(int Nu, double[] lambda, MIMO obiekt, double[] cel, double duMax, int N, Double[] strojenieZadane)
+    {
+        this(Nu, lambda, obiekt, cel, duMax, N);
+        this.liczbaStrojeniaZadanego=0;
+        this.strojenieZadane = strojenieZadane;
+        for(int i = 0; i <strojenieZadane.length; i++)
+        {
+            if(strojenieZadane[i]!=null)
+            {
+                liczbaStrojeniaZadanego+=1;
+                this.getLambda().set(i,strojenieZadane[i]);
+            }
+        }
+        this.policzWartosci(obiekt);
+    }
+    public DMC(int Nu, double[] lambda, MIMO obiekt, double[] cel, double duMax, int N)
+    {
+        List<Double> tempLambda = new ArrayList();
+        for(double wartosc : lambda)
+        {
+            tempLambda.add(wartosc);
+        }
+        this.Lambda = new ArrayList<>(tempLambda);
+        this.Nu = Nu;
+        this.N = N;
+        this.cel = cel;
+        this.duMax = duMax;
+        policzWartosci(obiekt);
+    }
 
     public double policzOutput(double aktualna)
     {
@@ -92,30 +144,6 @@ public class DMC extends Regulator{
         dodajdU(tempdU);
         return tempdU;
     }
-
-    public DMC(int Nu, double lambda, SISO SISO, double cel, double duMax, int N)
-    {
-        this.Lambda = Arrays.asList(lambda);
-        this.Nu = Nu;
-        this.N = N;
-        this.cel = new double[]{cel};
-        this.duMax = duMax;
-        policzWartosci(SISO);
-    }
-    public DMC(int Nu, double[] lambda, MIMO obiekt, double[] cel, double duMax, int N)
-    {
-        List<Double> tempLambda = new ArrayList();
-        for(double wartosc : lambda)
-        {
-            tempLambda.add(wartosc);
-        }
-        this.Lambda = new ArrayList<>(tempLambda);
-        this.Nu = Nu;
-        this.N = N;
-        this.cel = cel;
-        this.duMax = duMax;
-        policzWartosci(obiekt);
-    }
     private void policzWartosci(SISO SISO)
     {
         this.S = new ArrayList();
@@ -137,13 +165,32 @@ public class DMC extends Regulator{
 
     public void zmienWartosci(double[] wartosci){
         List<Double> tempLambda = new ArrayList();
-        for(double wartosc : wartosci)
+        if(this.liczbaStrojeniaZadanego==0)
         {
-            tempLambda.add(wartosc);
+            for(double wartosc : wartosci)
+            {
+                tempLambda.add(wartosc);
+            }
+        }
+        else
+        {
+            int iTemp = 0;
+            for(int i = 0; i<getLambda().size(); i++)
+            {
+                if(strojenieZadane[i]!=null)
+                {
+                    tempLambda.add(strojenieZadane[i]);
+                }
+                else
+                {
+                    tempLambda.add(wartosci[iTemp]);
+                    iTemp+=1;
+                }
+            }
         }
         setLambda(tempLambda);
-        policzK(wartosci.length);
-        resetujRegulator(wartosci.length);
+        policzK(tempLambda.size());
+        resetujRegulator(tempLambda.size());
     }
     public void resetujRegulator()
     {
@@ -323,6 +370,6 @@ public class DMC extends Regulator{
     }
     public int liczbaZmiennych()
     {
-        return cel.length;
+        return cel.length - liczbaStrojeniaZadanego;
     }
 }

@@ -163,6 +163,101 @@
         </div>
       </div>
     </div>
+    <div class="text-center mt-5">
+      <b *ngIf="!this.strojenie.get('MIMO.plik')?.value||this.strojenie.get('parRegulator.typ')?.value=='dmc'">Ustaw proszę wybrane wartości strojenia regulatora:</b>
+      <b *ngIf="this.strojenie.get('MIMO.plik')?.value&&this.strojenie.get('parRegulator.typ')?.value=='pid'">Ustaw proszę wybrane wartości strojenia regulatorów:</b>
+      <div *ngIf="strojenieTemp">
+        <div *ngIf="this.strojenie.get('MIMO.plik')?.value==null">
+          <div *ngIf="this.strojenie.get('parRegulator.typ')?.value=='dmc'">
+            <div *ngFor="let y of liczbaWyjscArray; let i = index" class="mx-auto" >
+              <div class="form-row align-items-center mb-3" style="margin-left: 20%; margin-right: 20%;">
+                <div class="input-group col align-items-center" >
+                  <label class="input-group-text d-block text-center"> Lambda </label>
+                  <input class="form-control d-block text-center" [(ngModel)]="strojenieTemp[i]" 
+                  name="strojenieTemp" (ngModelChange)="onStrojenieChange(i, $event)" [disabled]="isDisabled(i)">
+                  <label class="input-group-text d-block text-center">
+                    <input type="checkbox" (change)="onCheckboxChange(i, $event)" [defaultChecked]="true">
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="this.strojenie.get('parRegulator.typ')?.value=='pid'">
+            <div *ngIf="this.strojenie.controls.MIMO.controls.liczbaWyjsc.value">
+              <div *ngFor="let y of liczbaWyjscArray; let i = index" class="mx-auto" >
+                  <div class="form-row align-items-center mb-3" style="margin-left: 20%; margin-right: 20%;">
+                    <div class="input-group col align-items-center" >
+                      <label class="input-group-text d-block text-center" > P  </label>
+                      <input class="form-control d-block text-center" [(ngModel)]="strojenieTemp[0]" 
+                      name="strojenieTemp1" (ngModelChange)="onStrojenieChange(0, $event)" [disabled]="isDisabled(0)">
+                      <label class="input-group-text d-block text-center">
+                        <input type="checkbox" (change)="onCheckboxChange(0, $event)" [checked]="!isDisabled(0)">
+                      </label>
+                      <label class="input-group-text d-block text-center" > I  </label>
+                      <input class="form-control d-block text-center" [(ngModel)]="strojenieTemp[1]" 
+                      name="strojenieTemp2" (ngModelChange)="onStrojenieChange(1, $event)" [disabled]="isDisabled(1)">
+                      <label class="input-group-text d-block text-center">
+                        <input type="checkbox" (change)="onCheckboxChange(1, $event)" [checked]="!isDisabled(1)">
+                      </label>
+                      <label class="input-group-text d-block text-center"> D  </label>
+                      <input class="form-control d-block text-center" [(ngModel)]="strojenieTemp[2]"
+                      name="strojenieTemp3" (ngModelChange)="onStrojenieChange(2, $event)" [disabled]="isDisabled(2)">
+                      <label class="input-group-text d-block text-center">
+                        <input type="checkbox" (change)="onCheckboxChange(2, $event)" [checked]="!isDisabled(2)">
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+        <div *ngIf="this.strojenie.get('MIMO.plik')?.value!=null">
+          <div *ngIf="this.strojenie.get('parRegulator.typ')?.value=='dmc'">
+            <div *ngFor="let y of liczbaWyjscArray; let i = index" class="mx-auto" style="margin-left: 20%; margin-right: 20%;">
+              <div class="form-row align-items-center mb-3">
+                <div class="input-group col align-items-center" >
+                  <label class="input-group-text d-block text-center col-12"> Lambda {{i+1}} </label>
+                  <input class="form-control d-block text-center col-12" [(ngModel)]="strojenieTemp[i]" 
+                  name="strojenieTemp{{i}}" (ngModelChange)="onStrojenieChange(i, $event)" [disabled]="isDisabled(i)">
+                  <label class="input-group-text d-block text-center">
+                    <input type="checkbox" (change)="onCheckboxChange(i, $event)" [checked]="!isDisabled(i)">
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="this.strojenie.get('parRegulator.typ')?.value=='pid'">
+            <div *ngIf="this.strojenie.controls.MIMO.controls.liczbaWyjsc.value">
+              <div *ngFor="let y of liczbaWyjscArray; let i = index" class="mx-auto" style="margin-left: 20%; margin-right: 20%;">
+                <b>Wartości strojenia regulatora podłączonego do wyjścia {{i+1}}</b>
+                <div class="form-row align-items-center mb-3">
+                  <div class="input-group col-2 align-items-center" >
+                    <label class="input-group-text d-block text-center" > P </label>
+                    <input class="form-control d-block text-center" [(ngModel)]="strojenieTemp[i*3]"
+                    name="strojenieTemp{{i*3}}" (ngModelChange)="onStrojenieChange(i*3, $event)" [disabled]="isDisabled(i*3)">
+                    <label class="input-group-text d-block text-center">
+                      <input type="checkbox" (change)="onCheckboxChange(i*3, $event)" [checked]="!isDisabled(i*3)">
+                    </label>
+                    <label class="input-group-text d-block text-center" > I </label>
+                    <input class="form-control d-block text-center" [(ngModel)]="strojenieTemp[i*3+1]"
+                    name="strojenieTemp{{i*3+1}}" (ngModelChange)="onStrojenieChange(i*3+1, $event)" [disabled]="isDisabled(i*3+1)">
+                    <label class="input-group-text d-block text-center">
+                      <input type="checkbox" (change)="onCheckboxChange(i*3+1, $event)" [checked]="!isDisabled(i*3+1)">
+                    </label>
+                    <label class="input-group-text d-block text-center"> D </label>
+                    <input class="form-control d-block text-center" [(ngModel)]="strojenieTemp[i*3+2]"
+                    name="strojenieTemp{{i*3+2}}" (ngModelChange)="onStrojenieChange(i*3+2, $event)" [disabled]="isDisabled(i*3+2)">
+                    <label class="input-group-text d-block text-center">
+                      <input type="checkbox" (change)="onCheckboxChange(i*3+2, $event)" [checked]="!isDisabled(i*3+2)">
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="mt-5">
       <button class="btn btn-success" type="submit">Dobierz Strojenie</button>
     </div>
@@ -203,8 +298,8 @@
         </div>
       </div>
       <div *ngIf="odpowiedz.typRegulatora=='dmc'">
-        <b>Wartoś Lambda:</b>
-        <div *gFor="let regulator of liczbaRegulatorow">
+        <b>Wartość Lambda:</b>
+        <div *ngFor="let regulator of liczbaRegulatorow">
         <p> <b>Lambda</b>= {{odpowiedz.wspolczynniki[regulator]}}</p>
         </div>
       </div>

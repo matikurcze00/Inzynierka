@@ -19,7 +19,8 @@ public class PID extends Regulator{
     private double duMax;
     private double uMax;
     private double Error = 0;
-
+    private Double[] strojenieZadane;
+    private int liczbaStrojeniaZadanego;
     @Override
     public double policzOutput(double aktualna)
     {
@@ -43,6 +44,28 @@ public class PID extends Regulator{
         return new double[0];
     }
 
+    public PID(double P, double I, double D, double Ts, double[] cel, double duMax, double uMax, Double[] strojenieZadane)
+    {
+
+        this(P, I, D, Ts, cel, duMax, uMax);
+        if(strojenieZadane[0]!=null)
+            this.K=strojenieZadane[0];
+        if(strojenieZadane[1]!=null)
+            this.Ti=strojenieZadane[1];
+        if(strojenieZadane[2]!=null)
+            this.Td=strojenieZadane[2];
+        policzWartosci();
+        resetujRegulator();
+        this.strojenieZadane=strojenieZadane;
+        int liczbaTemp = 0;
+        for(Double wartosc : strojenieZadane)
+            if(wartosc!=null)
+                liczbaTemp+=1;
+        this.liczbaStrojeniaZadanego = liczbaTemp;
+
+    }
+
+
     public PID(double P, double I, double D, double Ts, double[] cel, double duMax, double uMax)
     {
         this.K = P;
@@ -58,9 +81,31 @@ public class PID extends Regulator{
     @Override
     public void zmienWartosci(double[] wartosci)
     {
-        this.K = wartosci[0];
-        this.Ti = wartosci[1];
-        this.Td = wartosci[2];
+        if(this.liczbaStrojeniaZadanego==0)
+        {
+            this.K = wartosci[0];
+            this.Ti = wartosci[1];
+            this.Td = wartosci[2];
+        }
+        else
+        {
+            int iTemp = 0;
+            if(strojenieZadane[0]==null)
+            {
+                this.K = wartosci[iTemp];
+                iTemp+=1;
+            }
+            if(strojenieZadane[1]==null)
+            {
+                this.Ti = wartosci[iTemp];
+                iTemp+=1;
+            }
+            if(strojenieZadane[2]==null)
+            {
+                this.Td = wartosci[iTemp];
+                iTemp+=1;
+            }
+        }
         policzWartosci();
         resetujRegulator();
     }
@@ -78,6 +123,6 @@ public class PID extends Regulator{
     }
     public int liczbaZmiennych()
     {
-        return 3;
+        return 3 - this.liczbaStrojeniaZadanego;
     }
 }

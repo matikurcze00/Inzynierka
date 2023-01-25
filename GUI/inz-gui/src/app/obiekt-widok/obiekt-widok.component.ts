@@ -27,8 +27,8 @@ export class ObiektWidokComponent implements OnInit {
       }),
       new FormGroup({
         plik: new FormControl(this.file),
-        liczbaWejsc: new FormControl(),
-        liczbaWyjsc: new FormControl()
+        liczbaWejsc: new FormControl(1),
+        liczbaWyjsc: new FormControl(1)
         }),
     ])
   })

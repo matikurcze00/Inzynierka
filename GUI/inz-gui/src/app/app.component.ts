@@ -60,23 +60,25 @@ export class AppComponent {
       yPP: new FormControl([0.0]),
       uPP: new FormControl([0.0]),
       skok: new FormControl([0.0]),
-      dlugosc: new FormControl(100.0)
+      dlugosc: new FormControl(100.0),
+      strojenie: new FormControl([null,null,null] as (number | null)[])
     })
     })
-
+    liczbaWyjscArray = [0]
     yZadTemp = this.strojenie.get('parWizualizacja.yZad')?.value
     yPPTemp = this.strojenie.get('parWizualizacja.yPP')?.value
     uPPTemp = this.strojenie.get('parWizualizacja.uPP')?.value
     skokTemp = this.strojenie.get('parWizualizacja.skok')?.value
     dlugoscTemp = this.strojenie.get('parWizualizacja.dlugosc')?.value
+    strojenieTemp = this.strojenie.get('parWizualizacja.strojenie')?.value
     zakladkaWizualizacja : String = "strojenie"
+    
     updateObiekt(updatedObiekt: FormArray) {
     console.log("updateObiekt")
     if(updatedObiekt.controls['0']!=undefined){
         console.log(updatedObiekt.controls['0'])
         console.log("dalej")
         this.strojenie.controls.parObiekt.patchValue(updatedObiekt.controls['0'].value)
-        console.log("update Obiekt")
         this.file=updatedObiekt.controls['1'].value;
         this.strojenie.controls.MIMO.patchValue(updatedObiekt.controls['1'].value)
         this.strojenie.controls.parWizualizacja.controls.yZad.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value).fill(0) as number[]); 
@@ -90,12 +92,34 @@ export class AppComponent {
         this.uPPTemp = this.strojenie.get('parWizualizacja.uPP')?.value;
         this.skokTemp = this.strojenie.get('parWizualizacja.skok')?.value;
 
+      if(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value)
+      {
+        if(this.strojenie.controls.parRegulator.controls.typ.value=='pid')
+          this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value*3).fill(null));
+        else
+          this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value).fill(null));
+        
+        this.strojenieTemp = this.strojenie.get('parWizualizacja.strojenie')?.value;
+        this.liczbaWyjscArray = Array.from({length:this.strojenie.controls.MIMO.controls.liczbaWyjsc.value}, (_,i) => i);
+      }
       }
     
   }
   updateRegulator(updatedRegulator: FormArray) {
     if(updatedRegulator.controls['0']!=undefined){
-        this.strojenie.controls.parRegulator.patchValue(updatedRegulator.controls['0'].value)
+      this.strojenie.controls.parRegulator.patchValue(updatedRegulator.controls['0'].value)
+
+      if(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value)
+      {
+        if(this.strojenie.controls.parRegulator.controls.typ.value=='pid')
+        {  
+          this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value*3).fill(null));
+        }else{
+          this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value).fill(null));
+        }
+        this.strojenieTemp =this.strojenie.get('parWizualizacja.strojenie')?.value;
+        }
+    
     }
   }
   setBlad(nazwa: string)
@@ -134,11 +158,21 @@ export class AppComponent {
       this.strojenie.get('parWizualizacja.skok')!.setValue(skok)
     }
   }
+  onStrojenieChange(index: number, value: any) {
+    let strojenie = this.strojenie.get('parWizualizacja.strojenie')?.value;
+    if(value && strojenie)
+    { 
+      strojenie[index] = value
+      this.strojenie.get('parWizualizacja.strojenie')!.setValue(strojenie)
+    }
+    this.strojenieTemp=this.strojenie.get('parWizualizacja.strojenie')!.value
+  }
   updateDlugosc(value: number) {
     this.strojenie.get('parWizualizacja.dlugosc')!.setValue(value);
   }
   onSubmit(){
     console.log("click")
+    console.log(this.strojenie.controls.parWizualizacja)
     this.odpowiedzMIMO = null;
     this.odpowiedz = null;
     if(this.strojenie.controls.MIMO.controls['plik'].value==null)
@@ -419,4 +453,24 @@ export class AppComponent {
       data : chartData
     });
   }}
+  onCheckboxChange(index: number, event: any) {
+    let strojenie: (number | null)[] | null | undefined = this.strojenie.get('parWizualizacja.strojenie')?.value;
+    if(strojenie) {
+      if(strojenie[index])
+      {
+        strojenie[index] = null;
+        
+      }else{
+        strojenie[index] = 1.0;
+      }
+      this.strojenie.get('parWizualizacja.strojenie')!.setValue(strojenie);
+    }
+  }
+  isDisabled(index: number) {
+    let strojenie = this.strojenie.get('parWizualizacja.strojenie')?.value;
+    if(strojenie)
+      return strojenie[index] == null;
+    else
+      return true;
+  }
 }
