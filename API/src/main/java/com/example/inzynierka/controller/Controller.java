@@ -39,16 +39,28 @@ public class Controller {
             ParObiekt parObiekt = parStrojenie.getParObiekt();
             ParRegulator parRegulator = parStrojenie.getParRegulator();
             ParWizualizacja parWizualizacja = parStrojenie.getParWizualizacja();
-            SISO SISO = new SISO(parObiekt, parRegulator.getUMax(), parRegulator.getUMin());
+            SISO SISO = new SISO(parObiekt, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
             Regulator regulator;
-
+            int populacja;
+            int iteracja;
+            int elita;
             if (parRegulator.getTyp().equals("pid"))
+            {
                 regulator = new PID(0.0, 0.0, 0.0, parObiekt.getTp(),new double[]{SISO.getYMax()} , parRegulator.getDuMax(), parRegulator.getUMax(), parWizualizacja.getStrojenie());
+                populacja = 300;
+                iteracja = 40;
+                elita = 10;
+            }
             else if (parRegulator.getTyp().equals("dmc"))
+            {
                 regulator = new DMC(4, 0.1, SISO, SISO.getYMax() / 2, parRegulator.getDuMax(), 11, parWizualizacja.getStrojenie());
+                populacja = 100;
+                iteracja = 20;
+                elita = 3;
+            }
             else
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-            AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(300, 40, 6, 0.3, 0.2);
+            AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(populacja, iteracja, elita, 0.3, 0.2);
             OdpowiedzStrojenie odpowiedzStrojenie = new OdpowiedzStrojenie();
             double[] tempWartosciGA = GA.dobierzWartosci(regulator.liczbaZmiennych(), regulator, SISO);
             int iTemp = 0;
@@ -125,20 +137,29 @@ public class Controller {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode root = objectMapper.readTree(file.getInputStream());
             ParObiektMIMO[] obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektMIMO[].class);
-            MIMO obiekt  = new MIMO(obiekty);
+            MIMO obiekt  = new MIMO(obiekty, parWizualizacja.getBlad());
             Regulator regulator;
+            int populacja;
+            int iteracja;
+            int elita;
             if(parRegulator.getTyp().equals("pid"))
             {
                 Integer[] PV = objectMapper.treeToValue(root.path("PV"), Integer[].class);
                 regulator = new ZbiorPID(obiekt,PV, parRegulator.getDuMax(), parWizualizacja.getStrojenie());
+                populacja = 300;
+                iteracja = 100;
+                elita = 10;
             }else if (parRegulator.getTyp().equals("dmc"))
             {
                 double[] tempLambda = {0.5,0.5};
                 regulator = new DMC(5, tempLambda, obiekt, obiekt.getYMax(), parRegulator.getDuMax(), 11, parWizualizacja.getStrojenie());
+                populacja = 100;
+                iteracja = 20;
+                elita = 3;
             }
             else
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-            AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(40, 10, 2, 0.3, 0.4);
+            AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(populacja, iteracja, elita, 0.3, 0.4);
             OdpowiedzStrojenieMIMO odpowiedz = new OdpowiedzStrojenieMIMO();
             double[] tempWartosciGA =GA.dobierzWartosci(regulator.liczbaZmiennych(), regulator, obiekt);
             int iTemp = 0;
@@ -176,6 +197,7 @@ public class Controller {
             odpowiedz.setCel(celTemp);
 
             obiekt.resetObiektu();
+            regulator.resetujRegulator();
             for (int i = 0; i < dlugoscSymulacji; i++) {
                 double[] temp = new double[obiekt.getLiczbaOUT()];
                 //przy każdej iteracji jest pobierane yzad
@@ -196,7 +218,7 @@ public class Controller {
             odpowiedz.setWykres(Y);
             odpowiedz.setSterowanie(U);
             double blad = 0.0;
-            for(int i = 0; i<50*obiekt.getLiczbaOUT(); i++)
+            for(int i = 0; i<dlugoscSymulacji; i++)
             {
                 blad+=Math.pow(Y[0][i]-regulator.getCel()[0],2);
             }
@@ -216,7 +238,7 @@ public class Controller {
         ParObiekt parObiekt = parStrojenie.getParObiekt();
         ParRegulator parRegulator = parStrojenie.getParRegulator();
         ParWizualizacja parWizualizacja = parStrojenie.getParWizualizacja();
-        SISO SISO = new SISO(parObiekt, parRegulator.getUMax(), parRegulator.getUMin());
+        SISO SISO = new SISO(parObiekt, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
 
         double U = 1;
 
@@ -237,7 +259,7 @@ public class Controller {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode root = objectMapper.readTree(file.getInputStream());
             ParObiektMIMO[] obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektMIMO[].class);
-            MIMO obiekt  = new MIMO(obiekty);
+            MIMO obiekt  = new MIMO(obiekty, parWizualizacja.getBlad());
 
             double U = 1;
             double Utemp = 0;

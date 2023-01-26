@@ -20,22 +20,24 @@ public class SISO {
     private double uMax;
     private double YMax;
     private int dlugosc;
+    private String blad;
     public SISO() {}
 
-    public SISO(ParObiekt parObiekt, double uMax, double uMin)
+    public SISO(ParObiekt parObiekt, double uMax, double uMin, String blad)
     {
         this(parObiekt.getGain(), parObiekt.getR1(), parObiekt.getQ1(), parObiekt.getR2(),
                 parObiekt.getQ2(), parObiekt.getT1(), parObiekt.getT2(), parObiekt.getT3()
-        ,parObiekt.getDelay(), parObiekt.getTp(), uMax, uMin);
+        ,parObiekt.getDelay(), parObiekt.getTp(), uMax, uMin, blad);
     }
     public SISO(double gain, double R1, int Q1, double R2, int Q2, double T1,
-                double T2, double T3, int delay, double Tp, double uMax, double uMin)
+                double T2, double T3, int delay, double Tp, double uMax, double uMin, String blad)
     {
         this.transmitancja = new TransmitancjaCiagla(gain, R1, Q1, R2, Q2, T1, T2, T3, delay, Tp);
         U = new ArrayList(Collections.nCopies(3+delay, transmitancja.getUpp()));
         Y = new ArrayList(Collections.nCopies(3, transmitancja.getYpp()));
         this.uMax = uMax;
         this.uMin = uMin;
+        this.blad = blad;
         obliczDlugosc();
         obliczYMax();
     }
@@ -59,17 +61,15 @@ public class SISO {
     public double obliczPraceObiektu(Regulator regulator, double[] cel)
     {
         resetObiektu();
-        double blad = 0.0;
         regulator.setCel(cel);
+        double[] Y = new double[dlugosc];
         for (int i = 0; i<this.dlugosc; i++)
         {
-//            if(i==25)
-//                blad = Math.abs(obliczKrok(regulator.policzOutput(getAktualna()))-cel[0]);
-            blad+=Math.pow(obliczKrok(regulator.policzOutput(getAktualna()))-cel[0],2);
+            Y[i]=obliczKrok(regulator.policzOutput(getAktualna()));
+//            blad+=Math.pow(obliczKrok(regulator.policzOutput(getAktualna()))-cel[0],2);
         }
-        blad=blad/this.dlugosc;
         resetObiektu();
-        return blad;
+        return obliczBlad(Y, cel[0]);
     }
     public double obliczKrok(double du)
     {
@@ -121,11 +121,24 @@ public class SISO {
         double Utemp = 0;
         Stemp.add((obliczKrok(U)- getYpp())/U);
         Stemp.add((obliczKrok(Utemp)- getYpp())/U);
-        while((!((Stemp.get(i-1)-Stemp.get(i-2))<=0.005) || Stemp.get(i-2)==0.0))
+        while(!(Math.abs(Stemp.get(i-1)-Stemp.get(i-2))<0.001) || Stemp.get(i-2)==0.0)
         {
             Stemp.add((obliczKrok(Utemp)- getYpp())/U);
             i++;
         }
         this.dlugosc = Stemp.size();
+        if(this.dlugosc<40)
+            this.dlugosc=40;
+    }
+    public double obliczBlad(double[] Y, double yZad)
+    {
+        double bladTemp = 0.0;
+        if(this.blad.equals("srednio"))
+            for(int i = 0; i<this.dlugosc; i++)
+                bladTemp+=Math.pow(Y[i]-yZad,2);
+        else if(this.blad.equals("absolutny"))
+            for(int i = 0; i<this.dlugosc; i++)
+                bladTemp+=Math.abs(Y[i]-yZad);
+        return bladTemp/this.dlugosc;
     }
 }

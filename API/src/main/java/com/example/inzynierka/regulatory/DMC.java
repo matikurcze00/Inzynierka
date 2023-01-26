@@ -125,8 +125,8 @@ public class DMC extends Regulator{
         Matrix y = new Matrix(yTemp,1);
         //UTEMP wychodzi odwrócone
         Matrix Utemp = K.times(yZad.transpose().minus(y.transpose()).minus(Mp.times(dU.transpose())));
-        double[] tempdU = new double[aktualna.length];
-        for(int i = 0; i<aktualna.length; i++) {
+        double[] tempdU = new double[getLambda().size()];
+        for(int i = 0; i<getLambda().size(); i++) {
             //TODO DO POPRAWY
             if (Utemp.get(i, 0) > duMax) {
                 Utemp.set(i, 0, duMax);
@@ -135,12 +135,6 @@ public class DMC extends Regulator{
             }
             tempdU[i] = Utemp.get(i,0);
         }
-//        for(int i = 0; i < Math.floor(aktualna.length/2); i++)
-//        {
-//            double temp = tempdU[i];
-//            tempdU[i] = tempdU[tempdU.length-i-1];
-//            tempdU[tempdU.length-i-1] = temp;
-//        }
         dodajdU(tempdU);
         return tempdU;
     }
@@ -213,7 +207,7 @@ public class DMC extends Regulator{
         SISO.resetObiektu();
         Stemp.add((SISO.obliczKrok(U)- SISO.getYpp())/U);
         Stemp.add((SISO.obliczKrok(Utemp)- SISO.getYpp())/U);
-        while(!(Math.abs((Stemp.get(i-1)-Stemp.get(i-2)))<=0.01) || Stemp.get(i-2)==0.0)
+        while(!(Math.abs(Stemp.get(i-1)-Stemp.get(i-2))<0.005) || Stemp.get(i-2)==0.0)
         {
             Stemp.add((SISO.obliczKrok(Utemp)- SISO.getYpp())/U);
             i++;
@@ -232,12 +226,11 @@ public class DMC extends Regulator{
             obiekt.resetObiektu();
             double U = obiekt.getUMax(j)/2;
             double Utemp = 0;
-
-               int k = 2;
+            int k = 2;
             List<Double> Stemp = new ArrayList();
             Stemp.add((obiekt.obliczKrok(U, j, i)- obiekt.getYpp(i))/U);
             Stemp.add((obiekt.obliczKrok(Utemp, j, i)- obiekt.getYpp(i))/U);
-            while((!(Stemp.get(k-1)==Stemp.get(k-2)) || Stemp.get(k-2)==0.0) && k<11)
+           while(!(Math.abs(Stemp.get(k-1)-Stemp.get(k-2))<0.005) || Stemp.get(k-2)==0.0)
             {
                 Stemp.add((obiekt.obliczKrok(Utemp,j, i )- obiekt.getYpp(i))/U);
                 k++;
@@ -253,6 +246,7 @@ public class DMC extends Regulator{
                 D=S.get(i).size();
             }
         }
+        this.N=D;
     }
     private void policzM()
     {
@@ -372,6 +366,6 @@ public class DMC extends Regulator{
     }
     public int liczbaZmiennych()
     {
-        return cel.length - liczbaStrojeniaZadanego;
+        return getLambda().size() - liczbaStrojeniaZadanego;
     }
 }

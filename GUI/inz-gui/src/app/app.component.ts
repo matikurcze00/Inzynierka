@@ -8,6 +8,7 @@ import { datasetsMIMO } from './model/datasetsMIMO';
 import { StrojenieService } from './service/strojenie.service';
 import { OdpowiedzSkokowaService } from './service/odpowiedz-skokowa.service';
 import { OdpowiedzSkokowa } from './model/odpowiedzSkokowa';
+import { HttpErrorResponse } from '@angular/common/http';
  
 @Component({
   selector: 'app-root',
@@ -53,7 +54,6 @@ export class AppComponent {
       uMin: new FormControl(),
       uMax: new FormControl(),
       duMax: new FormControl(),
-      blad: new FormControl("srednio")
     }),
     parWizualizacja: new FormGroup({
       yZad: new FormControl([10.0]),
@@ -61,10 +61,12 @@ export class AppComponent {
       uPP: new FormControl([0.0]),
       skok: new FormControl([0.0]),
       dlugosc: new FormControl(100.0),
-      strojenie: new FormControl([null,null,null] as (number | null)[])
+      strojenie: new FormControl([null,null,null] as (number | null)[]),
+      blad: new FormControl('srednio')
     })
     })
     liczbaWyjscArray = [0]
+    liczbaWejscArray = [0]
     liczbaWejsc : number|null = 1;
     typRegulatora = 'pid'
     yZadTemp = this.strojenie.get('parWizualizacja.yZad')?.value
@@ -73,8 +75,11 @@ export class AppComponent {
     skokTemp = this.strojenie.get('parWizualizacja.skok')?.value
     dlugoscTemp = this.strojenie.get('parWizualizacja.dlugosc')?.value
     strojenieTemp = this.strojenie.get('parWizualizacja.strojenie')?.value
-    zakladkaWizualizacja : String = "strojenie"
-    
+    zakladkaWizualizacja : String = "przebieg"
+    czyLaduje = false;
+    czyError=true;
+    errorInfo = "Wystapil blad";
+
     updateObiekt(updatedObiekt: FormArray) {
     console.log("updateObiekt")
     console.log(updatedObiekt)
@@ -102,19 +107,21 @@ export class AppComponent {
           this.uPPTemp = this.strojenie.get('parWizualizacja.uPP')?.value;
           this.skokTemp = this.strojenie.get('parWizualizacja.skok')?.value;
 
-          if(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value)
+          if(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value && this.strojenie.controls.MIMO.controls.liczbaWejsc.value )
           {
+            console.log("wchodzi")
             if(this.strojenie.controls.parRegulator.controls.typ.value=='pid')
               this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value*3).fill(null));
             else
-              this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value).fill(null));
-            
+              this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWejsc.value).fill(null));
+            console.log(this.strojenie.controls.MIMO.controls.liczbaWejsc.value)
             this.strojenieTemp = this.strojenie.get('parWizualizacja.strojenie')?.value;
             this.liczbaWyjscArray = Array.from({length:this.strojenie.controls.MIMO.controls.liczbaWyjsc.value}, (_,i) => i);
+            this.liczbaWejscArray = Array.from({length:this.strojenie.controls.MIMO.controls.liczbaWejsc.value}, (_,i) => i);
           }
         }      
+        console.log(this.strojenie.controls.parWizualizacja)
       }
-    
   }
   updateRegulator(updatedRegulator: FormArray) {
     if(updatedRegulator.controls['0']!=undefined){
@@ -129,7 +136,7 @@ export class AppComponent {
           {  
             this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value*3).fill(null));
           }else{
-            this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value).fill(null));
+            this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWejsc.value).fill(null));
           }
           this.strojenieTemp =this.strojenie.get('parWizualizacja.strojenie')?.value;
         }
@@ -138,7 +145,7 @@ export class AppComponent {
   }
   setBlad(nazwa: string)
   {
-    (<FormControl>this.strojenie.get('parRegulator.blad')).setValue(nazwa)
+    (<FormControl>this.strojenie.get('parWizualizacja.blad')).setValue(nazwa)
   }
   onYZadChange(index: number, value: any) {
     let yZad = this.strojenie.get('parWizualizacja.yZad')?.value;
@@ -189,9 +196,12 @@ export class AppComponent {
     console.log(this.strojenie.controls.parWizualizacja)
     this.odpowiedzMIMO = null;
     this.odpowiedz = null;
+    this.czyLaduje=true;
+    this.czyError=false;
     if(this.strojenie.controls.MIMO.controls['plik'].value==null)
     {
     this.strojenieService.dobierzStrojenieSISO(this.strojenie).subscribe({next: response =>{
+      this.czyLaduje=false;
       this.odpowiedz=response
       this.liczbaRegulatorow = [0];
       console.log(this.liczbaRegulatorow)
@@ -205,6 +215,8 @@ export class AppComponent {
       this.createChartSterowania()
     },
     error: error => {
+      this.czyError=true;
+      this.errorInfo = error.message;
       console.log(error.message)
       console.error('There was an error!', error);
       console.log(error)
@@ -213,6 +225,7 @@ export class AppComponent {
   else{
     console.log("ok")
     this.strojenieService.dobierzStrojenieMIMO(this.strojenie).subscribe({next: response =>{
+      this.czyLaduje=false;
       this.odpowiedzMIMO=response
       if(this.odpowiedzMIMO!=null)
         this.odpowiedzMIMO.typRegulatora=this.strojenie.controls.parRegulator.value['typ']
@@ -224,6 +237,8 @@ export class AppComponent {
       this.createChartSterowaniaMIMO()
     },
     error: error => {
+      this.czyError=true;
+      this.errorInfo = error.message;
       console.log(error.message)
       console.error('There was an error!', error);
       console.log(error)
@@ -320,13 +335,18 @@ export class AppComponent {
     WyznaczOdpowiedz()
     {
       console.log("click")
+      this.czyLaduje=true;
+      this.czyError=false;
       if(this.strojenie.controls.MIMO.controls['plik'].value==null)
       {
+        this.czyLaduje=false;
         this.odpowiedzSkokowaService.wyznaczOdpowiedzSISO(this.strojenie).subscribe({next: response =>{
           this.OdpowiedzSkokowa=response
           this.createChartOdpSkok()
         },
         error: error => {
+          this.czyError=true;
+          this.errorInfo = error.message;
           console.log(error.message)
           console.error('There was an error!', error);
           console.log(error)
@@ -335,11 +355,14 @@ export class AppComponent {
       else
       {
         this.odpowiedzSkokowaService.wyznaczOdpowiedzMIMO(this.strojenie).subscribe({next: response =>{
+          this.czyLaduje=false;
           this.OdpowiedzSkokowa=response
           console.log(this.OdpowiedzSkokowa)
           this.createChartOdpSkokMIMO()
         },
         error: error => {
+          this.czyError=true;
+          this.errorInfo = error.message;
           console.log(error.message)
           console.error('There was an error!', error);
           console.log(error)

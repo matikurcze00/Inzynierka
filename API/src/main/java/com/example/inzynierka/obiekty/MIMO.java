@@ -25,30 +25,32 @@ public class MIMO {
     private int delayMax = 0;
     private int dlugosc;
     public MIMO() {}
-    public MIMO(ParObiektMIMO[] parObiektMIMOS)
+    public MIMO(ParObiektMIMO[] parObiektMIMOS, String blad)
     {
         stworzTransmitancje(parObiektMIMOS);
         liczbaOUT = transmitancja.get(0).size();
         liczbaIN = transmitancja.size();
         obliczDelayMax();
+        this.blad=blad;
         obliczUMax(parObiektMIMOS);
 
         this.Y = new ArrayList();
         for (int i = 0; i < this.liczbaOUT; i++)
         {
-            Y.add(new ArrayList(Collections.nCopies(3, transmitancja.get(i).get(0).getYpp())));
+            Y.add(new ArrayList(Collections.nCopies(3, transmitancja.get(0).get(i).getYpp())));
         }
         this.U = new ArrayList();
         for (int i = 0; i < this.liczbaIN; i++)
         {
             U.add(new ArrayList(Collections.nCopies(3+delayMax, transmitancja.get(i).get(0).getUpp())));
         }
+        obliczDlugosc();
         obliczYMax();
     }
     public double[] obliczKrok(double[] du)
     {
         obliczU(du);
-        double[] Yakt = new double[liczbaIN];
+        double[] Yakt = new double[liczbaOUT];
         for (int i = 0; i<liczbaOUT; i++)
         {
             double YaktIN = 0.0;
@@ -151,14 +153,14 @@ public class MIMO {
     }
 
     public double[] getAktualne(){
-        double[] YAkt = new double[liczbaIN];
-        for (int i = 0; i<liczbaIN; i++)
+        double[] YAkt = new double[liczbaOUT];
+        for (int i = 0; i<liczbaOUT; i++)
             YAkt[i] = Y.get(i).get(0);
         return YAkt;
     }
     public double obliczPraceObiektu(Regulator regulator, double[] cel)
     {
-        int dlugoscBadania = 50;
+
         resetObiektu();
         double blad = 0.0;
         double[] tempCel = new double[liczbaOUT];
@@ -172,16 +174,19 @@ public class MIMO {
             regulator.setCel(tempCel);
             resetObiektu();
             regulator.resetujRegulator();
-            for (int i = 0; i<dlugoscBadania; i++)
+            for (int i = 0; i<this.dlugosc; i++)
             {
                 double[] Ytepm = obliczKrok(regulator.policzOutput(getAktualne()));
                 for(int j = 0; j < Ytepm.length; j++)
                 {
-                    blad+=Math.pow(Ytepm[j]-tempCel[j],2);
+                    if(this.blad.equals("srednio"))
+                        blad+=Math.pow(Ytepm[j]-tempCel[j],2);
+                    else if(this.blad.equals("absolutny"))
+                        blad+=Math.abs(Ytepm[j]-tempCel[j]);
                 }
             }
         }
-        blad=blad/dlugoscBadania*liczbaOUT*liczbaOUT;
+        blad=blad/this.dlugosc*liczbaOUT*liczbaOUT;
         resetObiektu();
         return blad;
     }
@@ -243,7 +248,7 @@ public class MIMO {
         {
             uMax[i] = this.uMax[i];
         }
-        for (int i = 0; i<100; i++)
+        for (int i = 0; i<dlugosc*2; i++)
         {
             obliczKrok(uMax);
         }
@@ -258,7 +263,7 @@ public class MIMO {
     {
         for (int i = 0; i < this.liczbaOUT; i++)
         {
-            Y.set(i, new ArrayList(Collections.nCopies(3, transmitancja.get(i).get(0).getYpp())));
+            Y.set(i, new ArrayList(Collections.nCopies(3, transmitancja.get(0).get(i).getYpp())));
         }
         for (int i = 0; i < this.liczbaIN; i++)
         {
@@ -280,24 +285,24 @@ public class MIMO {
             }
         }
     }
-    private void obliczDlugosc(MIMO obiekt)
+    private void obliczDlugosc()
     {
         List<List<Double>> dlugosc = new ArrayList();
-        for(int i = 0; i < obiekt.getLiczbaOUT(); i ++)
+        for(int i = 0; i < this.getLiczbaOUT(); i ++)
         {
-            for (int j = 0; j < obiekt.getLiczbaIN(); j++)
+            for (int j = 0; j < this.getLiczbaIN(); j++)
             {
-                obiekt.resetObiektu();
-                double U = obiekt.getUMax(j)/2;
+                this.resetObiektu();
+                double U = this.getUMax(j)/2;
                 double Utemp = 0;
 
                 int k = 2;
                 List<Double> dlugoscTemp = new ArrayList<Double>();
-                dlugoscTemp.add((obiekt.obliczKrok(U, j, i)- obiekt.getYpp(i))/U);
-                dlugoscTemp.add((obiekt.obliczKrok(Utemp, j, i)- obiekt.getYpp(i))/U);
-                while((!(dlugoscTemp.get(k-1)==dlugoscTemp.get(k-2)) || dlugoscTemp.get(k-2)==0.0) && k<11)
+                dlugoscTemp.add((this.obliczKrok(U, j, i)- this.getYpp(i))/U);
+                dlugoscTemp.add((this.obliczKrok(Utemp, j, i)- this.getYpp(i))/U);
+                while(!(Math.abs(dlugoscTemp.get(k-1)-dlugoscTemp.get(k-2))<0.005) || dlugoscTemp.get(k-2)==0.0)
                 {
-                    dlugoscTemp.add((obiekt.obliczKrok(Utemp,j, i )- obiekt.getYpp(i))/U);
+                    dlugoscTemp.add((this.obliczKrok(Utemp,j, i )- this.getYpp(i))/U);
                     k++;
                 }
                 dlugosc.add(dlugoscTemp);
@@ -312,5 +317,7 @@ public class MIMO {
             }
         }
         this.dlugosc = dlugoscInt;
+        if(this.dlugosc<40)
+            this.dlugosc=40;
     }
 }
