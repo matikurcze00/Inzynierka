@@ -167,7 +167,7 @@
       <b *ngIf="!this.strojenie.get('MIMO.plik')?.value||this.strojenie.get('parRegulator.typ')?.value=='dmc'">Ustaw proszę wybrane wartości strojenia regulatora:</b>
       <b *ngIf="this.strojenie.get('MIMO.plik')?.value&&this.strojenie.get('parRegulator.typ')?.value=='pid'">Ustaw proszę wybrane wartości strojenia regulatorów:</b>
       <div *ngIf="strojenieTemp">
-        <div *ngIf="this.strojenie.get('MIMO.plik')?.value==null">
+        <div *ngIf="this.strojenie.get('MIMO.liczbaWyjsc')?.value==1 && this.strojenie.get('MIMO.liczbaWejsc')?.value==1">
           <div *ngIf="this.strojenie.get('parRegulator.typ')?.value=='dmc'">
             <div *ngFor="let y of liczbaWyjscArray; let i = index" class="mx-auto" >
               <div class="form-row align-items-center mb-3" style="margin-left: 20%; margin-right: 20%;">
@@ -211,7 +211,7 @@
               </div>
             </div>
         </div>
-        <div *ngIf="this.strojenie.get('MIMO.plik')?.value!=null">
+        <div *ngIf="this.strojenie.get('MIMO.liczbaWyjsc')?.value!=1 || this.strojenie.get('MIMO.liczbaWejsc')?.value!=1">
           <div *ngIf="this.strojenie.get('parRegulator.typ')?.value=='dmc'">
             <div *ngFor="let y of liczbaWyjscArray; let i = index" class="mx-auto" style="margin-left: 20%; margin-right: 20%;">
               <div class="form-row align-items-center mb-3">

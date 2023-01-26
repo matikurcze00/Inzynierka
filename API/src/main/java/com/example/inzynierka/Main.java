@@ -38,15 +38,15 @@ public class Main {
 
         ////MIMO
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        Integer[] PV = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("PV"), Integer[].class);
-        ParObiektMIMO[] Obiekty = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("ParObiektMIMO"), ParObiektMIMO[].class);
-        System.out.println(Obiekty[0]);
-        System.out.println(Obiekty[1]);
-        MIMO obiekt  = new MIMO(Obiekty);
-        ZbiorPID regulator = new ZbiorPID(obiekt,PV, 3.0);
-        AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(1000, 400, 20, 0.5,0.8);
-        regulator.zmienWartosci(GA.dobierzWartosci(regulator.liczbaZmiennych(), regulator, obiekt));
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        Integer[] PV = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("PV"), Integer[].class);
+//        ParObiektMIMO[] Obiekty = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("ParObiektMIMO"), ParObiektMIMO[].class);
+//        System.out.println(Obiekty[0]);
+//        System.out.println(Obiekty[1]);
+//        MIMO obiekt  = new MIMO(Obiekty);
+//        ZbiorPID regulator = new ZbiorPID(obiekt,PV, 3.0, par);
+//        AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(1000, 400, 20, 0.5,0.8);
+//        regulator.zmienWartosci(GA.dobierzWartosci(regulator.liczbaZmiennych(), regulator, obiekt));
 //        double[] celTemp = {200.0,0.0};
 //        zbior.setCel(celTemp);
 //        List<double[]> Y = new ArrayList<>();
@@ -57,26 +57,26 @@ public class Main {
 //        }
 //        System.out.println("ok");
 //        //DMC - MIMO
-        double[] celTemp = {550.0,0.0};
-        List<double[]> Y = new ArrayList<>();
-        double[] tempLambda = {0.05,0.05};
-//        DMC regulator = new DMC(3, tempLambda, obiekt, celTemp, 3, 10);
-        regulator.setCel(celTemp);
-        obiekt.resetObiektu();
-        for(int k = 0; k<40; k++)
-        {
-                Y.add(obiekt.obliczKrok(regulator.policzOutput(obiekt.getAktualne())));
-
-        }
-        celTemp = new double[]{550.0,100.0};
-        regulator.setCel(celTemp);
-        for(int k = 0; k<40; k++)
-        {
-            Y.add(obiekt.obliczKrok(regulator.policzOutput(obiekt.getAktualne())));
-
-        }
-        System.out.println(Y.get(35)[0]);
-        System.out.println(Y.get(35)[1]);
+//        double[] celTemp = {550.0,0.0};
+//        List<double[]> Y = new ArrayList<>();
+//        double[] tempLambda = {0.05,0.05};
+////        DMC regulator = new DMC(3, tempLambda, obiekt, celTemp, 3, 10);
+//        regulator.setCel(celTemp);
+//        obiekt.resetObiektu();
+//        for(int k = 0; k<40; k++)
+//        {
+//                Y.add(obiekt.obliczKrok(regulator.policzOutput(obiekt.getAktualne())));
+//
+//        }
+//        celTemp = new double[]{550.0,100.0};
+//        regulator.setCel(celTemp);
+//        for(int k = 0; k<40; k++)
+//        {
+//            Y.add(obiekt.obliczKrok(regulator.policzOutput(obiekt.getAktualne())));
+//
+//        }
+//        System.out.println(Y.get(35)[0]);
+//        System.out.println(Y.get(35)[1]);
 //
 //        System.out.println(regulator.getCel()[0]);
 //        System.out.println(regulator.getCel()[1]);

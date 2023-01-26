@@ -65,6 +65,8 @@ export class AppComponent {
     })
     })
     liczbaWyjscArray = [0]
+    liczbaWejsc : number|null = 1;
+    typRegulatora = 'pid'
     yZadTemp = this.strojenie.get('parWizualizacja.yZad')?.value
     yPPTemp = this.strojenie.get('parWizualizacja.yPP')?.value
     uPPTemp = this.strojenie.get('parWizualizacja.uPP')?.value
@@ -75,33 +77,42 @@ export class AppComponent {
     
     updateObiekt(updatedObiekt: FormArray) {
     console.log("updateObiekt")
+    console.log(updatedObiekt)
     if(updatedObiekt.controls['0']!=undefined){
-        console.log(updatedObiekt.controls['0'])
-        console.log("dalej")
         this.strojenie.controls.parObiekt.patchValue(updatedObiekt.controls['0'].value)
-        this.file=updatedObiekt.controls['1'].value;
         this.strojenie.controls.MIMO.patchValue(updatedObiekt.controls['1'].value)
-        this.strojenie.controls.parWizualizacja.controls.yZad.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value).fill(0) as number[]); 
-        this.strojenie.controls.parWizualizacja.controls.yPP.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value).fill(0) as number[]); 
-        this.strojenie.controls.parWizualizacja.controls.uPP.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWejsc.value).fill(0) as number[]); 
-        this.strojenie.controls.parWizualizacja.controls.skok.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value).fill(0) as number[]); 
-        
-        console.log(this.strojenie.controls)
-        this.yZadTemp = this.strojenie.get('parWizualizacja.yZad')?.value;
-        this.yPPTemp = this.strojenie.get('parWizualizacja.yPP')?.value;
-        this.uPPTemp = this.strojenie.get('parWizualizacja.uPP')?.value;
-        this.skokTemp = this.strojenie.get('parWizualizacja.skok')?.value;
+        this.file=updatedObiekt.controls['1'].value;
+        if(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value != this.liczbaWyjscArray.length ||
+          this.strojenie.controls.MIMO.controls.liczbaWejsc.value!=this.liczbaWejsc
+          )
+        {
+          if(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value!=null)
+            this.liczbaWejsc = this.strojenie.controls.MIMO.controls.liczbaWejsc.value;
+          console.log("wchodzi")
+          console.log(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value)
+          console.log(this.strojenie.controls.MIMO.controls.liczbaWejsc.value)
 
-      if(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value)
-      {
-        if(this.strojenie.controls.parRegulator.controls.typ.value=='pid')
-          this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value*3).fill(null));
-        else
-          this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value).fill(null));
-        
-        this.strojenieTemp = this.strojenie.get('parWizualizacja.strojenie')?.value;
-        this.liczbaWyjscArray = Array.from({length:this.strojenie.controls.MIMO.controls.liczbaWyjsc.value}, (_,i) => i);
-      }
+          this.strojenie.controls.parWizualizacja.controls.yZad.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value).fill(0) as number[]); 
+          this.strojenie.controls.parWizualizacja.controls.yPP.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value).fill(0) as number[]); 
+          this.strojenie.controls.parWizualizacja.controls.uPP.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWejsc.value).fill(0) as number[]); 
+          this.strojenie.controls.parWizualizacja.controls.skok.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value).fill(0) as number[]); 
+          
+          this.yZadTemp = this.strojenie.get('parWizualizacja.yZad')?.value;
+          this.yPPTemp = this.strojenie.get('parWizualizacja.yPP')?.value;
+          this.uPPTemp = this.strojenie.get('parWizualizacja.uPP')?.value;
+          this.skokTemp = this.strojenie.get('parWizualizacja.skok')?.value;
+
+          if(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value)
+          {
+            if(this.strojenie.controls.parRegulator.controls.typ.value=='pid')
+              this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value*3).fill(null));
+            else
+              this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value).fill(null));
+            
+            this.strojenieTemp = this.strojenie.get('parWizualizacja.strojenie')?.value;
+            this.liczbaWyjscArray = Array.from({length:this.strojenie.controls.MIMO.controls.liczbaWyjsc.value}, (_,i) => i);
+          }
+        }      
       }
     
   }
@@ -111,15 +122,18 @@ export class AppComponent {
 
       if(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value)
       {
-        if(this.strojenie.controls.parRegulator.controls.typ.value=='pid')
-        {  
-          this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value*3).fill(null));
-        }else{
-          this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value).fill(null));
+        if(this.strojenie.controls.parRegulator.controls.typ.value!=this.typRegulatora)
+        {
+          this.typRegulatora=this.strojenie.controls.parRegulator.controls.typ.value
+          if(this.typRegulatora=='pid')
+          {  
+            this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value*3).fill(null));
+          }else{
+            this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value).fill(null));
+          }
+          this.strojenieTemp =this.strojenie.get('parWizualizacja.strojenie')?.value;
         }
-        this.strojenieTemp =this.strojenie.get('parWizualizacja.strojenie')?.value;
-        }
-    
+      }
     }
   }
   setBlad(nazwa: string)
@@ -247,12 +261,14 @@ export class AppComponent {
           {
             label: "Wartość zadana wyjścia obiektu",
             data: this.chartData.cel,
-            backgroundColor: 'blue'
+            borderColor: 'blue',
+            pointRadius: 3
           },
           {
             label: "Wyjście obiektu",
             data: this.chartData.obiekt,
-            backgroundColor: 'Lime'
+            borderColor: 'Lime',
+            pointRadius: 3
           }
         ]
       }
@@ -279,12 +295,14 @@ export class AppComponent {
         chartDataSet.push({
           label: "Wartość zadana wyjścia " + i,
           data: this.odpowiedzMIMO.cel[i-1],
-          backgroundColor: this.randomRGB() 
+          borderColor: this.randomRGB(), 
+          pointRadius: 3
         });
         chartDataSet.push({
           label: "Wartość wyjścia " + i,
           data: this.odpowiedzMIMO.wykres[i-1],
-          backgroundColor: this.randomRGB() 
+          borderColor: this.randomRGB(),
+          pointRadius: 3 
         });
       }
       console.log(chartDataSet)
@@ -376,7 +394,8 @@ export class AppComponent {
               {chartDataSet.push({
                 label: "Wejscie " +i,
                 data: this.odpowiedzMIMO.sterowanie[i-1],
-                backgroundColor: this.randomRGB()
+                borderColor: this.randomRGB(),
+                pointRadius: 3
               });
             }
       console.log(chartDataSet);
@@ -410,7 +429,8 @@ export class AppComponent {
           {
             label: "Wyjście obiektu",
             data: this.OdpowiedzSkokowa.przebieg[0],
-            backgroundColor: 'blue'
+            borderColor: 'blue',
+            pointRadius: 3
           }
         ]
       }
@@ -437,9 +457,10 @@ export class AppComponent {
           for(let i = 1; i < liczbaWejsc+1; i++)
             for(let j = 1; j<liczbaWyjsc+1; j++)
               {chartDataSet.push({
-                label: "IN-"+i+" OUT-" + j,
+                label: "u-"+i+"y-" + j,
                 data: this.OdpowiedzSkokowa.przebieg[(i-1)*liczbaWejsc+j-1],
-                backgroundColor: this.randomRGB()
+                borderColor: this.randomRGB(),
+                pointRadius: 3
               });
             }
       console.log(chartDataSet);

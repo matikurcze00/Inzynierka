@@ -210,15 +210,17 @@ public class DMC extends Regulator{
         int i = 2;
         List<Double> Stemp = new ArrayList<Double>();
         double Utemp = 0;
+        SISO.resetObiektu();
         Stemp.add((SISO.obliczKrok(U)- SISO.getYpp())/U);
         Stemp.add((SISO.obliczKrok(Utemp)- SISO.getYpp())/U);
-        while((!(Stemp.get(i-1)==Stemp.get(i-2)) || Stemp.get(i-2)==0.0) && i<11)
+        while(!(Math.abs((Stemp.get(i-1)-Stemp.get(i-2)))<=0.01) || Stemp.get(i-2)==0.0)
         {
             Stemp.add((SISO.obliczKrok(Utemp)- SISO.getYpp())/U);
             i++;
         }
         this.S.add(Stemp);
         this.D = S.get(0).size();
+        this.N = D;
 
     }
     private void policzS(MIMO obiekt)
@@ -232,7 +234,7 @@ public class DMC extends Regulator{
             double Utemp = 0;
 
                int k = 2;
-            List<Double> Stemp = new ArrayList<Double>();
+            List<Double> Stemp = new ArrayList();
             Stemp.add((obiekt.obliczKrok(U, j, i)- obiekt.getYpp(i))/U);
             Stemp.add((obiekt.obliczKrok(Utemp, j, i)- obiekt.getYpp(i))/U);
             while((!(Stemp.get(k-1)==Stemp.get(k-2)) || Stemp.get(k-2)==0.0) && k<11)

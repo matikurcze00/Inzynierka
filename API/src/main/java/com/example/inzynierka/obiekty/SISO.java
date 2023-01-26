@@ -19,6 +19,7 @@ public class SISO {
     private double uMin;
     private double uMax;
     private double YMax;
+    private int dlugosc;
     public SISO() {}
 
     public SISO(ParObiekt parObiekt, double uMax, double uMin)
@@ -35,6 +36,7 @@ public class SISO {
         Y = new ArrayList(Collections.nCopies(3, transmitancja.getYpp()));
         this.uMax = uMax;
         this.uMin = uMin;
+        obliczDlugosc();
         obliczYMax();
     }
 
@@ -56,17 +58,16 @@ public class SISO {
     }
     public double obliczPraceObiektu(Regulator regulator, double[] cel)
     {
-        int dlugoscBadania = 50;
         resetObiektu();
         double blad = 0.0;
         regulator.setCel(cel);
-        for (int i = 0; i<dlugoscBadania; i++)
+        for (int i = 0; i<this.dlugosc; i++)
         {
 //            if(i==25)
 //                blad = Math.abs(obliczKrok(regulator.policzOutput(getAktualna()))-cel[0]);
             blad+=Math.pow(obliczKrok(regulator.policzOutput(getAktualna()))-cel[0],2);
         }
-        blad=blad/dlugoscBadania;
+        blad=blad/this.dlugosc;
         resetObiektu();
         return blad;
     }
@@ -102,7 +103,7 @@ public class SISO {
     private void obliczYMax()
     {
         double Ytemp;
-        for (int i = 0; i<100; i++)
+        for (int i = 0; i<this.dlugosc*2; i++)
         {
             obliczKrok(getUMax());
         }
@@ -111,4 +112,20 @@ public class SISO {
         this.YMax = Ytemp;
     }
 
+    public void obliczDlugosc()
+    {
+        resetObiektu();
+        double U = getUMax()/2;
+        int i = 2;
+        List<Double> Stemp = new ArrayList<Double>();
+        double Utemp = 0;
+        Stemp.add((obliczKrok(U)- getYpp())/U);
+        Stemp.add((obliczKrok(Utemp)- getYpp())/U);
+        while((!((Stemp.get(i-1)-Stemp.get(i-2))<=0.005) || Stemp.get(i-2)==0.0))
+        {
+            Stemp.add((obliczKrok(Utemp)- getYpp())/U);
+            i++;
+        }
+        this.dlugosc = Stemp.size();
+    }
 }

@@ -23,6 +23,7 @@ public class MIMO {
     private int liczbaOUT;
     private int liczbaIN;
     private int delayMax = 0;
+    private int dlugosc;
     public MIMO() {}
     public MIMO(ParObiektMIMO[] parObiektMIMOS)
     {
@@ -278,5 +279,38 @@ public class MIMO {
                 }
             }
         }
+    }
+    private void obliczDlugosc(MIMO obiekt)
+    {
+        List<List<Double>> dlugosc = new ArrayList();
+        for(int i = 0; i < obiekt.getLiczbaOUT(); i ++)
+        {
+            for (int j = 0; j < obiekt.getLiczbaIN(); j++)
+            {
+                obiekt.resetObiektu();
+                double U = obiekt.getUMax(j)/2;
+                double Utemp = 0;
+
+                int k = 2;
+                List<Double> dlugoscTemp = new ArrayList<Double>();
+                dlugoscTemp.add((obiekt.obliczKrok(U, j, i)- obiekt.getYpp(i))/U);
+                dlugoscTemp.add((obiekt.obliczKrok(Utemp, j, i)- obiekt.getYpp(i))/U);
+                while((!(dlugoscTemp.get(k-1)==dlugoscTemp.get(k-2)) || dlugoscTemp.get(k-2)==0.0) && k<11)
+                {
+                    dlugoscTemp.add((obiekt.obliczKrok(Utemp,j, i )- obiekt.getYpp(i))/U);
+                    k++;
+                }
+                dlugosc.add(dlugoscTemp);
+            }
+        }
+        int dlugoscInt = dlugosc.get(0).size();
+        for (int i = 0; i < dlugosc.size(); i++)
+        {
+            if(dlugoscInt<dlugosc.get(i).size())
+            {
+                dlugoscInt=dlugosc.get(i).size();
+            }
+        }
+        this.dlugosc = dlugoscInt;
     }
 }

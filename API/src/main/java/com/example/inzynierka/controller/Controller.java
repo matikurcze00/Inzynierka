@@ -45,7 +45,7 @@ public class Controller {
             if (parRegulator.getTyp().equals("pid"))
                 regulator = new PID(0.0, 0.0, 0.0, parObiekt.getTp(),new double[]{SISO.getYMax()} , parRegulator.getDuMax(), parRegulator.getUMax(), parWizualizacja.getStrojenie());
             else if (parRegulator.getTyp().equals("dmc"))
-                regulator = new DMC(5, 0.1, SISO, SISO.getYMax() / 2, parRegulator.getDuMax(), 11, parWizualizacja.getStrojenie());
+                regulator = new DMC(4, 0.1, SISO, SISO.getYMax() / 2, parRegulator.getDuMax(), 11, parWizualizacja.getStrojenie());
             else
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(300, 40, 6, 0.3, 0.2);
@@ -82,6 +82,7 @@ public class Controller {
             double[] Y = new double[parWizualizacja.getDlugosc()];
             double[] U = new double[parWizualizacja.getDlugosc()];
             SISO.resetObiektu();
+            regulator.resetujRegulator();
             Y[0]=SISO.getYpp();
             U[0]=parWizualizacja.getUPP()[0];
             for(int i = 0; i<parWizualizacja.getSkok()[0]; i++)
@@ -96,6 +97,7 @@ public class Controller {
                 }
             }
             System.out.println("strojenie::OK");
+
             odpowiedzStrojenie.setWykres(Y);
             odpowiedzStrojenie.setSterowanie(U);
             double blad = 0.0;
@@ -128,7 +130,7 @@ public class Controller {
             if(parRegulator.getTyp().equals("pid"))
             {
                 Integer[] PV = objectMapper.treeToValue(root.path("PV"), Integer[].class);
-                regulator = new ZbiorPID(obiekt,PV, parRegulator.getDuMax());
+                regulator = new ZbiorPID(obiekt,PV, parRegulator.getDuMax(), parWizualizacja.getStrojenie());
             }else if (parRegulator.getTyp().equals("dmc"))
             {
                 double[] tempLambda = {0.5,0.5};
@@ -141,6 +143,7 @@ public class Controller {
             double[] tempWartosciGA =GA.dobierzWartosci(regulator.liczbaZmiennych(), regulator, obiekt);
             int iTemp = 0;
             double[] tempStrojenie = new double[parWizualizacja.getStrojenie().length];
+            regulator.zmienWartosci(tempWartosciGA);
             for(int i =0; i<parWizualizacja.getStrojenie().length; i++)
             {
                 if(parWizualizacja.getStrojenie()[i]==null)
@@ -154,11 +157,11 @@ public class Controller {
                 }
             }
             odpowiedz.setWspolczynniki(tempStrojenie);
-            regulator.zmienWartosci(odpowiedz.getWspolczynniki());
             int dlugoscSymulacji = parWizualizacja.getDlugosc();
             double[][] Y = new double[obiekt.getLiczbaOUT()][dlugoscSymulacji];
             double[][] U = new double[obiekt.getLiczbaIN()][dlugoscSymulacji];
 
+            //yZad
             double[][] celTemp = new double[obiekt.getLiczbaOUT()][dlugoscSymulacji];
             for(int i = 0; i < obiekt.getLiczbaOUT(); i++)
             {
@@ -175,10 +178,12 @@ public class Controller {
             obiekt.resetObiektu();
             for (int i = 0; i < dlugoscSymulacji; i++) {
                 double[] temp = new double[obiekt.getLiczbaOUT()];
+                //przy każdej iteracji jest pobierane yzad
                 for(int m = 0; m < obiekt.getLiczbaOUT(); m++)
                 {
                     temp[m] = celTemp[m][i];
                 }
+                //ustawiane
                 regulator.setCel(temp);
                 double [] tempY = obiekt.obliczKrok(regulator.policzOutput(obiekt.getAktualne()));
                 for(int j = 0; j < obiekt.getLiczbaOUT(); j++)
@@ -188,7 +193,6 @@ public class Controller {
             }
 
             System.out.println("strojenie::OK");
-
             odpowiedz.setWykres(Y);
             odpowiedz.setSterowanie(U);
             double blad = 0.0;

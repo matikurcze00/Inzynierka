@@ -1,5 +1,6 @@
 export interface datasetsMIMO{
   label: string;
   data: number[];
-  backgroundColor: any;
+  borderColor: any;
+  pointRadius: any;
 }
