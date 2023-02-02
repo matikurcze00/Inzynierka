@@ -9,12 +9,13 @@ import { FormArray, FormControl, FormGroup } from '@angular/forms';
 export class RegulatorWidokComponent implements OnInit {
   @Output() updateEvent = new EventEmitter<FormArray>()
   typ = [{id:1, typ:"PID"},
-          {id:2, typ:"DMC"},
-          {id:3, typ:"MPCs"}];
+          {id:2, typ:"DMC"}];
+          // {id:3, typ:"MPCs"}];
   regulatorForm = new FormGroup({
     regulator: new FormArray([
       new FormGroup({
         typ: new FormControl("pid"),
+        uMin: new FormControl(0.0),
         uMax: new FormControl(100.0),
         duMax: new FormControl(3.0),
       })

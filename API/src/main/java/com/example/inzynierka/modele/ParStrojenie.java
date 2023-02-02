@@ -11,4 +11,5 @@ public class ParStrojenie {
 
     private ParRegulator parRegulator;
     private ParObiekt parObiekt;
+    private ParWizualizacja parWizualizacja;
 }

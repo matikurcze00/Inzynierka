@@ -1,7 +1,8 @@
 package com.example.inzynierka.regulatory;
 
 import Jama.Matrix;
-import com.example.inzynierka.Obiekt;
+import com.example.inzynierka.obiekty.MIMO;
+import com.example.inzynierka.obiekty.SISO;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -10,22 +11,84 @@ import java.util.List;
 
 @Data
 public class DMC extends Regulator{
-    private int D;
-    private int N;
-    private int Nu;
-    private double Lambda;
+    private Integer D;
+    private Integer N;
+    private Integer Nu;
+    private List<Double> Lambda;
     private Matrix Mp;
     private Matrix K;
-    private List<Double> S;
+    private List<List<Double>> S;
     private Matrix dU;
     private Matrix M;
+    private double duMax;
+    private double[] cel;
+    private Double[] strojenieZadane;
+    private int liczbaStrojeniaZadanego;
 
-    @Override
+    public DMC(int Nu, double lambda, SISO SISO, double cel, double duMax, int N, Double[] strojenieZadane)
+    {
+        this(Nu, lambda, SISO, cel, duMax, N);
+        if(strojenieZadane[0]!=null)
+        {
+            liczbaStrojeniaZadanego=1;
+            this.strojenieZadane = strojenieZadane;
+            this.getLambda().set(0,strojenieZadane[0]);
+            this.policzWartosci(SISO);
+        }
+    }
+    public DMC(int Nu, double lambda, SISO SISO, double cel, double duMax, int N)
+    {
+        this.Lambda = Arrays.asList(lambda);
+        this.Nu = Nu;
+        this.N = N;
+        this.cel = new double[]{cel};
+        this.duMax = duMax;
+        policzWartosci(SISO);
+    }
+    public DMC(int Nu, double[] lambda, MIMO obiekt, double[] cel, double duMax, int N, Double[] strojenieZadane)
+    {
+        this(Nu, lambda, obiekt, cel, duMax, N);
+        this.liczbaStrojeniaZadanego=0;
+        this.strojenieZadane = strojenieZadane;
+        for(int i = 0; i <strojenieZadane.length; i++)
+        {
+            if(strojenieZadane[i]!=null)
+            {
+                liczbaStrojeniaZadanego+=1;
+                this.getLambda().set(i,strojenieZadane[i]);
+            }
+        }
+        this.policzWartosci(obiekt);
+    }
+    public DMC(int Nu, double[] lambda, MIMO obiekt, double[] cel, double duMax, int N)
+    {
+        List<Double> tempLambda = new ArrayList();
+        for(double wartosc : lambda)
+        {
+            tempLambda.add(wartosc);
+        }
+        this.Lambda = new ArrayList<>(tempLambda);
+        this.Nu = Nu;
+        this.N = N;
+        this.cel = cel;
+        this.duMax = duMax;
+        policzWartosci(obiekt);
+    }
+
     public double policzOutput(double aktualna)
     {
-        double[] yZadTemp = new double[N];
-        Arrays.fill(yZadTemp,cel);
-        Matrix yZad = new Matrix(yZadTemp,1);
+
+        List<double[]> yZadTemp = new ArrayList<>(cel.length);
+        for(int i = 0; i<cel.length; i++)
+        {
+            double[] tempCel = new double[N];
+            Arrays.fill(tempCel,cel[i]);
+            yZadTemp.add(tempCel);
+        }
+        Matrix yZad = new Matrix(cel.length, N);
+        for(int i = 0; i<cel.length; i++)
+            for(int j = 0; j<N; j++)
+                yZad.set(i,j,cel[i]);
         double[] yTemp = new double[N];
         Arrays.fill(yTemp,aktualna);
         Matrix y = new Matrix(yTemp,1);
@@ -42,65 +105,148 @@ public class DMC extends Regulator{
         return Utemp.get(0,0);
     }
 
-    public DMC(int Nu, double lambda, Obiekt obiekt, double cel, double duMax)
+    public double[] policzOutput(double[] aktualna)
     {
-        this.Lambda = lambda;
-        this.Nu = Nu;
-        this.cel = cel;
-        this.duMax = duMax;
-        policzWartosci(obiekt);
+        int OUT = cel.length; //TODO zaimplementowa
+
+        double[] celTemp = new double[N * OUT];
+        for(int i = 0; i<N * OUT; i++)
+        {
+            celTemp[i] = cel[i%OUT];
+        }
+        Matrix yZad = new Matrix(celTemp,1);
+
+
+        double[] yTemp = new double[N * OUT];
+        for(int i = 0; i<N * OUT; i++)
+        {
+            yTemp[i] = aktualna[i%OUT];
+        }
+        Matrix y = new Matrix(yTemp,1);
+        //UTEMP wychodzi odwrócone
+        Matrix Utemp = K.times(yZad.transpose().minus(y.transpose()).minus(Mp.times(dU.transpose())));
+        double[] tempdU = new double[getLambda().size()];
+        for(int i = 0; i<getLambda().size(); i++) {
+            //TODO DO POPRAWY
+            if (Utemp.get(i, 0) > duMax) {
+                Utemp.set(i, 0, duMax);
+            } else if (Utemp.get(i, 0) < -duMax) {
+                Utemp.set(i, 0, -duMax);
+            }
+            tempdU[i] = Utemp.get(i,0);
+        }
+        dodajdU(tempdU);
+        return tempdU;
     }
-    private void policzWartosci(Obiekt obiekt)
+    private void policzWartosci(SISO SISO)
     {
-        policzS(obiekt);
+        this.S = new ArrayList();
+        policzS(SISO);
         policzMp();
         policzM();
         policzK();
-        resetujRegulator();
+        resetujRegulator(1);
     }
-    @Override
+    private void policzWartosci(MIMO obiekt)
+    {
+        this.S = new ArrayList();
+        policzS(obiekt);
+        policzMp(obiekt.getLiczbaIN(),obiekt.getLiczbaOUT());
+        policzM(obiekt.getLiczbaIN(),obiekt.getLiczbaOUT());
+        policzK(obiekt.getLiczbaIN());
+        resetujRegulator(obiekt.getLiczbaIN());
+    }
+
     public void zmienWartosci(double[] wartosci){
-        setLambda(wartosci[0]);
-        policzK();
-        resetujRegulator();
-    }
-
-    @Override
-    public void resetujRegulator()
-    {
-       double[] uTemp = new double[D-1];
-        Arrays.fill(uTemp,0);
-        dU = new Matrix(uTemp,1);
-    }
-    private void policzS(Obiekt obiekt)
-    {
-        double U = obiekt.getUMax()/2;
-        int i = 2;
-        S = new ArrayList<Double>();
-        S.add((obiekt.obliczKrok(U)- obiekt.getYpp())/U);
-        S.add((obiekt.obliczKrok(U)- obiekt.getYpp())/U);
-        while(Math.abs(S.get(i-1)-S.get(i-2))>Math.abs(obiekt.getYMax()/500)||S.get(i-2)==0.0)
+        List<Double> tempLambda = new ArrayList();
+        if(this.liczbaStrojeniaZadanego==0)
         {
-            S.add((obiekt.obliczKrok(U)- obiekt.getYpp())/U);
-            i++;
-        }
-
-        this.D = S.size();
-        this.N = S.size();
-    }
-    private void policzMp()
-    {
-        Mp = new Matrix(N,D-1);
-        for (int i = 0; i<D-1; i++)
-        {
-            for (int j = 0; j<N; j++)
+            for(double wartosc : wartosci)
             {
-                if((j+i+1)<D)
-                    Mp.set(j,i,S.get(j+i+1)-S.get(i));
-                else
-                    Mp.set(j,i,S.get(D-1)-S.get(i));
+                tempLambda.add(wartosc);
             }
         }
+        else
+        {
+            int iTemp = 0;
+            for(int i = 0; i<getLambda().size(); i++)
+            {
+                if(strojenieZadane[i]!=null)
+                {
+                    tempLambda.add(strojenieZadane[i]);
+                }
+                else
+                {
+                    tempLambda.add(wartosci[iTemp]);
+                    iTemp+=1;
+                }
+            }
+        }
+        setLambda(tempLambda);
+        policzK(tempLambda.size());
+        resetujRegulator(tempLambda.size());
+    }
+    public void resetujRegulator()
+    {
+        for(int i = 0; i < dU.getColumnDimension(); i++)
+            for(int j = 0; j < dU.getRowDimension(); j++)
+                dU.set(j,i,0.0);
+    }
+
+    public void resetujRegulator(int IN)
+    {
+        dU = new Matrix(1, (D-1)*IN, 0.0);
+    }
+
+    private void policzS(SISO SISO)
+    {
+        double U = SISO.getUMax()/2;
+        int i = 2;
+        List<Double> Stemp = new ArrayList<Double>();
+        double Utemp = 0;
+        SISO.resetObiektu();
+        Stemp.add((SISO.obliczKrok(U)- SISO.getYpp())/U);
+        Stemp.add((SISO.obliczKrok(Utemp)- SISO.getYpp())/U);
+        while(!(Math.abs(Stemp.get(i-1)-Stemp.get(i-2))<0.005) || Stemp.get(i-2)==0.0)
+        {
+            Stemp.add((SISO.obliczKrok(Utemp)- SISO.getYpp())/U);
+            i++;
+        }
+        this.S.add(Stemp);
+        this.D = S.get(0).size();
+        this.N = D;
+
+    }
+    private void policzS(MIMO obiekt)
+    {
+        for(int i = 0; i < obiekt.getLiczbaOUT(); i ++)
+        {
+           for (int j = 0; j < obiekt.getLiczbaIN(); j++)
+           {
+            obiekt.resetObiektu();
+            double U = obiekt.getUMax(j)/2;
+            double Utemp = 0;
+            int k = 2;
+            List<Double> Stemp = new ArrayList();
+            Stemp.add((obiekt.obliczKrok(U, j, i)- obiekt.getYpp(i))/U);
+            Stemp.add((obiekt.obliczKrok(Utemp, j, i)- obiekt.getYpp(i))/U);
+           while(!(Math.abs(Stemp.get(k-1)-Stemp.get(k-2))<0.005) || Stemp.get(k-2)==0.0)
+            {
+                Stemp.add((obiekt.obliczKrok(Utemp,j, i )- obiekt.getYpp(i))/U);
+                k++;
+            }
+            this.S.add(Stemp);
+            }
+        }
+        this.D = S.get(0).size();
+        for (int i = 0; i < S.size(); i++)
+        {
+            if(D<S.get(i).size())
+            {
+                D=S.get(i).size();
+            }
+        }
+        this.N=D;
     }
     private void policzM()
     {
@@ -110,12 +256,59 @@ public class DMC extends Regulator{
             for (int j = 0; j<N; j++)
             {
                 if(j>=i)
-                    M.set(j,i,S.get(j-i));
+                    M.set(j,i,S.get(0).get(j-i));
                 else
                     M.set(j,i,0);
             }
         }
         this.M = M;
+    }
+    private void policzM(int IN, int OUT)
+    {
+        Matrix M = new Matrix(N*OUT,Nu*IN);
+        for (int i = 0; i<Nu; i++)
+        {
+            for (int j = 0; j<N; j++)
+            {
+                if(j>=i)
+                    for(int k = 0; k<OUT; k++)
+                        for(int m = 0; m<IN; m++)
+                            M.set(j*OUT+k,i*IN+m,S.get(k*IN+m).get(j-i));
+            }
+        }
+        this.M = M;
+    }
+    private void policzMp()
+    {
+        Mp = new Matrix(N,D-1);
+        for (int i = 0; i<D-1; i++)
+        {
+            for (int j = 0; j<N; j++)
+            {
+                if((j+i+1)<D)
+                    Mp.set(j,i,S.get(0).get(j+i+1)-S.get(0).get(i));
+                else
+                    Mp.set(j,i,S.get(0).get(D-1)-S.get(0).get(i));
+            }
+        }
+    }
+    private void policzMp(int IN, int OUT)
+    {
+        Mp = new Matrix(N*OUT,(D-1)*IN);
+        for (int i = 0; i<D-1; i++)
+        {
+            for (int j = 0; j<N; j++)
+            {
+                for(int k = 0; k<OUT; k++) {
+                    for (int m = 0; m < IN; m++) {
+                        if ((j + i + 1) < D) {
+                            Mp.set(j*OUT+k, i*IN+m, S.get(k*IN+m).get(j + i + 1) - S.get(k*IN+m).get(i));
+                        } else
+                            Mp.set(j*OUT+k, i*IN+m, S.get(k*IN+m).get(D - 1) - S.get(k*IN+m).get(i));
+                    }
+                }
+            }
+        }
     }
     private void policzK()
     {
@@ -125,14 +318,30 @@ public class DMC extends Regulator{
             for (int j = 0; j<Nu; j++)
             {
                 if (i==j) {
-                    I.set(i,j, getLambda());
+                    I.set(i,j, getLambda().get(0));
                 }
                 else
                     I.set(i,j,0);
             }
         }
         this.K = ((M.transpose().times(M).plus(I)).inverse()).times(M.transpose());
-
+    }
+    private void policzK(int IN)
+    {
+        Matrix I = new Matrix(Nu*IN,Nu*IN);
+        for (int i = 0; i<Nu; i++)
+        {
+            for (int j = 0; j<Nu; j++)
+            {
+                for (int m = 0; m < IN; m++) {
+                    if (i == j) {
+                        I.set(i*IN+m, j*IN+m, getLambda().get(m));
+                    } else
+                        I.set(i*IN+m, j*IN+m, 0);
+                }
+            }
+        }
+        this.K = ((M.transpose().times(M).plus(I)).inverse()).times(M.transpose());
     }
     private void dodajdU(double dUAktualne)
     {
@@ -142,8 +351,21 @@ public class DMC extends Regulator{
         }
         dU.set(0,0,dUAktualne);
     }
+    private void dodajdU(double[] dUAktualne)
+    {
+
+        for(int i = D-1; i>1; i--)
+        {
+            for(int j = dUAktualne.length-1; j>=0; j--)
+                dU.set(0, dUAktualne.length*i-1-j,dU.get(0,dUAktualne.length*i-dUAktualne.length-j));
+        }
+
+        for(int j = dUAktualne.length-1; j>=0; j--)
+            dU.set(0,j,dUAktualne[j]);
+
+    }
     public int liczbaZmiennych()
     {
-        return 1;
+        return getLambda().size() - liczbaStrojeniaZadanego;
     }
 }

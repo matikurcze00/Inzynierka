@@ -1,35 +1,86 @@
-<div >
+<div class ="text-center">
   <h4>Transmitancja obiektu:</h4>
-  <p>{{pierwszeRownanie}}</p>
-  <h5>Wprowadź wartości transmitancji:</h5>
-  <form [formGroup]="obiektForm">
+  <div class="mt-5">
+    <div class="btn-group">
+      <input
+      mdbRadio
+      type="radio"
+      class="btn-check"
+      name="options-obiekt"
+      id="option1-model"
+      autocomplete="off"
+      [checked]="true"
+      (change)="typ='SISO'; resetMIMO()" 
+    />
+    <label class="btn btn-secondary" for="option1-model" >SISO</label>
+    <input
+      mdbRadio
+      type="radio"
+      class="btn-check"
+      name="options-obiekt"
+      id="option2-model"
+      autocomplete="off"
+      (change)="typ='MIMO'"
+    />
+    <label class="btn btn-secondary" for="option2-model" >MIMO</label>
+    </div>
+  </div>
+
+  <div class="mt-5" *ngIf="typ=='MIMO'">
+      <div class="form-row align-items-center mb-3" >
+
+        <span class="p-3">{{file ? 'Wybrany plik to: ' +file.name : 'Wybierz plik lub go tu przyciągnij i upuść ' }}</span>
+        <input class="file-input" type="file">
+        <form [formGroup]="obiektForm" >
+          <div class="container ml-0 mr-0 mx-auto">
+            <div class="form-group mb-3" formArrayName="obiekt">
+              <div class="form-row align-items-center" [formGroupName]="1">
+                <div class="input-group col">
+                  <label class="input-group-text"> Liczba wejść:  </label>
+                  <input class="form-control" type="number" placeholder="1" formControlName="liczbaWejsc"/>
+                  <label class="input-group-text"> Liczba wyjść:   </label>
+                  <input class="form-control" type="number" placeholder="1" formControlName="liczbaWyjsc"/>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+  </div>
+  <div class="mt-5" *ngIf="typ=='SISO'">
+    {{pierwszeRownanie}}
+  <h5 class="mt-5">Wprowadź wartości transmitancji:</h5>
+  <form [formGroup]="obiektForm" >
     <div class="container ml-0 mr-0 mx-auto">
       <div class="form-group mb-3" formArrayName="obiekt">
         <div class="form-row align-items-center" [formGroupName]="0">
           <div class="input-group col">
             <label class="input-group-text"> {{zmienne[0].nazwa}} &nbsp; </label>
-            <input class="form-control" type="number" placeholder="1.0" formControlName="k"/>
+            <input class="form-control" type="number" placeholder="1.0" formControlName="gain"/>
             <label class="input-group-text">{{zmienne[1].nazwa}}</label>
-            <input class="form-control" type="number" placeholder="1.0" formControlName="z1"/>
+            <input class="form-control" type="number" placeholder="1.0" formControlName="r1"/>
             <label class="input-group-text">{{zmienne[2].nazwa}}</label>
-            <input class="form-control" type="number" placeholder="1.0" formControlName="z2"/>
+            <input class="form-control" type="number" placeholder="1.0" formControlName="q1"/>
             <label class="input-group-text">{{zmienne[3].nazwa}}</label>
-            <input class="form-control" type="number" placeholder="1.0" formControlName="b1"/>
+            <input class="form-control" type="number" placeholder="1.0" formControlName="r2"/>
             <label class="input-group-text">{{zmienne[4].nazwa}}</label>
-            <input class="form-control" type="number" placeholder="1.0" formControlName="b2"/>
-            <label class="input-group-text">{{zmienne[5].nazwa}}</label>
-            <input class="form-control" type="number" placeholder="1.0" formControlName="b3"/>
+            <input class="form-control" type="number" placeholder="1.0" formControlName="q2"/>
           </div>
           <div class="input-group col-3">
+            <label class="input-group-text">{{zmienne[5].nazwa}}</label>
+            <input class="form-control" type="number" placeholder="1.0" formControlName="t1"/>
             <label class="input-group-text">{{zmienne[6].nazwa}}</label>
-            <input class="form-control" type="number" placeholder="1.0" formControlName="ts"/>
+            <input class="form-control" type="number" placeholder="1.0" formControlName="t2"/>
             <label class="input-group-text">{{zmienne[7].nazwa}}</label>
-            <input class="form-control" type="number" placeholder="1.0" formControlName="opoznienie"/>
+            <input class="form-control" type="number" placeholder="1.0" formControlName="t3"/>
             <label class="input-group-text">{{zmienne[8].nazwa}}</label>
-            <input class="form-control" type="number" placeholder="1.0" formControlName="szum"/>
+            <input class="form-control" type="number" placeholder="1.0" formControlName="delay"/>
+            <label class="input-group-text">{{zmienne[9].nazwa}}</label>
+            <input class="form-control" type="number" placeholder="1.0" formControlName="tp"/>
           </div>
         </div>      
       </div>
     </div>
   </form>
+</div>
 </div>

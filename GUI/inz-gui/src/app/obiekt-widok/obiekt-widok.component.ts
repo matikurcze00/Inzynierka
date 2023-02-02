@@ -1,6 +1,6 @@
-import { outputAst } from '@angular/compiler';
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { FormArray, FormControl, FormGroup } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { Component, EventEmitter, HostListener, OnInit, Output } from '@angular/core';
+import { ControlContainer, FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-obiekt-widok',
@@ -8,34 +8,58 @@ import { FormArray, FormControl, FormGroup } from '@angular/forms';
   styleUrls: ['./obiekt-widok.component.css']
 })
 export class ObiektWidokComponent implements OnInit {
+  file: File | null = null;
+  typ='SISO'
   @Output() updateEvent = new EventEmitter<FormArray>()
   obiektForm = new FormGroup({
     obiekt: new FormArray([
       new FormGroup({
-        k: new FormControl(1.0),
-        z1: new FormControl(1.0),
-        z2: new FormControl(1.0),
-        b1: new FormControl(1.1),
-        b2: new FormControl(1.0),
-        b3: new FormControl(1.0),
-        ts: new FormControl(1.0),
-        opoznienie: new FormControl(0),
-        szum: new FormControl(0.0),
-      })
+        gain: new FormControl(1.0),
+        r1: new FormControl(1.0),
+        q1: new FormControl(1.0),
+        r2: new FormControl(1.1),
+        q2: new FormControl(1.0),
+        t1: new FormControl(1.0),
+        t2: new FormControl(1.0),
+        t3: new FormControl(1.0),
+        tp: new FormControl(1.0),
+        delay: new FormControl(0),
+      }),
+      new FormGroup({
+        plik: new FormControl(this.file),
+        liczbaWejsc: new FormControl(1),
+        liczbaWyjsc: new FormControl(1)
+        }),
     ])
   })
-  pierwszeRownanie = " G(s) = $ \\large K * \\frac{(s-z1)(s-z2)}{(s-b1)(s-b2)(s-b3)}$";
-  zmienne = [{id: 1, nazwa: "K"},
-            {id: 2, nazwa: "z1"},
-            {id: 3, nazwa: "z2"},
-            {id: 4, nazwa:"b1"},
-            {id: 5, nazwa: "b2"},
-            {id: 6, nazwa: "b3"},
-            {id: 7, nazwa: "Ts"},
-            {id: 8, nazwa: "Opoznienie"},
-            {id: 9, nazwa: "Szum"}];
-  constructor() { }
+  
+  @HostListener('change', ['$event.target.files']) emitFiles( event: FileList ) {
+    const file = event && event.item(0);
+    if(file)
+    {
+      this.file = file;
+      this.obiektForm.get('obiekt')?.get([1])?.patchValue({ plik: this.file });
+      console.log(this.obiektForm.controls.obiekt.controls[1])
+    }
+  }
 
+  pierwszeRownanie = " $ \\large G(s) = Gain * \\frac{(R1*s + Q1)(R2*s + Q2)}{(T1*s+1)(T2*s+1)(T3+3)}*e^{Delay}$  ";
+  drugieRownanie =  " $ \\large G(s) = K * \\frac{(s-z1)}{(s-b1)(s-b2)(s-b3)}$";
+  zmienne = [{id: 1, nazwa: "Gain"},
+            {id: 2, nazwa: "R1"},
+            {id: 3, nazwa: "Q1"},
+            {id: 4, nazwa:"R2"},
+            {id: 5, nazwa: "Q2"},
+            {id: 6, nazwa: "T1"},
+            {id: 7, nazwa: "T2"},
+            {id: 8, nazwa: "T3"},
+            {id: 9, nazwa: "Delay"},
+            {id: 10, nazwa: "Tp"}];
+  constructor(private http: HttpClient) { }
+  resetMIMO(): void{
+    this.obiektForm.get('obiekt')?.get([1])?.patchValue({ plik: null, liczbaWejsc: 1, liczbaWyjsc: 1 }); 
+    this.file=null
+  }
   ngOnInit(): void {
     this.updateEvent.emit(this.obiektForm.controls.obiekt);
     this.obiektForm.valueChanges.subscribe( value =>{
@@ -43,5 +67,4 @@ export class ObiektWidokComponent implements OnInit {
       console.log(value)
     })
   }
-
 }
