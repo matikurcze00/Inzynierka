@@ -18,7 +18,6 @@ public class PID extends Regulator{
     private double r2;
     private double duMax;
     private double uMax;
-    private double Error = 0;
     private Double[] strojenieZadane;
     private int liczbaStrojeniaZadanego;
     @Override
@@ -28,7 +27,6 @@ public class PID extends Regulator{
         E.set(2, E.get(1));
         E.set(1,E.get(0));
         E.set(0,cel[0]-aktualna);
-        Error += cel[0]-aktualna;
 
         //
         double du = r0 * E.get(0) + r1 * E.get(1) + r2 * E.get(2);
@@ -113,6 +111,7 @@ public class PID extends Regulator{
     public void resetujRegulator()
     {
         E = Arrays.asList(0.0,0.0,0.0);
+
     }
     private void policzWartosci()
     {

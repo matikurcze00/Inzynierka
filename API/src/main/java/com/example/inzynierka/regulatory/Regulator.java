@@ -7,7 +7,6 @@ abstract public class Regulator {
     double[] cel ;
     double duMax;
     double uMax;
-    double Error;
     abstract public double policzOutput(double aktualna);
     abstract public double[] policzOutput(double[] aktualna);
 

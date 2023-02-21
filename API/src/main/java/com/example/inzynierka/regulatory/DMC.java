@@ -36,14 +36,15 @@ public class DMC extends Regulator{
             this.policzWartosci(SISO);
         }
     }
-    public DMC(int Nu, double lambda, SISO SISO, double cel, double duMax, int N)
+    public DMC(int Nu, double lambda, SISO siso, double cel, double duMax, int N)
     {
         this.Lambda = Arrays.asList(lambda);
         this.Nu = Nu;
         this.N = N;
         this.cel = new double[]{cel};
         this.duMax = duMax;
-        policzWartosci(SISO);
+        policzWartosci(siso);
+
     }
     public DMC(int Nu, double[] lambda, MIMO obiekt, double[] cel, double duMax, int N, Double[] strojenieZadane)
     {
@@ -138,23 +139,25 @@ public class DMC extends Regulator{
         dodajdU(tempdU);
         return tempdU;
     }
-    private void policzWartosci(SISO SISO)
+    private void policzWartosci(SISO siso)
     {
         this.S = new ArrayList();
-        policzS(SISO);
+        policzS(siso);
         policzMp();
         policzM();
         policzK();
         resetujRegulator(1);
+        siso.resetObiektu();
     }
-    private void policzWartosci(MIMO obiekt)
+    private void policzWartosci(MIMO mimo)
     {
         this.S = new ArrayList();
-        policzS(obiekt);
-        policzMp(obiekt.getLiczbaIN(),obiekt.getLiczbaOUT());
-        policzM(obiekt.getLiczbaIN(),obiekt.getLiczbaOUT());
-        policzK(obiekt.getLiczbaIN());
-        resetujRegulator(obiekt.getLiczbaIN());
+        policzS(mimo);
+        policzMp(mimo.getLiczbaIN(),mimo.getLiczbaOUT());
+        policzM(mimo.getLiczbaIN(),mimo.getLiczbaOUT());
+        policzK(mimo.getLiczbaIN());
+        resetujRegulator(mimo.getLiczbaIN());
+        mimo.resetObiektu();
     }
 
     public void zmienWartosci(double[] wartosci){
@@ -244,6 +247,13 @@ public class DMC extends Regulator{
             if(D<S.get(i).size())
             {
                 D=S.get(i).size();
+            }
+        }
+        for (int i = 0; i < S.size(); i++)
+        {
+            while(D!=S.get(i).size())
+            {
+                S.get(i).add(S.get(i).get(S.size()));
             }
         }
         this.N=D;
