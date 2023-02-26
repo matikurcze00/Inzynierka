@@ -10,6 +10,7 @@ import { ControlContainer, FormArray, FormControl, FormGroup, Validators } from 
 export class ObiektWidokComponent implements OnInit {
   file: File | null = null;
   typ='SISO'
+  optionsQ = [-1, 0 ,1]
   @Output() updateEvent = new EventEmitter<FormArray>()
   obiektForm = new FormGroup({
     obiekt: new FormArray([
