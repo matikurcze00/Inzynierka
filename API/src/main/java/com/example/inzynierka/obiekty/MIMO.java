@@ -2,9 +2,7 @@ package com.example.inzynierka.obiekty;
 
 import com.example.inzynierka.modele.ParObiektMIMO;
 import com.example.inzynierka.regulatory.Regulator;
-import lombok.AccessLevel;
 import lombok.Data;
-import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,57 +22,54 @@ public class MIMO {
     private int liczbaIN;
     private int delayMax = 0;
     private int dlugosc;
-    public MIMO() {}
-    public MIMO(ParObiektMIMO[] parObiektMIMOS, String blad)
-    {
+
+    public MIMO() {
+    }
+
+    public MIMO(ParObiektMIMO[] parObiektMIMOS, String blad) {
         stworzTransmitancje(parObiektMIMOS);
         liczbaOUT = transmitancja.get(0).size();
         liczbaIN = transmitancja.size();
         obliczDelayMax();
-        this.blad=blad;
+        this.blad = blad;
         obliczUMax(parObiektMIMOS);
 
         this.Y = new ArrayList();
-        for (int i = 0; i < this.liczbaOUT; i++)
-        {
+        for (int i = 0; i < this.liczbaOUT; i++) {
             Y.add(new ArrayList(Collections.nCopies(3, transmitancja.get(0).get(i).getYpp())));
         }
         this.U = new ArrayList();
-        for (int i = 0; i < this.liczbaIN; i++)
-        {
-            U.add(new ArrayList(Collections.nCopies(3+delayMax, transmitancja.get(i).get(0).getUpp())));
+        for (int i = 0; i < this.liczbaIN; i++) {
+            U.add(new ArrayList(Collections.nCopies(3 + delayMax, transmitancja.get(i).get(0).getUpp())));
         }
         obliczDlugosc();
         obliczYMax();
     }
-    public double[] obliczKrok(double[] du)
-    {
+
+    public double[] obliczKrok(double[] du) {
         obliczU(du);
         double[] Yakt = new double[liczbaOUT];
-        for (int i = 0; i<liczbaOUT; i++)
-        {
+        for (int i = 0; i < liczbaOUT; i++) {
             double YaktIN = 0.0;
-            for (int j = 0; j<liczbaIN; j++)
-            {
-                    YaktIN+= transmitancja.get(j).get(i).obliczKrok(U.get(j));
+            for (int j = 0; j < liczbaIN; j++) {
+                YaktIN += transmitancja.get(j).get(i).obliczKrok(U.get(j));
             }
             Yakt[i] = YaktIN;
         }
-        for(int i = 0; i<liczbaOUT; i++) {
+        for (int i = 0; i < liczbaOUT; i++) {
             List<Double> Ytemp = Y.get(i);
             for (int j = Y.get(i).size() - 1; j > 0; j--)
-                Ytemp.set(j, Ytemp.get(j-1));
+                Ytemp.set(j, Ytemp.get(j - 1));
             Ytemp.set(0, Yakt[i]);
-            Y.set(i,Ytemp);
+            Y.set(i, Ytemp);
         }
         return Yakt;
     }
 
-    public double obliczKrok(double du, int IN, int OUT)
-    {
+    public double obliczKrok(double du, int IN, int OUT) {
         obliczU(du, IN);
         double YaktIN = 0.0;
-        YaktIN+= transmitancja.get(IN).get(OUT).obliczKrok(U.get(IN));
+        YaktIN += transmitancja.get(IN).get(OUT).obliczKrok(U.get(IN));
         List<Double> Ytemp = Y.get(OUT);
         for (int j = Y.get(OUT).size() - 1; j > 0; j--)
             Ytemp.set(j, Ytemp.get(j - 1));
@@ -84,135 +79,123 @@ public class MIMO {
         return YaktIN;
     }
 
-    public void stworzTransmitancje(ParObiektMIMO[] parObiektMIMOS)
-    {
+    public void stworzTransmitancje(ParObiektMIMO[] parObiektMIMOS) {
         this.transmitancja = new ArrayList();
-        for(ParObiektMIMO parObiekt: parObiektMIMOS)
-        {
+        for (ParObiektMIMO parObiekt : parObiektMIMOS) {
             List<TransmitancjaCiagla> transmitancjaTemp = new ArrayList();
-            for(int i = 0; i<parObiekt.getGain().length; i++)
-            {
+            for (int i = 0; i < parObiekt.getGain().length; i++) {
 
-            transmitancjaTemp.add(new TransmitancjaCiagla(
-                    parObiekt.getGain()[i],
-                    parObiekt.getR1()[i],
-                    parObiekt.getQ1()[i],
-                    parObiekt.getR2()[i],
-                    parObiekt.getQ2()[i],
-                    parObiekt.getT1()[i],
-                    parObiekt.getT2()[i],
-                    parObiekt.getT3()[i],
-                    parObiekt.getDelay()[i],
-                    parObiekt.getTp()));
+                transmitancjaTemp.add(new TransmitancjaCiagla(
+                        parObiekt.getGain()[i],
+                        parObiekt.getR1()[i],
+                        parObiekt.getQ1()[i],
+                        parObiekt.getR2()[i],
+                        parObiekt.getQ2()[i],
+                        parObiekt.getT1()[i],
+                        parObiekt.getT2()[i],
+                        parObiekt.getT3()[i],
+                        parObiekt.getDelay()[i],
+                        parObiekt.getTp()));
             }
-        this.transmitancja.add(transmitancjaTemp);
+            this.transmitancja.add(transmitancjaTemp);
         }
     }
-    private void obliczUMax(ParObiektMIMO[] obiektyMIMO)
-    {
-        this.uMax= new double[obiektyMIMO.length];
-        this.uMin= new double[obiektyMIMO.length];
-        for(int i = 0; i<obiektyMIMO.length; i++)
-        {
-            this.uMax[i]=obiektyMIMO[i].getUMax();
-            this.uMin[i]=obiektyMIMO[i].getUMin();
+
+    private void obliczUMax(ParObiektMIMO[] obiektyMIMO) {
+        this.uMax = new double[obiektyMIMO.length];
+        this.uMin = new double[obiektyMIMO.length];
+        for (int i = 0; i < obiektyMIMO.length; i++) {
+            this.uMax[i] = obiektyMIMO[i].getUMax();
+            this.uMin[i] = obiektyMIMO[i].getUMin();
         }
     }
-    public void obliczU(double[] du)
-    {
-        for(int j = 0; j<du.length; j++)
-        {
+
+    public void obliczU(double[] du) {
+        for (int j = 0; j < du.length; j++) {
             double Uakt = U.get(j).get(0) + du[j];
-                if(Uakt>uMax[j])
-                    Uakt=uMax[j];
-                else if (Uakt<uMin[j])
-                    Uakt=uMin[j];
+            if (Uakt > uMax[j])
+                Uakt = uMax[j];
+            else if (Uakt < uMin[j])
+                Uakt = uMin[j];
 
-            for(int i = U.get(j).size()-1; i>0 ;i--)
-                U.get(j).set(i,U.get(j).get(i-1));
-            U.get(j).set(0,Uakt);
+            for (int i = U.get(j).size() - 1; i > 0; i--)
+                U.get(j).set(i, U.get(j).get(i - 1));
+            U.get(j).set(0, Uakt);
         }
     }
-    public void obliczU(double du, int IN)
-    {
+
+    public void obliczU(double du, int IN) {
         double Uakt = U.get(IN).get(0) + du;
-            if(Uakt>uMax[IN]) {
-                Uakt=uMax[IN];
-            }
-            else if (Uakt<uMin[IN]) {
-                Uakt=uMin[IN];
-            }
-        for(int i = U.get(IN).size()-1; i>0 ;i--)
-            U.get(IN).set(i,U.get(IN).get(i-1));
-        U.get(IN).set(0,Uakt);
+        if (Uakt > uMax[IN]) {
+            Uakt = uMax[IN];
+        } else if (Uakt < uMin[IN]) {
+            Uakt = uMin[IN];
+        }
+        for (int i = U.get(IN).size() - 1; i > 0; i--)
+            U.get(IN).set(i, U.get(IN).get(i - 1));
+        U.get(IN).set(0, Uakt);
     }
 
-    public double getTp(int IN)
-    {
+    public double getTp(int IN) {
         return transmitancja.get(IN).get(0).getTp();
     }
 
-    public double[] getAktualne(){
+    public double[] getAktualne() {
         double[] YAkt = new double[liczbaOUT];
-        for (int i = 0; i<liczbaOUT; i++)
+        for (int i = 0; i < liczbaOUT; i++)
             YAkt[i] = Y.get(i).get(0);
         return YAkt;
     }
-    public double obliczPraceObiektu(Regulator regulator, double[] cel)
-    {
+
+    public double obliczPraceObiektu(Regulator regulator, double[] cel) {
 
         resetObiektu();
         double blad = 0.0;
         double[] tempCel = new double[liczbaOUT];
 
 
-        for(int k = 0; k < liczbaOUT; k++)
-        {
-            for(int i = 0; i < liczbaOUT; i++)
+        for (int k = 0; k < liczbaOUT; k++) {
+            for (int i = 0; i < liczbaOUT; i++)
                 tempCel[i] = 0;
             tempCel[k] = cel[k];
             regulator.setCel(tempCel);
             resetObiektu();
             regulator.resetujRegulator();
-            for (int i = 0; i<this.dlugosc; i++)
-            {
+            for (int i = 0; i < this.dlugosc; i++) {
                 double[] Ytepm = obliczKrok(regulator.policzOutput(getAktualne()));
-                for(int j = 0; j < Ytepm.length; j++)
-                {
-                    if(this.blad.equals("srednio"))
-                        blad+=Math.pow(Ytepm[j]-tempCel[j],2);
-                    else if(this.blad.equals("absolutny"))
-                        blad+=Math.abs(Ytepm[j]-tempCel[j]);
+                for (int j = 0; j < Ytepm.length; j++) {
+                    if (this.blad.equals("srednio"))
+                        blad += Math.pow(Ytepm[j] - tempCel[j], 2);
+                    else if (this.blad.equals("absolutny"))
+                        blad += Math.abs(Ytepm[j] - tempCel[j]);
                 }
             }
         }
-        blad=blad/this.dlugosc*liczbaOUT*liczbaOUT;
+        blad = blad / this.dlugosc * liczbaOUT * liczbaOUT;
         resetObiektu();
         return blad;
     }
 
-    public void SetU (List<List<Double>> noweU)
-    {
+    public void SetU(List<List<Double>> noweU) {
         this.U = noweU;
     }
 
-    public void SetY (List<List<Double>> noweY)
-    {
+    public void SetY(List<List<Double>> noweY) {
         this.Y = noweY;
     }
 
-    public double[] getYMax()
-    {
+    public double[] getYMax() {
         return YMax;
     }
-    public double getUMax(int IN)
-    {
+
+    public double getUMax(int IN) {
         return getUMax()[IN];
     }
-    public double getYpp(int IN)
-    {
+
+    public double getYpp(int IN) {
         return 0.0;
     }
+
     public double obliczBlad(int dlugosc, List<double[]> wyjscie, double[] cel) {
         double blad = 0.0;
         switch (this.blad) {
@@ -221,103 +204,90 @@ public class MIMO {
                     blad += wyjscie.get(0)[(int) Math.floor(dlugosc / cel.length)] - cel[i];
                 break;
             case "srednio":
-                for(int i = 0; i < dlugosc; i++)
-                    for(int j = 0; j < cel.length; j++)
-                        blad+=Math.pow(wyjscie.get(j)[i]-cel[j],2);
+                for (int i = 0; i < dlugosc; i++)
+                    for (int j = 0; j < cel.length; j++)
+                        blad += Math.pow(wyjscie.get(j)[i] - cel[j], 2);
                 break;
             case "absolutny":
-                for(int i = 0; i < dlugosc; i++)
-                    for(int j = 0; j < cel.length; j++)
-                        blad+=Math.abs(wyjscie.get(j)[i]-cel[j]);
+                for (int i = 0; i < dlugosc; i++)
+                    for (int j = 0; j < cel.length; j++)
+                        blad += Math.abs(wyjscie.get(j)[i] - cel[j]);
                 break;
             default:
                 break;
-            }
+        }
         return blad;
     }
 
-    private void obliczYMax()
-    {
+    private void obliczYMax() {
         double[] Ytemp;
 
         this.YMax = new double[liczbaOUT];
-        for(int i = 0; i<liczbaOUT; i++)
+        for (int i = 0; i < liczbaOUT; i++)
             this.YMax[i] = 0.0;
         double[] uMax = new double[liczbaIN];
-        for(int i = 0; i < liczbaIN; i ++)
-        {
+        for (int i = 0; i < liczbaIN; i++) {
             uMax[i] = this.uMax[i];
         }
-        for (int i = 0; i<dlugosc*2; i++)
-        {
+        for (int i = 0; i < dlugosc * 2; i++) {
             obliczKrok(uMax);
         }
         Ytemp = getAktualne();
         resetObiektu();
-        for(int i = 0; i<this.YMax.length; i++)
-            if(this.YMax[i]<Ytemp[i])
+        for (int i = 0; i < this.YMax.length; i++)
+            if (this.YMax[i] < Ytemp[i])
                 this.YMax[i] = Ytemp[i];
     }
 
-    public void resetObiektu()
-    {
-        for (int i = 0; i < this.liczbaOUT; i++)
-        {
+    public void resetObiektu() {
+        for (int i = 0; i < this.liczbaOUT; i++) {
             Y.set(i, new ArrayList(Collections.nCopies(3, transmitancja.get(0).get(i).getYpp())));
         }
-        for (int i = 0; i < this.liczbaIN; i++)
-        {
-            U.set(i, new ArrayList(Collections.nCopies(3+delayMax, transmitancja.get(i).get(0).getUpp())));
+        for (int i = 0; i < this.liczbaIN; i++) {
+            U.set(i, new ArrayList(Collections.nCopies(3 + delayMax, transmitancja.get(i).get(0).getUpp())));
         }
-        for(List<TransmitancjaCiagla> ListaTransmitancji: transmitancja)
-            for(TransmitancjaCiagla tran: ListaTransmitancji)
+        for (List<TransmitancjaCiagla> ListaTransmitancji : transmitancja)
+            for (TransmitancjaCiagla tran : ListaTransmitancji)
                 tran.reset();
     }
-    public void obliczDelayMax()
-    {
-        for(List<TransmitancjaCiagla> listaTransmitancji: transmitancja)
-        {
-            for(TransmitancjaCiagla tran: listaTransmitancji)
-            {
-                if(tran.getDelay()>this.delayMax) {
-                    this.delayMax=tran.getDelay();
+
+    public void obliczDelayMax() {
+        for (List<TransmitancjaCiagla> listaTransmitancji : transmitancja) {
+            for (TransmitancjaCiagla tran : listaTransmitancji) {
+                if (tran.getDelay() > this.delayMax) {
+                    this.delayMax = tran.getDelay();
                 }
             }
         }
     }
-    private void obliczDlugosc()
-    {
+
+    private void obliczDlugosc() {
         List<List<Double>> dlugosc = new ArrayList();
-        for(int i = 0; i < this.getLiczbaOUT(); i ++)
-        {
-            for (int j = 0; j < this.getLiczbaIN(); j++)
-            {
+        for (int i = 0; i < this.getLiczbaOUT(); i++) {
+            for (int j = 0; j < this.getLiczbaIN(); j++) {
                 this.resetObiektu();
-                double U = this.getUMax(j)/2;
+                double U = this.getUMax(j) / 2;
                 double Utemp = 0;
 
                 int k = 2;
                 List<Double> dlugoscTemp = new ArrayList<Double>();
-                dlugoscTemp.add((this.obliczKrok(U, j, i)- this.getYpp(i))/U);
-                dlugoscTemp.add((this.obliczKrok(Utemp, j, i)- this.getYpp(i))/U);
-                while(!(Math.abs(dlugoscTemp.get(k-1)-dlugoscTemp.get(k-2))<0.005) || dlugoscTemp.get(k-2)==0.0)
-                {
-                    dlugoscTemp.add((this.obliczKrok(Utemp,j, i )- this.getYpp(i))/U);
+                dlugoscTemp.add((this.obliczKrok(U, j, i) - this.getYpp(i)) / U);
+                dlugoscTemp.add((this.obliczKrok(Utemp, j, i) - this.getYpp(i)) / U);
+                while (!(Math.abs(dlugoscTemp.get(k - 1) - dlugoscTemp.get(k - 2)) < 0.005) || dlugoscTemp.get(k - 2) == 0.0) {
+                    dlugoscTemp.add((this.obliczKrok(Utemp, j, i) - this.getYpp(i)) / U);
                     k++;
                 }
                 dlugosc.add(dlugoscTemp);
             }
         }
         int dlugoscInt = dlugosc.get(0).size();
-        for (int i = 0; i < dlugosc.size(); i++)
-        {
-            if(dlugoscInt<dlugosc.get(i).size())
-            {
-                dlugoscInt=dlugosc.get(i).size();
+        for (int i = 0; i < dlugosc.size(); i++) {
+            if (dlugoscInt < dlugosc.get(i).size()) {
+                dlugoscInt = dlugosc.get(i).size();
             }
         }
         this.dlugosc = dlugoscInt;
-        if(this.dlugosc<40)
-            this.dlugosc=40;
+        if (this.dlugosc < 40)
+            this.dlugosc = 40;
     }
 }

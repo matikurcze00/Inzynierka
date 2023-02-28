@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class ParWizualizacja {
-    public ParWizualizacja(double[] yZad, double[] yPP,double[] uPP, int[] skok, int dlugosc,
+    public ParWizualizacja(double[] yZad, double[] yPP, double[] uPP, int[] skok, int dlugosc,
                            Double[] strojenie, String blad) {
         this.yZad = yZad;
         this.yPP = yPP;
@@ -14,6 +14,7 @@ public class ParWizualizacja {
         this.strojenie = strojenie;
         this.blad = blad;
     }
+
     private double[] yZad;
     private double[] yPP;
     private double[] uPP;

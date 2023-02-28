@@ -1,23 +1,7 @@
 package com.example.inzynierka;
 
 
-import com.example.inzynierka.EA.AlgorytmEwolucyjny;
-import com.example.inzynierka.modele.ParObiektMIMO;
-import com.example.inzynierka.obiekty.MIMO;
-import com.example.inzynierka.obiekty.SISO;
-import com.example.inzynierka.obiekty.TransmitancjaCiagla;
-import com.example.inzynierka.regulatory.DMC;
-import com.example.inzynierka.regulatory.PID;
-import com.example.inzynierka.regulatory.ZbiorPID;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.val;
-
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 public class Main {
 
@@ -107,7 +91,6 @@ public class Main {
 //            System.out.println("Y : " + Y);
 ////            System.out.println("DMC : " + dmc.getLambda());
 //            System.out.println("Zadane : " + pid.getCel()[0]);
-
 
 
     }
