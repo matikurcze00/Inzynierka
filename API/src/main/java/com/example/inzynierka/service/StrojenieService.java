@@ -28,8 +28,10 @@ public class StrojenieService {
         Regulator regulator;
         regulator = dobierzRegulatorSISO(parObiekt, parRegulator, parWizualizacja, obiekt, PIE);
         if (regulator == null) return null;
-        AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(PIE[1], PIE[2], PIE[3], 0.3, 0.2);
+        AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(PIE[0], PIE[1], PIE[2], 0.3, 0.2);
         dobierzStrojenieSISO(parWizualizacja, obiekt, regulator, GA, odpowiedzStrojenie);
+        if(parStrojenie.getParObiektSymulacji()!=null)
+            obiekt = new SISO (parStrojenie.getParObiektSymulacji(), parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
         double[] Y = symulacjaRegulacjiSISO(parWizualizacja, obiekt, regulator, odpowiedzStrojenie);
         System.out.println("strojenie::OK");
         obliczBladSISO(parWizualizacja, regulator, Y);

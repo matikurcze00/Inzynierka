@@ -3,6 +3,7 @@ package com.example.inzynierka.controller;
 import com.example.inzynierka.modele.*;
 import com.example.inzynierka.service.OdpowiedzService;
 import com.example.inzynierka.service.StrojenieService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -12,12 +13,19 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 public class Controller {
-    static StrojenieService strojenieService;
-    static OdpowiedzService odpowiedzService;
+
+    private final StrojenieService strojenieService;
+    private final OdpowiedzService odpowiedzService;
+
+    @Autowired
+    public Controller(StrojenieService strojenieService, OdpowiedzService odpowiedzService) {
+        this.strojenieService = strojenieService;
+        this.odpowiedzService = odpowiedzService;
+    }
 
     @RequestMapping(value = "/strojenie/SISO", method = RequestMethod.POST)
     @ResponseBody
-    public static ResponseEntity<OdpowiedzStrojenie> strojenieSISO(@RequestBody ParStrojenie parStrojenie) {
+    public ResponseEntity<OdpowiedzStrojenie> strojenieSISO(@RequestBody ParStrojenie parStrojenie) {
         System.out.println("strojenieSISO::start ");
         OdpowiedzStrojenie odpowiedz = strojenieService.SISOStrojenie(parStrojenie);
 
@@ -31,7 +39,7 @@ public class Controller {
 
     @RequestMapping(value = "/strojenie/MIMO", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, method = RequestMethod.POST)
     @ResponseBody
-    public static ResponseEntity<OdpowiedzStrojenieMIMO> strojenieMIMO(@RequestPart("file") MultipartFile file, @ModelAttribute ParRegulator parRegulator, @ModelAttribute ParWizualizacja parWizualizacja) {
+    public ResponseEntity<OdpowiedzStrojenieMIMO> strojenieMIMO(@RequestPart("file") MultipartFile file, @ModelAttribute ParRegulator parRegulator, @ModelAttribute ParWizualizacja parWizualizacja) {
         System.out.println("strojenieMIMO::start ");
         OdpowiedzStrojenieMIMO odpowiedz = strojenieService.MIMOStrojenie(file, parRegulator, parWizualizacja);
         if (odpowiedz == null) {
@@ -43,7 +51,7 @@ public class Controller {
 
     @RequestMapping(value = "/odpowiedz/SISO", method = RequestMethod.POST)
     @ResponseBody
-    public static ResponseEntity<OdpowiedzSkokowa> odpowiedzSISO(@RequestBody ParStrojenie parStrojenie) {
+    public ResponseEntity<OdpowiedzSkokowa> odpowiedzSISO(@RequestBody ParStrojenie parStrojenie) {
         System.out.println("odpowiedzSISO::start ");
         OdpowiedzSkokowa odpowiedzSkokowa = odpowiedzService.SISOOdpowiedz(parStrojenie);
         if (odpowiedzSkokowa == null) {
@@ -55,7 +63,7 @@ public class Controller {
 
     @RequestMapping(value = "/odpowiedz/MIMO", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, method = RequestMethod.POST)
     @ResponseBody
-    public static ResponseEntity<OdpowiedzSkokowa> odpowiedzMIMO(@RequestPart("file") MultipartFile file, @ModelAttribute ParRegulator parRegulator, @ModelAttribute ParWizualizacja parWizualizacja) {
+    public ResponseEntity<OdpowiedzSkokowa> odpowiedzMIMO(@RequestPart("file") MultipartFile file, @ModelAttribute ParRegulator parRegulator, @ModelAttribute ParWizualizacja parWizualizacja) {
         System.out.println("odpowiedzMIMO::start ");
         OdpowiedzSkokowa odpowiedzSkokowa = odpowiedzService.MIMOOdpowiedz(file, parRegulator, parWizualizacja);
         if (odpowiedzSkokowa == null) {

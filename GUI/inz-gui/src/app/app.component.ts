@@ -30,6 +30,19 @@ export class AppComponent {
   file: File | null = null;
   primaryXAxis = {valueType: 'krok'}
   title = 'Symulacje obiektu regulowanego'
+  rownanie = " $ \\large G(s) = Gain * \\frac{(R1*s + Q1)(R2*s + Q2)}{(T1*s+1)(T2*s+1)(T3+3)}*e^{Delay}$  ";
+  zmienne = [{id: 1, nazwa: "Gain"},
+  {id: 2, nazwa: "R1"},
+  {id: 3, nazwa: "Q1"},
+  {id: 4, nazwa:"R2"},
+  {id: 5, nazwa: "Q2"},
+  {id: 6, nazwa: "T1"},
+  {id: 7, nazwa: "T2"},
+  {id: 8, nazwa: "T3"},
+  {id: 9, nazwa: "Delay"},
+  {id: 10, nazwa: "Tp"}];
+  optionsQ = [-1, 0 ,1]
+
   chartData?: WykresDane;
   strojenie = new FormGroup({
     parObiekt: new FormGroup({
@@ -63,7 +76,19 @@ export class AppComponent {
       dlugosc: new FormControl(100.0),
       strojenie: new FormControl([null,null,null] as (number | null)[]),
       blad: new FormControl('srednio')
-    })
+    }),
+    parObiektSymulacji : new FormGroup({
+      gain: new FormControl(),
+      r1: new FormControl(),
+      q1: new FormControl(),
+      r2: new FormControl(),
+      q2: new FormControl(),
+      t1: new FormControl(),
+      t2: new FormControl(),
+      t3: new FormControl(),
+      tp: new FormControl(),
+      delay: new FormControl(),
+    }),
     })
     liczbaWyjscArray = [0]
     liczbaWejscArray = [0]
@@ -79,7 +104,7 @@ export class AppComponent {
     czyLaduje = false;
     czyError=true;
     errorInfo = "Wystapil blad";
-
+    czyInnyObiekt = false;
     updateObiekt(updatedObiekt: FormArray) {
     console.log("updateObiekt")
     console.log(updatedObiekt)
@@ -516,5 +541,23 @@ export class AppComponent {
       return strojenie[index] == null;
     else
       return true;
+  }
+  obiektSymulacjiInputs() {
+    if(this.czyInnyObiekt)
+    {
+      this.strojenie.get('parObiektSymulacji')?.reset();
+      this.strojenie.get('parObiektSymulacji')?.disable();
+      this.czyInnyObiekt = !this.czyInnyObiekt
+    }
+    else
+    {
+      this.strojenie.get('parObiektSymulacji')?.enable();
+      this.strojenie.get('parObiektSymulacji')?.patchValue(this.strojenie.get('parObiekt')!.value);
+      this.czyInnyObiekt = !this.czyInnyObiekt
+    }
+    
+  }
+  ngOnInit(): void {
+    this.strojenie.get('parObiektSymulacji')?.disable();
   }
 }

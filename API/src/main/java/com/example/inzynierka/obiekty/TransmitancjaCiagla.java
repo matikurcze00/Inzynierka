@@ -118,7 +118,7 @@ public class TransmitancjaCiagla {
             throws IllegalArgumentException {
 
         if (Tp <= 0)
-            throw new IllegalArgumentException("Tp must be greater than 0");
+            throw new IllegalArgumentException("Tp msui być większe niż 0");
         //denominator degree must be greater or equal to nominator
         int denomDeg = 0;
         int nomDeg = 0;
@@ -128,22 +128,27 @@ public class TransmitancjaCiagla {
         if (R1 > 0) nomDeg++;
         if (R2 > 0) nomDeg++;
         if (denomDeg < nomDeg)
-            throw new IllegalArgumentException("Denominator degree must be greater or equal to nominator");
+            throw new IllegalArgumentException("Denominator musi być większy lub równy nominatorowi");
 
         if (Q1 != -1 && Q1 != 0 && Q1 != 1)
-            throw new IllegalArgumentException("Q1 have to be equal to -1 or 0 or 1");
+            throw new IllegalArgumentException("Q1 musi być równe -1, 0 lub 1");
 
         if (Q2 != -1 && Q2 != 0 && Q2 != 1)
-            throw new IllegalArgumentException("Q2 have to be equal to -1 or 0 or 1");
+            throw new IllegalArgumentException("Q2 musi być równe -1, 0 lub 1");
 
         if (T1 <= 0 && R1 > 0) {
-            System.out.println("T1 less or equal to 0. Force R1 to 0");
+            System.out.println("T1 jest mniejsze lub równe 0. Zmieniam R1 na 0");
             this.R1 = 0;
         }
 
         if (T2 <= 0 && R2 > 0) {
-            System.out.println("T2 less or equal to 0. Force R2 to 0");
+            System.out.println("T2 jest mniejsze lub równe  0. Zmieniam R2 na 0");
             this.R2 = 0;
+        }
+        if(R1==0 && R2 ==0)
+        {
+            System.out.println("R1 i R2 są równe 0. Zmieniam R1 na 1");
+            this.R1 = 1;
         }
     }
 }

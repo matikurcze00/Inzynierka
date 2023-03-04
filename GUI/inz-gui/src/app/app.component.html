@@ -1,86 +1,105 @@
 <div>
   <app-naglowek class="mt-5"></app-naglowek>
   <form (ngSubmit)="onSubmit()" class="text-center" novalidate>
-    <div class="btn-group  mt-5">
+    <div class="btn-group mt-5">
       <input
-      mdbRadio
-      type="radio"
-      class="btn-check"
-      name="options"
-      id="option1"
-      autocomplete="off"
-      [checked]="true"
-      (change)="zakladka='model'"
-    />
-    <label class="btn btn-secondary" for="option1" >Model</label>
-    <input
-      mdbRadio
-      type="radio"
-      class="btn-check"
-      name="options"
-      id="option2"
-      autocomplete="off"
-      (change)="zakladka='regulator'"
-    />
-    <label class="btn btn-secondary" for="option2">Regulator</label>
-    <input
-      mdbRadio
-      type="radio"
-      class="btn-check"
-      name="options"
-      id="option3"
-      autocomplete="off"
-      (change)="zakladka='wizualizacja'"
-    />
-    <label class="btn btn-secondary" for="option3">Wizualizacja</label>
+        mdbRadio
+        type="radio"
+        class="btn-check"
+        name="options"
+        id="option1"
+        autocomplete="off"
+        [checked]="true"
+        (change)="zakladka = 'model'"
+      />
+      <label class="btn btn-secondary" for="option1">Model</label>
+      <input
+        mdbRadio
+        type="radio"
+        class="btn-check"
+        name="options"
+        id="option2"
+        autocomplete="off"
+        (change)="zakladka = 'regulator'"
+      />
+      <label class="btn btn-secondary" for="option2">Regulator</label>
+      <input
+        mdbRadio
+        type="radio"
+        class="btn-check"
+        name="options"
+        id="option3"
+        autocomplete="off"
+        (change)="zakladka = 'wizualizacja'"
+      />
+      <label class="btn btn-secondary" for="option3">Wizualizacja</label>
     </div>
     <div class="dane">
-      <app-obiekt-widok (updateEvent)="updateObiekt($event)" [hidden]="zakladka!=='model'"></app-obiekt-widok>
-      <app-regulator-widok (updateEvent)="updateRegulator($event)" [hidden]="zakladka!=='regulator'"></app-regulator-widok>
+      <app-obiekt-widok
+        (updateEvent)="updateObiekt($event)"
+        [hidden]="zakladka !== 'model'"
+      ></app-obiekt-widok>
+      <app-regulator-widok
+        (updateEvent)="updateRegulator($event)"
+        [hidden]="zakladka !== 'regulator'"
+      ></app-regulator-widok>
     </div>
 
-    <div *ngIf="zakladka=='wizualizacja'">
+    <div *ngIf="zakladka == 'wizualizacja'">
       <div class="mt-5">
         <div class="btn-group">
           <input
-          mdbRadio
-          type="radio"
-          class="btn-check"
-          name="options-obiekt"
-          id="option2-wizualizacja"
-          autocomplete="off"
-          [checked]="zakladkaWizualizacja=='odpowiedz'"
-          (change)="zakladkaWizualizacja='odpowiedz'"
+            mdbRadio
+            type="radio"
+            class="btn-check"
+            name="options-obiekt"
+            id="option2-wizualizacja"
+            autocomplete="off"
+            [checked]="zakladkaWizualizacja == 'odpowiedz'"
+            (change)="zakladkaWizualizacja = 'odpowiedz'"
           />
-          <label class="btn btn-secondary" for="option2-wizualizacja" >Odpowiedź skokowa</label>
+          <label class="btn btn-secondary" for="option2-wizualizacja"
+            >Odpowiedź skokowa</label
+          >
           <input
-          mdbRadio
-          type="radio"
-          class="btn-check"
-          name="options-obiekt"
-          id="option1-wizualizacja"
-          autocomplete="off"
-          [checked]="zakladkaWizualizacja=='przebieg'"
-          (change)="zakladkaWizualizacja='przebieg'" 
+            mdbRadio
+            type="radio"
+            class="btn-check"
+            name="options-obiekt"
+            id="option1-wizualizacja"
+            autocomplete="off"
+            [checked]="zakladkaWizualizacja == 'przebieg'"
+            (change)="zakladkaWizualizacja = 'przebieg'"
           />
-          <label class="btn btn-secondary" for="option1-wizualizacja" >Parametry wizualizacji</label>
+          <label class="btn btn-secondary" for="option1-wizualizacja"
+            >Parametry wizualizacji</label
+          >
           <input
-          mdbRadio
-          type="radio"
-          class="btn-check"
-          name="options-obiekt"
-          id="option3-wizualizacja"
-          autocomplete="off"
-          [checked]="zakladkaWizualizacja=='parametry'"
-          (change)="zakladkaWizualizacja='parametry'" 
+            mdbRadio
+            type="radio"
+            class="btn-check"
+            name="options-obiekt"
+            id="option3-wizualizacja"
+            autocomplete="off"
+            [checked]="zakladkaWizualizacja == 'parametry'"
+            (change)="zakladkaWizualizacja = 'parametry'"
           />
-          <label class="btn btn-secondary" for="option3-wizualizacja" >Parametry strojenia</label>
+          <label class="btn btn-secondary" for="option3-wizualizacja"
+            >Parametry strojenia</label
+          >
         </div>
       </div>
-      <div class="text-center mt-5 mb-3" [hidden]="(this.zakladkaWizualizacja!='przebieg' && this.zakladkaWizualizacja!='przebieg') || zakladka!='wizualizacja'">
+      <div
+        class="text-center mt-5 mb-3"
+        [hidden]="
+          (this.zakladkaWizualizacja != 'przebieg' &&
+            this.zakladkaWizualizacja != 'przebieg') ||
+          zakladka != 'wizualizacja'
+        "
+      >
         <b class="title">Wybierz sposób liczenia błędu</b>
         <div class="btn-group mb-3 align-items-center">
-            <input
+          <input
             mdbRadio
             type="radio"
             class="btn-check"
@@ -90,7 +109,9 @@
             [checked]="true"
             (change)="setBlad('srednio')"
           />
-          <label class="btn btn-secondary" for="option1-blad" >Średniokwadratowy</label>
+          <label class="btn btn-secondary" for="option1-blad"
+            >Średniokwadratowy</label
+          >
           <input
             mdbRadio
             type="radio"
@@ -110,18 +131,34 @@
             autocomplete="off"
             (change)="setBlad('mediana')"
           />
-          <label class="btn btn-secondary" for="option3-blad">Mediana błędu</label>
+          <label class="btn btn-secondary" for="option3-blad"
+            >Mediana błędu</label
+          >
         </div>
       </div>
-      <div class="przebiegClass" [hidden]="this.zakladkaWizualizacja!='przebieg'">
+      <div
+        class="przebiegClass"
+        [hidden]="this.zakladkaWizualizacja != 'przebieg'"
+      >
         <div class="text-center mt-5">
           <b>Ustaw proszę wartość początkową wyjść: </b>
           <div *ngIf="yPPTemp">
             <div class="form-row d-flex align-items-center mb-3">
-              <div class="input-group col align-items-center" >
-                <div *ngFor="let y of yPPTemp; let i = index"  class="mx-auto" style="margin-left: 20%; margin-right: 20%;">
-                  <label class="input-group-text mx-auto d-block text-center"> Wyjście {{i+1}} </label>
-                  <input class="form-control mx-auto d-block text-center" [(ngModel)]="yPPTemp[i]" name="yPPTemp" (ngModelChange)="onYPPChange(i, $event)">
+              <div class="input-group col align-items-center">
+                <div
+                  *ngFor="let y of yPPTemp; let i = index"
+                  class="mx-auto"
+                  style="margin-left: 20%; margin-right: 20%"
+                >
+                  <label class="input-group-text mx-auto d-block text-center">
+                    Wyjście {{ i + 1 }}
+                  </label>
+                  <input
+                    class="form-control mx-auto d-block text-center"
+                    [(ngModel)]="yPPTemp[i]"
+                    name="yPPTemp"
+                    (ngModelChange)="onYPPChange(i, $event)"
+                  />
                 </div>
               </div>
             </div>
@@ -132,9 +169,20 @@
           <div *ngIf="yZadTemp">
             <div class="form-row align-items-center mb-3">
               <div class="input-group col align-items-center">
-                <div *ngFor="let y of yZadTemp; let i = index" class="mx-auto" style="margin-left: 20%; margin-right: 20%;">
-                  <label class="input-group-text mx-auto d-block text-center"> Wyjście {{i+1}}  </label>
-                  <input class="form-control mx-auto d-block text-center" [(ngModel)]="yZadTemp[i]" name="yZadTemp" (ngModelChange)="onYZadChange(i, $event)">
+                <div
+                  *ngFor="let y of yZadTemp; let i = index"
+                  class="mx-auto"
+                  style="margin-left: 20%; margin-right: 20%"
+                >
+                  <label class="input-group-text mx-auto d-block text-center">
+                    Wyjście {{ i + 1 }}
+                  </label>
+                  <input
+                    class="form-control mx-auto d-block text-center"
+                    [(ngModel)]="yZadTemp[i]"
+                    name="yZadTemp"
+                    (ngModelChange)="onYZadChange(i, $event)"
+                  />
                 </div>
               </div>
             </div>
@@ -144,10 +192,21 @@
           <b>Ustaw proszę w którym kroku ustawić wartość zadaną wyjścia: </b>
           <div *ngIf="skokTemp">
             <div class="form-row align-items-center mb-3">
-              <div class="input-group col align-items-center" >
-                <div *ngFor="let y of skokTemp; let i = index" class="mx-auto" style="margin-left: 20%; margin-right: 20%;">
-                  <label class="input-group-text d-block text-center"> Wyjście {{i+1}}  </label>
-                  <input class="form-control d-block text-center" [(ngModel)]="skokTemp[i]" name="skokTemp" (ngModelChange)="onSkokChange(i, $event)">
+              <div class="input-group col align-items-center">
+                <div
+                  *ngFor="let y of skokTemp; let i = index"
+                  class="mx-auto"
+                  style="margin-left: 20%; margin-right: 20%"
+                >
+                  <label class="input-group-text d-block text-center">
+                    Wyjście {{ i + 1 }}
+                  </label>
+                  <input
+                    class="form-control d-block text-center"
+                    [(ngModel)]="skokTemp[i]"
+                    name="skokTemp"
+                    (ngModelChange)="onSkokChange(i, $event)"
+                  />
                 </div>
               </div>
             </div>
@@ -157,111 +216,272 @@
           <b>Ustaw proszę wartość początkową wejścia:</b>
           <div *ngIf="uPPTemp">
             <div class="form-row align-items-center mb-3">
-              <div class="input-group col align-items-center" >
-                <div *ngFor="let y of uPPTemp; let i = index" class="mx-auto" style="margin-left: 20%; margin-right: 20%;">
-                  <label class="input-group-text d-block text-center"> Wejście {{i+1}} </label>
-                  <input class="form-control d-block text-center" [(ngModel)]="uPPTemp[i]" name="uPPTemp" (ngModelChange)="onUPPChange(i, $event)">
+              <div class="input-group col align-items-center">
+                <div
+                  *ngFor="let y of uPPTemp; let i = index"
+                  class="mx-auto"
+                  style="margin-left: 20%; margin-right: 20%"
+                >
+                  <label class="input-group-text d-block text-center">
+                    Wejście {{ i + 1 }}
+                  </label>
+                  <input
+                    class="form-control d-block text-center"
+                    [(ngModel)]="uPPTemp[i]"
+                    name="uPPTemp"
+                    (ngModelChange)="onUPPChange(i, $event)"
+                  />
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="text-center mt-5 mx-auto" style="margin-left: 20%; margin-right: 20%;">
+        <div
+          class="text-center mt-5 mx-auto"
+          style="margin-left: 20%; margin-right: 20%"
+        >
           <b>Ustaw proszę długość symulacji: </b>
           <div class="row mx-auto">
             <div class="col-2 mx-auto">
-              <label class="input-group-text col-12 d-block text-center"> Długość </label>
-              <input class="form-control col-12 d-block text-center" [(ngModel)]="dlugoscTemp" name="dlugoscTemp" (ngModelChange)="updateDlugosc($event)">
+              <label class="input-group-text col-12 d-block text-center">
+                Długość
+              </label>
+              <input
+                class="form-control col-12 d-block text-center"
+                [(ngModel)]="dlugoscTemp"
+                name="dlugoscTemp"
+                (ngModelChange)="updateDlugosc($event)"
+              />
             </div>
           </div>
-        </div> 
+        </div>
       </div>
-      <div class="text-center mt-5" [hidden]="this.zakladkaWizualizacja!='parametry'">
-        <b *ngIf="!this.strojenie.get('MIMO.plik')?.value||this.strojenie.get('parRegulator.typ')?.value=='dmc'">Ustaw proszę wybrane wartości strojenia regulatora:</b>
-        <b *ngIf="this.strojenie.get('MIMO.plik')?.value&&this.strojenie.get('parRegulator.typ')?.value=='pid'">Ustaw proszę wybrane wartości strojenia regulatorów:</b>
+      <div
+        class="text-center mt-5"
+        [hidden]="this.zakladkaWizualizacja != 'parametry'"
+      >
+        <b
+          *ngIf="
+            !this.strojenie.get('MIMO.plik')?.value ||
+            this.strojenie.get('parRegulator.typ')?.value == 'dmc'
+          "
+          >Ustaw proszę wybrane wartości strojenia regulatora:</b
+        >
+        <b
+          *ngIf="
+            this.strojenie.get('MIMO.plik')?.value &&
+            this.strojenie.get('parRegulator.typ')?.value == 'pid'
+          "
+          >Ustaw proszę wybrane wartości strojenia regulatorów:</b
+        >
         <div *ngIf="strojenieTemp">
-          <div *ngIf="this.strojenie.get('MIMO.liczbaWyjsc')?.value==1 && this.strojenie.get('MIMO.liczbaWejsc')?.value==1">
-            <div *ngIf="this.strojenie.get('parRegulator.typ')?.value=='dmc'">
-              <div *ngFor="let y of liczbaWejscArray; let i = index" class="mx-auto" >
-                <div class="form-row align-items-center mb-3" style="margin-left: 20%; margin-right: 20%;">
-                  <div class="input-group col align-items-center" >
-                    <label class="input-group-text d-block text-center"> Lambda </label>
-                    <input class="form-control d-block text-center" [(ngModel)]="strojenieTemp[i]" 
-                    name="strojenieTemp" (ngModelChange)="onStrojenieChange(i, $event)" [disabled]="isDisabled(i)">
+          <div
+            *ngIf="
+              this.strojenie.get('MIMO.liczbaWyjsc')?.value == 1 &&
+              this.strojenie.get('MIMO.liczbaWejsc')?.value == 1
+            "
+          >
+            <div *ngIf="this.strojenie.get('parRegulator.typ')?.value == 'dmc'">
+              <div
+                *ngFor="let y of liczbaWejscArray; let i = index"
+                class="mx-auto"
+              >
+                <div
+                  class="form-row align-items-center mb-3"
+                  style="margin-left: 20%; margin-right: 20%"
+                >
+                  <div class="input-group col align-items-center">
                     <label class="input-group-text d-block text-center">
-                      <input type="checkbox" (change)="onCheckboxChange(i, $event)" [defaultChecked]="true">
+                      Lambda
+                    </label>
+                    <input
+                      class="form-control d-block text-center"
+                      [(ngModel)]="strojenieTemp[i]"
+                      name="strojenieTemp"
+                      (ngModelChange)="onStrojenieChange(i, $event)"
+                      [disabled]="isDisabled(i)"
+                    />
+                    <label class="input-group-text d-block text-center">
+                      <input
+                        type="checkbox"
+                        (change)="onCheckboxChange(i, $event)"
+                        [defaultChecked]="true"
+                      />
                     </label>
                   </div>
                 </div>
               </div>
             </div>
-            <div *ngIf="this.strojenie.get('parRegulator.typ')?.value=='pid'">
-              <div *ngIf="this.strojenie.controls.MIMO.controls.liczbaWyjsc.value">
-                <div *ngFor="let y of liczbaWyjscArray; let i = index" class="mx-auto" >
-                    <div class="form-row align-items-center mb-3" style="margin-left: 20%; margin-right: 20%;">
-                      <div class="input-group col align-items-center" >
-                        <label class="input-group-text d-block text-center" > P  </label>
-                        <input class="form-control d-block text-center" [(ngModel)]="strojenieTemp[0]" 
-                        name="strojenieTemp1" (ngModelChange)="onStrojenieChange(0, $event)" [disabled]="isDisabled(0)">
-                        <label class="input-group-text d-block text-center">
-                          <input type="checkbox" (change)="onCheckboxChange(0, $event)" [checked]="!isDisabled(0)">
-                        </label>
-                        <label class="input-group-text d-block text-center" > I  </label>
-                        <input class="form-control d-block text-center" [(ngModel)]="strojenieTemp[1]" 
-                        name="strojenieTemp2" (ngModelChange)="onStrojenieChange(1, $event)" [disabled]="isDisabled(1)">
-                        <label class="input-group-text d-block text-center">
-                          <input type="checkbox" (change)="onCheckboxChange(1, $event)" [checked]="!isDisabled(1)">
-                        </label>
-                        <label class="input-group-text d-block text-center"> D  </label>
-                        <input class="form-control d-block text-center" [(ngModel)]="strojenieTemp[2]"
-                        name="strojenieTemp3" (ngModelChange)="onStrojenieChange(2, $event)" [disabled]="isDisabled(2)">
-                        <label class="input-group-text d-block text-center">
-                          <input type="checkbox" (change)="onCheckboxChange(2, $event)" [checked]="!isDisabled(2)">
-                        </label>
-                      </div>
+            <div *ngIf="this.strojenie.get('parRegulator.typ')?.value == 'pid'">
+              <div
+                *ngIf="this.strojenie.controls.MIMO.controls.liczbaWyjsc.value"
+              >
+                <div
+                  *ngFor="let y of liczbaWyjscArray; let i = index"
+                  class="mx-auto"
+                >
+                  <div
+                    class="form-row align-items-center mb-3"
+                    style="margin-left: 20%; margin-right: 20%"
+                  >
+                    <div class="input-group col align-items-center">
+                      <label class="input-group-text d-block text-center">
+                        P
+                      </label>
+                      <input
+                        class="form-control d-block text-center"
+                        [(ngModel)]="strojenieTemp[0]"
+                        name="strojenieTemp1"
+                        (ngModelChange)="onStrojenieChange(0, $event)"
+                        [disabled]="isDisabled(0)"
+                      />
+                      <label class="input-group-text d-block text-center">
+                        <input
+                          type="checkbox"
+                          (change)="onCheckboxChange(0, $event)"
+                          [checked]="!isDisabled(0)"
+                        />
+                      </label>
+                      <label class="input-group-text d-block text-center">
+                        I
+                      </label>
+                      <input
+                        class="form-control d-block text-center"
+                        [(ngModel)]="strojenieTemp[1]"
+                        name="strojenieTemp2"
+                        (ngModelChange)="onStrojenieChange(1, $event)"
+                        [disabled]="isDisabled(1)"
+                      />
+                      <label class="input-group-text d-block text-center">
+                        <input
+                          type="checkbox"
+                          (change)="onCheckboxChange(1, $event)"
+                          [checked]="!isDisabled(1)"
+                        />
+                      </label>
+                      <label class="input-group-text d-block text-center">
+                        D
+                      </label>
+                      <input
+                        class="form-control d-block text-center"
+                        [(ngModel)]="strojenieTemp[2]"
+                        name="strojenieTemp3"
+                        (ngModelChange)="onStrojenieChange(2, $event)"
+                        [disabled]="isDisabled(2)"
+                      />
+                      <label class="input-group-text d-block text-center">
+                        <input
+                          type="checkbox"
+                          (change)="onCheckboxChange(2, $event)"
+                          [checked]="!isDisabled(2)"
+                        />
+                      </label>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
           </div>
-          <div *ngIf="this.strojenie.get('MIMO.liczbaWyjsc')?.value!=1 || this.strojenie.get('MIMO.liczbaWejsc')?.value!=1">
-            <div *ngIf="this.strojenie.get('parRegulator.typ')?.value=='dmc'">
-              <div *ngFor="let y of liczbaWejscArray; let i = index" class="mx-auto" style="margin-left: 20%; margin-right: 20%;">
+          <div
+            *ngIf="
+              this.strojenie.get('MIMO.liczbaWyjsc')?.value != 1 ||
+              this.strojenie.get('MIMO.liczbaWejsc')?.value != 1
+            "
+          >
+            <div *ngIf="this.strojenie.get('parRegulator.typ')?.value == 'dmc'">
+              <div
+                *ngFor="let y of liczbaWejscArray; let i = index"
+                class="mx-auto"
+                style="margin-left: 20%; margin-right: 20%"
+              >
                 <div class="form-row align-items-center mb-3">
-                  <div class="input-group col align-items-center" >
-                    <label class="input-group-text d-block text-center col-12"> Lambda {{i+1}} </label>
-                    <input class="form-control d-block text-center col-12" [(ngModel)]="strojenieTemp[i]" 
-                    name="strojenieTemp{{i}}" (ngModelChange)="onStrojenieChange(i, $event)" [disabled]="isDisabled(i)">
+                  <div class="input-group col align-items-center">
+                    <label class="input-group-text d-block text-center col-12">
+                      Lambda {{ i + 1 }}
+                    </label>
+                    <input
+                      class="form-control d-block text-center col-12"
+                      [(ngModel)]="strojenieTemp[i]"
+                      name="strojenieTemp{{ i }}"
+                      (ngModelChange)="onStrojenieChange(i, $event)"
+                      [disabled]="isDisabled(i)"
+                    />
                     <label class="input-group-text d-block text-center">
-                      <input type="checkbox" (change)="onCheckboxChange(i, $event)" [checked]="!isDisabled(i)">
+                      <input
+                        type="checkbox"
+                        (change)="onCheckboxChange(i, $event)"
+                        [checked]="!isDisabled(i)"
+                      />
                     </label>
                   </div>
                 </div>
               </div>
             </div>
-            <div *ngIf="this.strojenie.get('parRegulator.typ')?.value=='pid'">
-              <div *ngIf="this.strojenie.controls.MIMO.controls.liczbaWyjsc.value">
-                <div *ngFor="let y of liczbaWyjscArray; let i = index" class="mx-auto" style="margin-left: 20%; margin-right: 20%;">
-                  <b>Wartości strojenia regulatora podłączonego do wyjścia {{i+1}}</b>
+            <div *ngIf="this.strojenie.get('parRegulator.typ')?.value == 'pid'">
+              <div
+                *ngIf="this.strojenie.controls.MIMO.controls.liczbaWyjsc.value"
+              >
+                <div
+                  *ngFor="let y of liczbaWyjscArray; let i = index"
+                  class="mx-auto"
+                  style="margin-left: 20%; margin-right: 20%"
+                >
+                  <b
+                    >Wartości strojenia regulatora podłączonego do wyjścia
+                    {{ i + 1 }}</b
+                  >
                   <div class="form-row align-items-center mb-3">
-                    <div class="input-group col-2 align-items-center" >
-                      <label class="input-group-text d-block text-center" > P </label>
-                      <input class="form-control d-block text-center" [(ngModel)]="strojenieTemp[i*3]"
-                      name="strojenieTemp{{i*3}}" (ngModelChange)="onStrojenieChange(i*3, $event)" [disabled]="isDisabled(i*3)">
+                    <div class="input-group col-2 align-items-center">
                       <label class="input-group-text d-block text-center">
-                        <input type="checkbox" (change)="onCheckboxChange(i*3, $event)" [checked]="!isDisabled(i*3)">
+                        P
                       </label>
-                      <label class="input-group-text d-block text-center" > I </label>
-                      <input class="form-control d-block text-center" [(ngModel)]="strojenieTemp[i*3+1]"
-                      name="strojenieTemp{{i*3+1}}" (ngModelChange)="onStrojenieChange(i*3+1, $event)" [disabled]="isDisabled(i*3+1)">
+                      <input
+                        class="form-control d-block text-center"
+                        [(ngModel)]="strojenieTemp[i * 3]"
+                        name="strojenieTemp{{ i * 3 }}"
+                        (ngModelChange)="onStrojenieChange(i * 3, $event)"
+                        [disabled]="isDisabled(i * 3)"
+                      />
                       <label class="input-group-text d-block text-center">
-                        <input type="checkbox" (change)="onCheckboxChange(i*3+1, $event)" [checked]="!isDisabled(i*3+1)">
+                        <input
+                          type="checkbox"
+                          (change)="onCheckboxChange(i * 3, $event)"
+                          [checked]="!isDisabled(i * 3)"
+                        />
                       </label>
-                      <label class="input-group-text d-block text-center"> D </label>
-                      <input class="form-control d-block text-center" [(ngModel)]="strojenieTemp[i*3+2]"
-                      name="strojenieTemp{{i*3+2}}" (ngModelChange)="onStrojenieChange(i*3+2, $event)" [disabled]="isDisabled(i*3+2)">
                       <label class="input-group-text d-block text-center">
-                        <input type="checkbox" (change)="onCheckboxChange(i*3+2, $event)" [checked]="!isDisabled(i*3+2)">
+                        I
+                      </label>
+                      <input
+                        class="form-control d-block text-center"
+                        [(ngModel)]="strojenieTemp[i * 3 + 1]"
+                        name="strojenieTemp{{ i * 3 + 1 }}"
+                        (ngModelChange)="onStrojenieChange(i * 3 + 1, $event)"
+                        [disabled]="isDisabled(i * 3 + 1)"
+                      />
+                      <label class="input-group-text d-block text-center">
+                        <input
+                          type="checkbox"
+                          (change)="onCheckboxChange(i * 3 + 1, $event)"
+                          [checked]="!isDisabled(i * 3 + 1)"
+                        />
+                      </label>
+                      <label class="input-group-text d-block text-center">
+                        D
+                      </label>
+                      <input
+                        class="form-control d-block text-center"
+                        [(ngModel)]="strojenieTemp[i * 3 + 2]"
+                        name="strojenieTemp{{ i * 3 + 2 }}"
+                        (ngModelChange)="onStrojenieChange(i * 3 + 2, $event)"
+                        [disabled]="isDisabled(i * 3 + 2)"
+                      />
+                      <label class="input-group-text d-block text-center">
+                        <input
+                          type="checkbox"
+                          (change)="onCheckboxChange(i * 3 + 2, $event)"
+                          [checked]="!isDisabled(i * 3 + 2)"
+                        />
                       </label>
                     </div>
                   </div>
@@ -270,74 +490,254 @@
             </div>
           </div>
         </div>
+        <div
+          *ngIf="
+            !this.strojenie.get('MIMO.plik')?.value &&
+            this.strojenie.get('MIMO.liczbaWejsc')?.value == 1 &&
+            this.strojenie.get('MIMO.liczbaWyjsc')?.value == 1
+          "
+        >
+          <div
+            class="form-row align-items-center mb-3 justify-content-center"
+            style="margin-left: 20%; margin-right: 20%; display: flex"
+          >
+            <label class="input-group-text d-block text-center">
+              Czy chcesz wybrać inny obiekt symulacji niż regulowany obiekt?
+            </label>
+            <label class="input-group-text d-block text-center">
+              <input
+                type="checkbox"
+                (change)="obiektSymulacjiInputs()"
+                [checked]="czyInnyObiekt"
+              />
+            </label>
+          </div>
+          <div>
+            {{ rownanie }}
+            <h5 class="mt-5">Wprowadź wartości transmitancji:</h5>
+            <div class="container ml-0 mr-0 mx-auto">
+              <div class="form-group mb-3" [formGroup]="strojenie">
+                <div
+                  class="form-row align-items-center"
+                  formGroupName="parObiektSymulacji"
+                >
+                  <div class="input-group col">
+                    <label class="input-group-text"> Gain &nbsp; </label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      formControlName="gain"
+                      [disabled]="czyInnyObiekt"
+                    />
+                    <label class="input-group-text">R1</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      formControlName="r1"
+                      [disabled]="czyInnyObiekt"
+                    />
+                    <label class="input-group-text">Q1</label>
+                    <select
+                      class="form-control"
+                      formControlName="q1"
+                      [disabled]="czyInnyObiekt"
+                    >
+                      <option *ngFor="let option of optionsQ" [value]="option">
+                        {{ option }}
+                      </option>
+                    </select>
+                    <label class="input-group-text">R2</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      formControlName="r2"
+                      [disabled]="czyInnyObiekt"
+                    />
+                    <label class="input-group-text">Q2</label>
+                    <select
+                      class="form-control"
+                      formControlName="q2"
+                      [disabled]="czyInnyObiekt"
+                    >
+                      <option *ngFor="let option of optionsQ" [value]="option">
+                        {{ option }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="input-group col-3">
+                    <label class="input-group-text">{{
+                      zmienne[5].nazwa
+                    }}</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      formControlName="t1"
+                      [disabled]="czyInnyObiekt"
+                    />
+                    <label class="input-group-text">{{
+                      zmienne[6].nazwa
+                    }}</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      formControlName="t2"
+                      [disabled]="czyInnyObiekt"
+                    />
+                    <label class="input-group-text">{{
+                      zmienne[7].nazwa
+                    }}</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      formControlName="t3"
+                      [disabled]="czyInnyObiekt"
+                    />
+                    <label class="input-group-text">{{
+                      zmienne[8]!.nazwa
+                    }}</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      formControlName="delay"
+                      [disabled]="czyInnyObiekt"
+                    />
+                    <label class="input-group-text">{{
+                      zmienne[9]!.nazwa
+                    }}</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      formControlName="tp"
+                      [disabled]="czyInnyObiekt"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="mt-5" [hidden]="(this.zakladkaWizualizacja!='przebieg'&& this.zakladkaWizualizacja!='parametry')">
+      <div
+        class="mt-5"
+        [hidden]="
+          this.zakladkaWizualizacja != 'przebieg' &&
+          this.zakladkaWizualizacja != 'parametry'
+        "
+      >
         <button class="btn btn-success" type="submit">Dobierz Strojenie</button>
       </div>
     </div>
   </form>
-  <div class="odpowiedz" [hidden]="this.zakladkaWizualizacja!='odpowiedz' || zakladka!=='wizualizacja'">
-    <div class="text-center"><b>Wyznacz przebieg odpowiedzi skokowej na model:</b>
-      <div class="text-center mt-5 mx-auto" style="margin-left: 20%; margin-right: 20%;">
+  <div
+    class="odpowiedz"
+    [hidden]="
+      this.zakladkaWizualizacja != 'odpowiedz' || zakladka !== 'wizualizacja'
+    "
+  >
+    <div class="text-center">
+      <b>Wyznacz przebieg odpowiedzi skokowej na model:</b>
+      <div
+        class="text-center mt-5 mx-auto"
+        style="margin-left: 20%; margin-right: 20%"
+      >
         <b>Ustaw proszę długość przebiegu: </b>
         <div class="row mx-auto">
           <div class="col-2 mx-auto">
-            <label class="input-group-text col-12 d-block text-center"> Długość </label>
-            <input class="form-control col-12 d-block text-center" [(ngModel)]="dlugoscTemp" name="dlugoscTemp" (ngModelChange)="updateDlugosc($event)">
+            <label class="input-group-text col-12 d-block text-center">
+              Długość
+            </label>
+            <input
+              class="form-control col-12 d-block text-center"
+              [(ngModel)]="dlugoscTemp"
+              name="dlugoscTemp"
+              (ngModelChange)="updateDlugosc($event)"
+            />
           </div>
         </div>
       </div>
       <div class="mt-5">
-        <button class="btn btn-success" (click)="WyznaczOdpowiedz()">Wyznacz odpowiedź skokową</button>
+        <button class="btn btn-success" (click)="WyznaczOdpowiedz()">
+          Wyznacz odpowiedź skokową
+        </button>
       </div>
       <div class="odp-skokowa-wykres">
-        <canvas  id='odpSkokowaChart' [hidden]="zakladka!=='wizualizacja' || zakladkaWizualizacja!='odpowiedz' || czyLaduje">{{this.odpSkokowaChart}}</canvas>
+        <canvas
+          id="odpSkokowaChart"
+          [hidden]="
+            zakladka !== 'wizualizacja' ||
+            zakladkaWizualizacja != 'odpowiedz' ||
+            czyLaduje
+          "
+          >{{ this.odpSkokowaChart }}</canvas
+        >
       </div>
     </div>
   </div>
-  <div class="wykres-odp" *ngIf="odpowiedz" [hidden]="(this.zakladkaWizualizacja!='parametry' && this.zakladkaWizualizacja!='przebieg' )|| zakladka!='wizualizacja'">
-    <div *ngIf="liczbaRegulatorow" >
-      <div *ngIf="odpowiedz.typRegulatora=='pid'">
+  <div
+    class="wykres-odp"
+    *ngIf="odpowiedz"
+    [hidden]="
+      (this.zakladkaWizualizacja != 'parametry' &&
+        this.zakladkaWizualizacja != 'przebieg') ||
+      zakladka != 'wizualizacja'
+    "
+  >
+    <div *ngIf="liczbaRegulatorow">
+      <div *ngIf="odpowiedz.typRegulatora == 'pid'">
         <div *ngFor="let regulator of this.liczbaRegulatorow">
           <b>Wartości parametrów regulatora</b>
 
-          <p><b>P</b> = {{odpowiedz.wspolczynniki[regulator*3+0]}}</p>
-          <p><b>I</b> = {{odpowiedz.wspolczynniki[regulator*3+1]}}</p>
-          <p><b>D</b> = {{odpowiedz.wspolczynniki[regulator*3+2]}}</p>
+          <p><b>P</b> = {{ odpowiedz.wspolczynniki[regulator * 3 + 0] }}</p>
+          <p><b>I</b> = {{ odpowiedz.wspolczynniki[regulator * 3 + 1] }}</p>
+          <p><b>D</b> = {{ odpowiedz.wspolczynniki[regulator * 3 + 2] }}</p>
         </div>
       </div>
-      <div *ngIf="odpowiedz.typRegulatora=='dmc'">
+      <div *ngIf="odpowiedz.typRegulatora == 'dmc'">
         <b>Wartość Lambda:</b>
         <div *ngFor="let regulator of liczbaRegulatorow">
-        <p> <b>Lambda</b>= {{odpowiedz.wspolczynniki[regulator]}}</p>
+          <p><b>Lambda</b>= {{ odpowiedz.wspolczynniki[regulator] }}</p>
         </div>
       </div>
     </div>
   </div>
   <div class="wykres-odp">
     <div *ngIf="odpowiedzMIMO">
-      <div *ngIf="odpowiedzMIMO.typRegulatora=='pid'">
+      <div *ngIf="odpowiedzMIMO.typRegulatora == 'pid'">
         <div *ngFor="let regulator of this.liczbaRegulatorow">
-          <b>Wartości parametrów regulatora podłączonego do wyjścia {{regulator+1}}</b>
+          <b
+            >Wartości parametrów regulatora podłączonego do wyjścia
+            {{ regulator + 1 }}</b
+          >
 
-          <p><b>P</b> = {{odpowiedzMIMO.wspolczynniki[regulator*3+0]}}</p>
-          <p><b>I</b> = {{odpowiedzMIMO.wspolczynniki[regulator*3+1]}}</p>
-          <p><b>D</b> = {{odpowiedzMIMO.wspolczynniki[regulator*3+2]}}</p>
+          <p><b>P</b> = {{ odpowiedzMIMO.wspolczynniki[regulator * 3 + 0] }}</p>
+          <p><b>I</b> = {{ odpowiedzMIMO.wspolczynniki[regulator * 3 + 1] }}</p>
+          <p><b>D</b> = {{ odpowiedzMIMO.wspolczynniki[regulator * 3 + 2] }}</p>
         </div>
       </div>
-      <div *ngIf="odpowiedzMIMO.typRegulatora=='dmc'">
+      <div *ngIf="odpowiedzMIMO.typRegulatora == 'dmc'">
         <b>Wartości Lambda:</b>
         <div *ngFor="let regulator of this.liczbaRegulatorow">
-          <p><b>Lambda {{regulator+1}}</b> = {{odpowiedzMIMO.wspolczynniki[regulator]}}</p>
+          <p>
+            <b>Lambda {{ regulator + 1 }}</b> =
+            {{ odpowiedzMIMO.wspolczynniki[regulator] }}
+          </p>
         </div>
       </div>
     </div>
   </div>
-  <div class="text-center mt-5 mx-auto" [hidden]="zakladka!='wizualizacja' || (zakladkaWizualizacja!='przebieg' && zakladkaWizualizacja!='parametry') || czyLaduje" >
-    <div style="margin-left: 20%; margin-right: 20%;">
+  <div
+    class="text-center mt-5 mx-auto"
+    [hidden]="
+      zakladka != 'wizualizacja' ||
+      (zakladkaWizualizacja != 'przebieg' &&
+        zakladkaWizualizacja != 'parametry') ||
+      czyLaduje
+    "
+  >
+    <div style="margin-left: 20%; margin-right: 20%">
       <b *ngIf="odpowiedz">Przebieg symulacji regulowanego obiektu</b>
-      <canvas  id='myChart' >{{this.myChart}}</canvas>
-      <canvas id="sterowanieChart">{{this.sterowanieChart}}</canvas>
+      <canvas id="myChart">{{ this.myChart }}</canvas>
+      <canvas id="sterowanieChart">{{ this.sterowanieChart }}</canvas>
     </div>
   </div>
 </div>
