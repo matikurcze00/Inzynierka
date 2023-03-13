@@ -32,6 +32,7 @@ export class StrojenieService {
   public dobierzStrojenieMIMO(form: any): Observable<OdpowiedzMIMO> {
     const formData = new FormData();
     formData.append('file', form.controls.MIMO.controls['plik'].value);
+    formData.append('file', form.controls.MIMO.controls['plikWizualizacji'].value);
     formData.append('typ', form.controls.parRegulator.value.typ);
     formData.append('duMax', form.controls.parRegulator.value.duMax);
     formData.append('uMin', form.controls.parRegulator.value.uMin);

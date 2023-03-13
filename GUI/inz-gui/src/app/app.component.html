@@ -490,13 +490,6 @@
             </div>
           </div>
         </div>
-        <div
-          *ngIf="
-            !this.strojenie.get('MIMO.plik')?.value &&
-            this.strojenie.get('MIMO.liczbaWejsc')?.value == 1 &&
-            this.strojenie.get('MIMO.liczbaWyjsc')?.value == 1
-          "
-        >
           <div
             class="form-row align-items-center mb-3 justify-content-center"
             style="margin-left: 20%; margin-right: 20%; display: flex"
@@ -512,7 +505,11 @@
               />
             </label>
           </div>
-          <div>
+          <div *ngIf="
+          !this.strojenie.get('MIMO.plik')?.value &&
+          this.strojenie.get('MIMO.liczbaWejsc')?.value == 1 &&
+          this.strojenie.get('MIMO.liczbaWyjsc')?.value == 1
+        ">
             {{ rownanie }}
             <h5 class="mt-5">Wprowadź wartości transmitancji:</h5>
             <div class="container ml-0 mr-0 mx-auto">
@@ -615,7 +612,13 @@
               </div>
             </div>
           </div>
-        </div>
+          <div *ngIf="this.strojenie.get('MIMO.plik')?.value">
+            <h5 class="mt-5" [ngClass]="{'text-muted': !czyInnyObiekt}">Wprowadź plik przedstawiający obiekt symulacji:</h5>
+            <span class="p-3"  [ngClass]="{'text-muted': !czyInnyObiekt}">
+              {{ strojenie.get('MIMO.plikWizualizacji')?.value?.name ? 'Wybrany plik to: ' +fileWizualizacji!.name : 'Wybierz plik lub go tu przyciągnij i upuść ' }}</span>
+            <input class="file-input" type="file" #fileInput [disabled]="!czyInnyObiekt" (change)="onFileChange($event)">
+          </div>
+        
       </div>
       <div
         class="mt-5"

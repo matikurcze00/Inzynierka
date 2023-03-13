@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component , ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { Chart, registerables  } from 'chart.js';
 import { Odpowiedz } from './model/odpowiedz';
@@ -18,8 +18,14 @@ import { HttpErrorResponse } from '@angular/common/http';
 
 export class AppComponent {
   zakladka = "model"
-  constructor(private strojenieService: StrojenieService, private odpowiedzSkokowaService: OdpowiedzSkokowaService) 
-  {Chart.register(...registerables)}
+  @ViewChild('fileInput') fileInput: ElementRef<HTMLInputElement>;
+  
+  constructor(private strojenieService: StrojenieService, private odpowiedzSkokowaService: OdpowiedzSkokowaService,
+     private cdRef: ChangeDetectorRef) 
+  {Chart.register(...registerables);
+    this.fileInput = new ElementRef(document.createElement('input'));
+  this.fileInput.nativeElement.type = 'file';
+  this.fileInput.nativeElement.style.display = 'none';}
   odpowiedz?: Odpowiedz|null;
   OdpowiedzSkokowa?: OdpowiedzSkokowa|null;
   odpowiedzMIMO?: OdpowiedzMIMO|null;
@@ -28,6 +34,7 @@ export class AppComponent {
   sterowanieChart?: any;
   liczbaRegulatorow?: any;
   file: File | null = null;
+  fileWizualizacji: File | null = null;
   primaryXAxis = {valueType: 'krok'}
   title = 'Symulacje obiektu regulowanego'
   rownanie = " $ \\large G(s) = Gain * \\frac{(R1*s + Q1)(R2*s + Q2)}{(T1*s+1)(T2*s+1)(T3+3)}*e^{Delay}$  ";
@@ -60,7 +67,8 @@ export class AppComponent {
     MIMO: new FormGroup({
           plik: new FormControl(this.file),
           liczbaWejsc: new FormControl(1),
-          liczbaWyjsc: new FormControl(1)
+          liczbaWyjsc: new FormControl(1),
+          plikWizualizacji: new FormControl(this.fileWizualizacji)
         }),
     parRegulator: new FormGroup({
       typ: new FormControl(),
@@ -106,45 +114,49 @@ export class AppComponent {
     errorInfo = "Wystapil blad";
     czyInnyObiekt = false;
     updateObiekt(updatedObiekt: FormArray) {
-    console.log("updateObiekt")
-    console.log(updatedObiekt)
-    if(updatedObiekt.controls['0']!=undefined){
-        this.strojenie.controls.parObiekt.patchValue(updatedObiekt.controls['0'].value)
-        this.strojenie.controls.MIMO.patchValue(updatedObiekt.controls['1'].value)
-        this.file=updatedObiekt.controls['1'].value;
-        if(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value != this.liczbaWyjscArray.length ||
-          this.strojenie.controls.MIMO.controls.liczbaWejsc.value!=this.liczbaWejsc
-          )
-        {
-          if(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value!=null)
-            this.liczbaWejsc = this.strojenie.controls.MIMO.controls.liczbaWejsc.value;
-          console.log("wchodzi")
-          console.log(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value)
-          console.log(this.strojenie.controls.MIMO.controls.liczbaWejsc.value)
-
-          this.strojenie.controls.parWizualizacja.controls.yZad.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value).fill(0) as number[]); 
-          this.strojenie.controls.parWizualizacja.controls.yPP.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value).fill(0) as number[]); 
-          this.strojenie.controls.parWizualizacja.controls.uPP.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWejsc.value).fill(0) as number[]); 
-          this.strojenie.controls.parWizualizacja.controls.skok.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value).fill(0) as number[]); 
-          
-          this.yZadTemp = this.strojenie.get('parWizualizacja.yZad')?.value;
-          this.yPPTemp = this.strojenie.get('parWizualizacja.yPP')?.value;
-          this.uPPTemp = this.strojenie.get('parWizualizacja.uPP')?.value;
-          this.skokTemp = this.strojenie.get('parWizualizacja.skok')?.value;
-
-          if(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value && this.strojenie.controls.MIMO.controls.liczbaWejsc.value )
+      console.log("updateObiekt")
+      console.log(updatedObiekt)
+      if(updatedObiekt.controls['0']!=undefined){
+          this.strojenie.controls.parObiekt.patchValue(updatedObiekt.controls['0'].value)
+          this.strojenie.controls.MIMO.patchValue(updatedObiekt.controls['1'].value)
+          this.file=updatedObiekt.controls['1'].value;
+          if(this.file==null)
           {
-            console.log("wchodzi")
-            if(this.strojenie.controls.parRegulator.controls.typ.value=='pid')
-              this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value*3).fill(null));
-            else
-              this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWejsc.value).fill(null));
-            console.log(this.strojenie.controls.MIMO.controls.liczbaWejsc.value)
-            this.strojenieTemp = this.strojenie.get('parWizualizacja.strojenie')?.value;
-            this.liczbaWyjscArray = Array.from({length:this.strojenie.controls.MIMO.controls.liczbaWyjsc.value}, (_,i) => i);
-            this.liczbaWejscArray = Array.from({length:this.strojenie.controls.MIMO.controls.liczbaWejsc.value}, (_,i) => i);
+            this.fileWizualizacji = null
           }
-        }      
+          if(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value != this.liczbaWyjscArray.length ||
+            this.strojenie.controls.MIMO.controls.liczbaWejsc.value!=this.liczbaWejsc
+            )
+          {
+            if(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value!=null)
+              this.liczbaWejsc = this.strojenie.controls.MIMO.controls.liczbaWejsc.value;
+            console.log("wchodzi")
+            console.log(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value)
+            console.log(this.strojenie.controls.MIMO.controls.liczbaWejsc.value)
+
+            this.strojenie.controls.parWizualizacja.controls.yZad.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value).fill(0) as number[]); 
+            this.strojenie.controls.parWizualizacja.controls.yPP.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value).fill(0) as number[]); 
+            this.strojenie.controls.parWizualizacja.controls.uPP.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWejsc.value).fill(0) as number[]); 
+            this.strojenie.controls.parWizualizacja.controls.skok.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value).fill(0) as number[]); 
+            
+            this.yZadTemp = this.strojenie.get('parWizualizacja.yZad')?.value;
+            this.yPPTemp = this.strojenie.get('parWizualizacja.yPP')?.value;
+            this.uPPTemp = this.strojenie.get('parWizualizacja.uPP')?.value;
+            this.skokTemp = this.strojenie.get('parWizualizacja.skok')?.value;
+
+            if(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value && this.strojenie.controls.MIMO.controls.liczbaWejsc.value )
+            {
+              console.log("wchodzi")
+              if(this.strojenie.controls.parRegulator.controls.typ.value=='pid')
+                this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWejsc.value*3).fill(null));
+              else
+                this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWejsc.value).fill(null));
+              console.log(this.strojenie.controls.MIMO.controls.liczbaWejsc.value)
+              this.strojenieTemp = this.strojenie.get('parWizualizacja.strojenie')?.value;
+              this.liczbaWyjscArray = Array.from({length:this.strojenie.controls.MIMO.controls.liczbaWyjsc.value}, (_,i) => i);
+              this.liczbaWejscArray = Array.from({length:this.strojenie.controls.MIMO.controls.liczbaWejsc.value}, (_,i) => i);
+            }
+          }      
         console.log(this.strojenie.controls.parWizualizacja)
       }
   }
@@ -152,14 +164,14 @@ export class AppComponent {
     if(updatedRegulator.controls['0']!=undefined){
       this.strojenie.controls.parRegulator.patchValue(updatedRegulator.controls['0'].value)
 
-      if(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value)
+      if(this.strojenie.controls.MIMO.controls.liczbaWejsc.value)
       {
         if(this.strojenie.controls.parRegulator.controls.typ.value!=this.typRegulatora)
         {
           this.typRegulatora=this.strojenie.controls.parRegulator.controls.typ.value
           if(this.typRegulatora=='pid')
           {  
-            this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value*3).fill(null));
+            this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWejsc.value*3).fill(null));
           }else{
             this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(new Array(this.strojenie.controls.MIMO.controls.liczbaWejsc.value).fill(null));
           }
@@ -216,6 +228,7 @@ export class AppComponent {
   updateDlugosc(value: number) {
     this.strojenie.get('parWizualizacja.dlugosc')!.setValue(value);
   }
+
   onSubmit(){
     console.log("click")
     console.log(this.strojenie.controls.parWizualizacja)
@@ -542,22 +555,33 @@ export class AppComponent {
     else
       return true;
   }
+  onFileChange(event: any) {
+    const file = event.target.files[0];
+    this.fileWizualizacji = file;
+    this.strojenie.get('MIMO.plikWizualizacji')?.patchValue(file);
+    this.cdRef.detectChanges();
+  }
   obiektSymulacjiInputs() {
     if(this.czyInnyObiekt)
     {
       this.strojenie.get('parObiektSymulacji')?.reset();
       this.strojenie.get('parObiektSymulacji')?.disable();
-      this.czyInnyObiekt = !this.czyInnyObiekt
+      this.fileWizualizacji=null;
+      this.strojenie.get('MIMO.plikWizualizacji')!.reset();
+      this.fileInput.nativeElement.value = '';
     }
     else
     {
       this.strojenie.get('parObiektSymulacji')?.enable();
       this.strojenie.get('parObiektSymulacji')?.patchValue(this.strojenie.get('parObiekt')!.value);
-      this.czyInnyObiekt = !this.czyInnyObiekt
     }
+    this.czyInnyObiekt = !this.czyInnyObiekt
     
   }
   ngOnInit(): void {
     this.strojenie.get('parObiektSymulacji')?.disable();
+  }
+  ngAfterViewInit() {
+    this.cdRef.detectChanges();
   }
 }
