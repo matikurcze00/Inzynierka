@@ -11,12 +11,12 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertArrayEquals;
 
-public class DMCTest {
+public class DMCAnalitycznyTest {
 
     @Test
     public void SISOTest() {
         SISO siso = new SISO(10.0, 1.0, 1, 1.0, 0, 1.0, 1.0, 0.0, 0, 1, 100.0, -100.0, "srednio");
-        Regulator regulator = new DMC(4, 0.1, siso, siso.getYMax() / 2, 3.0, 11);;
+        Regulator regulator = new DMCAnalityczny(4, 0.1, siso, siso.getYMax() / 2, 3.0, 11);;
         regulator.setCel(new double[]{30.0});
         assert(regulator.getCel()[0]==30.0);
         double tempY = siso.obliczKrok(regulator.policzOutput(siso.getAktualna()));
@@ -38,7 +38,7 @@ public class DMCTest {
         MIMO obiekt  = new MIMO(Obiekty, "srednio");
         double[] tempLambda = {0.5,0.5};
         Double[] tempStrojenie = new Double[]{1.0, 1.0};
-        Regulator regulator = new DMC(5, tempLambda, obiekt, obiekt.getYMax(), 3.0, 11, tempStrojenie);
+        Regulator regulator = new DMCAnalityczny(5, tempLambda, obiekt, obiekt.getYMax(), 3.0, 11, tempStrojenie);
         double[] tempCel = {30.0, 30.0};
         regulator.setCel(tempCel);
         assert(regulator.getCel()[0]==30.0);

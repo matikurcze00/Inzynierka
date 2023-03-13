@@ -4,7 +4,7 @@ import com.example.inzynierka.EA.AlgorytmEwolucyjny;
 import com.example.inzynierka.modele.*;
 import com.example.inzynierka.obiekty.MIMO;
 import com.example.inzynierka.obiekty.SISO;
-import com.example.inzynierka.regulatory.DMC;
+import com.example.inzynierka.regulatory.DMCAnalityczny;
 import com.example.inzynierka.regulatory.PID;
 import com.example.inzynierka.regulatory.Regulator;
 import com.example.inzynierka.regulatory.ZbiorPID;
@@ -92,7 +92,7 @@ public class StrojenieService {
             PIE[1] = 40;
             PIE[2] = 10;
         } else if (parRegulator.getTyp().equals("dmc")) {
-            regulator = new DMC(4, 0.1, obiekt, obiekt.getYMax() / 2, parRegulator.getDuMax(), 11, parWizualizacja.getStrojenie());
+            regulator = new DMCAnalityczny(4, 0.1, obiekt, obiekt.getYMax() / 2, parRegulator.getDuMax(), 11, parWizualizacja.getStrojenie());
             PIE[0] = 100;
             PIE[1] = 20;
             PIE[2] = 3;
@@ -206,7 +206,7 @@ public class StrojenieService {
             double[] tempLambda = new double[obiekt.getLiczbaIN()];
             for (int i = 0; i < obiekt.getLiczbaIN(); i++)
                 tempLambda[i] = 0.5;
-            regulator = new DMC(5, tempLambda, obiekt, obiekt.getYMax(), parRegulator.getDuMax(), 11, parWizualizacja.getStrojenie());
+            regulator = new DMCAnalityczny(5, tempLambda, obiekt, obiekt.getYMax(), parRegulator.getDuMax(), 11, parWizualizacja.getStrojenie());
             PIE[0] = 40;
             PIE[1] = 20;
             PIE[2] = 1;

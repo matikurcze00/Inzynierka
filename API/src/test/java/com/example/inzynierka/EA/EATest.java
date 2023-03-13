@@ -3,7 +3,7 @@ package com.example.inzynierka.EA;
 import com.example.inzynierka.modele.ParObiektMIMO;
 import com.example.inzynierka.obiekty.MIMO;
 import com.example.inzynierka.obiekty.SISO;
-import com.example.inzynierka.regulatory.DMC;
+import com.example.inzynierka.regulatory.DMCAnalityczny;
 import com.example.inzynierka.regulatory.PID;
 import com.example.inzynierka.regulatory.Regulator;
 import com.example.inzynierka.regulatory.ZbiorPID;
@@ -39,7 +39,7 @@ public class EATest {
     public void DMCSisoTest()
     {
         SISO siso = new SISO(10.0, 1.0, 1, 1.0, 0, 1.0, 1.0, 0.0, 0, 1, 100.0, -100.0, "srednio");
-        Regulator regulator = new DMC(4, 0.1, siso, siso.getYMax() / 2, 3.0, 11);;
+        Regulator regulator = new DMCAnalityczny(4, 0.1, siso, siso.getYMax() / 2, 3.0, 11);;
         int populacja = 100;
         int iteracja = 20;
         int elita = 3;
@@ -87,7 +87,7 @@ public class EATest {
         MIMO obiekt  = new MIMO(Obiekty, "srednio");
         double[] tempLambda = {0.5,0.5};
         Double[] tempStrojenie = new Double[]{1.0, null};
-        Regulator regulator = new DMC(5, tempLambda, obiekt, obiekt.getYMax(), 3.0, 11, tempStrojenie);
+        Regulator regulator = new DMCAnalityczny(5, tempLambda, obiekt, obiekt.getYMax(), 3.0, 11, tempStrojenie);
         int populacja = 100;
         int iteracja = 20;
         int elita = 3;

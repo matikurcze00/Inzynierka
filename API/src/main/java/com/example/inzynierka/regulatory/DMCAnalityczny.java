@@ -10,22 +10,25 @@ import java.util.Arrays;
 import java.util.List;
 
 @Data
-public class DMC extends Regulator {
-    private Integer D;
-    private Integer N;
-    private Integer Nu;
-    private List<Double> Lambda;
-    private Matrix Mp;
+public class DMCAnalityczny extends Regulator {
+    protected Integer D;
+    protected Integer N;
+    protected Integer Nu;
+    protected List<Double> Lambda;
+    protected Matrix Mp;
     private Matrix K;
-    private List<List<Double>> S;
-    private Matrix dU;
-    private Matrix M;
-    private double duMax;
-    private double[] cel;
-    private Double[] strojenieZadane;
-    private int liczbaStrojeniaZadanego;
+    protected List<List<Double>> S;
+    protected Matrix dU;
+    protected Matrix M;
+    protected double duMax;
+    protected double[] cel;
+    protected Double[] strojenieZadane;
+    protected int liczbaStrojeniaZadanego;
 
-    public DMC(int Nu, double lambda, SISO SISO, double cel, double duMax, int N, Double[] strojenieZadane) {
+    public DMCAnalityczny() {
+    }
+
+    public DMCAnalityczny(int Nu, double lambda, SISO SISO, double cel, double duMax, int N, Double[] strojenieZadane) {
         this(Nu, lambda, SISO, cel, duMax, N);
         if (strojenieZadane[0] != null) {
             liczbaStrojeniaZadanego = 1;
@@ -35,7 +38,7 @@ public class DMC extends Regulator {
         }
     }
 
-    public DMC(int Nu, double lambda, SISO siso, double cel, double duMax, int N) {
+    public DMCAnalityczny(int Nu, double lambda, SISO siso, double cel, double duMax, int N) {
         this.Lambda = Arrays.asList(lambda);
         this.Nu = Nu;
         this.N = N;
@@ -45,7 +48,7 @@ public class DMC extends Regulator {
 
     }
 
-    public DMC(int Nu, double[] lambda, MIMO obiekt, double[] cel, double duMax, int N, Double[] strojenieZadane) {
+    public DMCAnalityczny(int Nu, double[] lambda, MIMO obiekt, double[] cel, double duMax, int N, Double[] strojenieZadane) {
         this(Nu, lambda, obiekt, cel, duMax, N);
         this.liczbaStrojeniaZadanego = 0;
         this.strojenieZadane = strojenieZadane;
@@ -58,7 +61,7 @@ public class DMC extends Regulator {
         this.policzWartosci(obiekt);
     }
 
-    public DMC(int Nu, double[] lambda, MIMO obiekt, double[] cel, double duMax, int N) {
+    public DMCAnalityczny(int Nu, double[] lambda, MIMO obiekt, double[] cel, double duMax, int N) {
         List<Double> tempLambda = new ArrayList();
         for (double wartosc : lambda) {
             tempLambda.add(wartosc);
@@ -72,62 +75,55 @@ public class DMC extends Regulator {
     }
 
     public double policzOutput(double aktualna) {
-
-        List<double[]> yZadTemp = new ArrayList<>(cel.length);
-        for (int i = 0; i < cel.length; i++) {
-            double[] tempCel = new double[N];
-            Arrays.fill(tempCel, cel[i]);
-            yZadTemp.add(tempCel);
-        }
-        Matrix yZad = new Matrix(cel.length, N);
-        for (int i = 0; i < cel.length; i++)
-            for (int j = 0; j < N; j++)
-                yZad.set(i, j, cel[i]);
+        Matrix yZad = ustawMatrixYZad();
         double[] yTemp = new double[N];
         Arrays.fill(yTemp, aktualna);
         Matrix y = new Matrix(yTemp, 1);
         Matrix Utemp = K.times(yZad.transpose().minus(y.transpose()).minus(Mp.times(dU.transpose())));
-        if (Utemp.get(0, 0) > duMax) {
-            Utemp.set(0, 0, duMax);
-        } else if (Utemp.get(0, 0) < -duMax) {
-            Utemp.set(0, 0, -duMax);
-        }
+        poprawaUTemp(Utemp, 0);
         dodajdU(Utemp.get(0, 0));
         return Utemp.get(0, 0);
     }
 
-    public double[] policzOutput(double[] aktualna) {
-        int OUT = cel.length; //TODO zaimplementowa
+    protected void poprawaUTemp(Matrix Utemp, int i) {
+        if (Utemp.get(i, 0) > duMax) {
+            Utemp.set(i, 0, duMax);
+        } else if (Utemp.get(i, 0) < -duMax) {
+            Utemp.set(i, 0, -duMax);
+        }
+    }
 
+    protected Matrix ustawMatrixYZad() {
+        Matrix yZad = new Matrix(cel.length, N);
+        for (int i = 0; i < cel.length; i++)
+            for (int j = 0; j < N; j++)
+                yZad.set(i, j, cel[i]);
+        return yZad;
+    }
+
+    public double[] policzOutput(double[] aktualna) {
+        int OUT = cel.length; //TODO zaimplementowac
         double[] celTemp = new double[N * OUT];
         for (int i = 0; i < N * OUT; i++) {
             celTemp[i] = cel[i % OUT];
         }
         Matrix yZad = new Matrix(celTemp, 1);
-
-
         double[] yTemp = new double[N * OUT];
         for (int i = 0; i < N * OUT; i++) {
             yTemp[i] = aktualna[i % OUT];
         }
         Matrix y = new Matrix(yTemp, 1);
-        //UTEMP wychodzi odwrócone
         Matrix Utemp = K.times(yZad.transpose().minus(y.transpose()).minus(Mp.times(dU.transpose())));
         double[] tempdU = new double[getLambda().size()];
         for (int i = 0; i < getLambda().size(); i++) {
-            //TODO DO POPRAWY
-            if (Utemp.get(i, 0) > duMax) {
-                Utemp.set(i, 0, duMax);
-            } else if (Utemp.get(i, 0) < -duMax) {
-                Utemp.set(i, 0, -duMax);
-            }
+            poprawaUTemp(Utemp, i);
             tempdU[i] = Utemp.get(i, 0);
         }
         dodajdU(tempdU);
         return tempdU;
     }
 
-    private void policzWartosci(SISO siso) {
+    protected void policzWartosci(SISO siso) {
         this.S = new ArrayList();
         policzS(siso);
         policzMp();
@@ -137,7 +133,7 @@ public class DMC extends Regulator {
         siso.resetObiektu();
     }
 
-    private void policzWartosci(MIMO mimo) {
+    protected void policzWartosci(MIMO mimo) {
         this.S = new ArrayList();
         policzS(mimo);
         policzMp(mimo.getLiczbaIN(), mimo.getLiczbaOUT());
@@ -179,7 +175,7 @@ public class DMC extends Regulator {
         dU = new Matrix(1, (D - 1) * IN, 0.0);
     }
 
-    private void policzS(SISO SISO) {
+    protected void policzS(SISO SISO) {
         double U = SISO.getUMax() / 2;
         int i = 2;
         List<Double> Stemp = new ArrayList<Double>();
@@ -197,7 +193,7 @@ public class DMC extends Regulator {
 
     }
 
-    private void policzS(MIMO obiekt) {
+    protected void policzS(MIMO obiekt) {
         for (int i = 0; i < obiekt.getLiczbaOUT(); i++) {
             for (int j = 0; j < obiekt.getLiczbaIN(); j++) {
                 obiekt.resetObiektu();
@@ -228,7 +224,7 @@ public class DMC extends Regulator {
         this.N = D;
     }
 
-    private void policzM() {
+    protected void policzM() {
         Matrix M = new Matrix(N, Nu);
         for (int i = 0; i < Nu; i++) {
             for (int j = 0; j < N; j++) {
@@ -241,7 +237,7 @@ public class DMC extends Regulator {
         this.M = M;
     }
 
-    private void policzM(int IN, int OUT) {
+    protected void policzM(int IN, int OUT) {
         Matrix M = new Matrix(N * OUT, Nu * IN);
         for (int i = 0; i < Nu; i++) {
             for (int j = 0; j < N; j++) {
@@ -254,7 +250,7 @@ public class DMC extends Regulator {
         this.M = M;
     }
 
-    private void policzMp() {
+    protected void policzMp() {
         Mp = new Matrix(N, D - 1);
         for (int i = 0; i < D - 1; i++) {
             for (int j = 0; j < N; j++) {
@@ -266,7 +262,7 @@ public class DMC extends Regulator {
         }
     }
 
-    private void policzMp(int IN, int OUT) {
+    protected void policzMp(int IN, int OUT) {
         Mp = new Matrix(N * OUT, (D - 1) * IN);
         for (int i = 0; i < D - 1; i++) {
             for (int j = 0; j < N; j++) {
@@ -310,14 +306,14 @@ public class DMC extends Regulator {
         this.K = ((M.transpose().times(M).plus(I)).inverse()).times(M.transpose());
     }
 
-    private void dodajdU(double dUAktualne) {
+    protected void dodajdU(double dUAktualne) {
         for (int i = D - 1; i > 1; i--) {
             dU.set(0, i - 1, dU.get(0, i - 2));
         }
         dU.set(0, 0, dUAktualne);
     }
 
-    private void dodajdU(double[] dUAktualne) {
+    protected void dodajdU(double[] dUAktualne) {
 
         for (int i = D - 1; i > 1; i--) {
             for (int j = dUAktualne.length - 1; j >= 0; j--)
