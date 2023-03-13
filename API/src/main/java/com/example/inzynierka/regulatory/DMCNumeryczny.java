@@ -42,9 +42,11 @@ public class DMCNumeryczny extends DMCAnalityczny{
         double[] yTemp = new double[N];
         Arrays.fill(yTemp, aktualna);
         Matrix y = new Matrix(yTemp, 1);
-        Matrix Utemp = K.times(yZad.transpose().minus(y.transpose()).minus(Mp.times(dU.transpose())));
-        poprawaUTemp(Utemp, 0);
-        dodajdU(Utemp.get(0, 0));
-        return Utemp.get(0, 0);
+        //TODO: zaimlementowac numeryczne obliczenia
+//        Matrix Utemp = K.times(yZad.transpose().minus(y.transpose()).minus(Mp.times(dU.transpose())));
+//        poprawaUTemp(Utemp, 0);
+//        dodajdU(Utemp.get(0, 0));
+//        return Utemp.get(0, 0);
+        return 0.0;
     }
 }

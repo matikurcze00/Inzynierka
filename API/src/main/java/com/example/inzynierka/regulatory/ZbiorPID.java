@@ -48,7 +48,7 @@ public class ZbiorPID extends Regulator {
     @Override
     public void setCel(double[] cel) {
         this.cel = cel;
-        for (int i = 0; i < cel.length; i++) {
+        for (int i = 0; i < PIDy.size(); i++) {
             PIDy.get(i).setCel(new double[]{cel[i]});
         }
     }

@@ -26,6 +26,25 @@ public class MIMO {
     public MIMO() {
     }
 
+    public MIMO(ParObiektMIMO[] parObiektMIMOS)
+    {
+        stworzTransmitancje(parObiektMIMOS);
+        liczbaOUT = transmitancja.get(0).size();
+        liczbaIN = transmitancja.size();
+        obliczDelayMax();
+        this.blad = "srednio";
+        obliczUMax(parObiektMIMOS);
+        this.Y = new ArrayList();
+        for (int i = 0; i < this.liczbaOUT; i++) {
+            Y.add(new ArrayList(Collections.nCopies(3, transmitancja.get(0).get(i).getYpp())));
+        }
+        this.U = new ArrayList();
+        for (int i = 0; i < this.liczbaIN; i++) {
+            U.add(new ArrayList(Collections.nCopies(3 + delayMax, transmitancja.get(i).get(0).getUpp())));
+        }
+        obliczDlugosc();
+        obliczYMax();
+    }
     public MIMO(ParObiektMIMO[] parObiektMIMOS, String blad) {
         stworzTransmitancje(parObiektMIMOS);
         liczbaOUT = transmitancja.get(0).size();
@@ -200,8 +219,8 @@ public class MIMO {
         double blad = 0.0;
         switch (this.blad) {
             case "mediana":
-                for (int i = 0; i < cel.length; i++)
-                    blad += wyjscie.get(0)[(int) Math.floor(dlugosc / cel.length)] - cel[i];
+                for (int i = 0; i < liczbaIN; i++)
+                    blad += wyjscie.get(0)[Math.floorDiv(dlugosc, 2)] - cel[i];
                 break;
             case "srednio":
                 for (int i = 0; i < dlugosc; i++)

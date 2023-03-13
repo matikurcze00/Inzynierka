@@ -139,7 +139,7 @@ public class StrojenieService {
         return tempStrojenie;
     }
 
-    public OdpowiedzStrojenieMIMO MIMOStrojenie(MultipartFile file, ParRegulator parRegulator, ParWizualizacja parWizualizacja) {
+    public OdpowiedzStrojenieMIMO MIMOStrojenie(MultipartFile[] file, ParRegulator parRegulator, ParWizualizacja parWizualizacja) {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode root;
         MIMO obiekt;
@@ -147,7 +147,7 @@ public class StrojenieService {
         Integer[] PIE = new Integer[3];
         OdpowiedzStrojenieMIMO odpowiedz = new OdpowiedzStrojenieMIMO();
         try {
-            root = objectMapper.readTree(file.getInputStream());
+            root = objectMapper.readTree(file[0].getInputStream());
             obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektMIMO[].class);
             obiekt = new MIMO(obiekty, parWizualizacja.getBlad());
         } catch (Exception ex) {
@@ -158,6 +158,16 @@ public class StrojenieService {
         if (regulator == null) return null;
         AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(PIE[0], PIE[1], PIE[2], 0.3, 0.4);
         dobierzStrojenieMIMO(parWizualizacja, obiekt, regulator, GA, odpowiedz);
+        if(file.length==2)
+        {
+            try {
+                root = objectMapper.readTree(file[1].getInputStream());
+                obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektMIMO[].class);
+                obiekt = new MIMO(obiekty, parWizualizacja.getBlad());
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
         double[][] Y = symulacjaRegulacjiMIMO(parWizualizacja, obiekt, regulator, odpowiedz);
         System.out.println("strojenie::OK");
         obliczBladMIMO(regulator, parWizualizacja.getDlugosc(), Y);

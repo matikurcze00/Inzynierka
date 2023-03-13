@@ -26,11 +26,14 @@
     </div>
   </div>
   <div class="mt-5" *ngIf="typ=='MIMO'">
-      <div class="form-row align-items-center mb-3" >
+    <div class="form-row align-items-center mb-3" >
 
         <span class="p-3">{{file ? 'Wybrany plik to: ' +file.name : 'Wybierz plik lub go tu przyciągnij i upuść ' }}</span>
         <input class="file-input" type="file">
-        <form [formGroup]="obiektForm" >
+        <div class="container ml-0 mr-0 mt-5 mx-auto">
+          <button class="btn btn-secondary" (click)="infoWejscieWyjscia()" [disabled]="this.obiektForm.get('obiekt.1.plik')?.value==null" type="button"> Wyślij obiekt </button>
+        </div>
+        <!-- <form [formGroup]="obiektForm" >
           <div class="container ml-0 mr-0 mx-auto">
             <div class="form-group mb-3" formArrayName="obiekt">
               <div class="form-row align-items-center" [formGroupName]="1">
@@ -43,8 +46,20 @@
               </div>
             </div>
           </div>
-        </form>
+        </form>  -->
+      <div *ngIf="this.obiektForm.get('obiekt.1.liczbaWejsc')?.value!=1||
+        this.obiektForm.get('obiekt.1.liczbaWyjsc')?.value!=1">
+        <h2>
+          <ul class="mt-5"style="list-style: none;">
+            <li><b>Liczba Wejsc:</b> {{this.obiektForm.get('obiekt.1.liczbaWejsc')?.value}}</li>
+            <li class="mt-2"><b>Liczba Wyjsc:</b> {{this.obiektForm.get('obiekt.1.liczbaWyjsc')?.value}}</li>
+          </ul>
+        </h2>
+       </div>
+      <div *ngIf="this.czyError" class="alert alert-danger" role="alert">
+        Obiekt jest zły
       </div>
+    </div>
   </div>
   <div class="mt-5" *ngIf="typ=='SISO'">
     {{pierwszeRownanie}}

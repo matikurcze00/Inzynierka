@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, EventEmitter, HostListener, OnInit, Output } from '@angular/core';
 import { ControlContainer, FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
+import { InfoService } from '../service/info.service';
 
 @Component({
   selector: 'app-obiekt-widok',
@@ -11,6 +12,7 @@ export class ObiektWidokComponent implements OnInit {
   file: File | null = null;
   typ='SISO'
   optionsQ = [-1, 0 ,1]
+  czyError = false;
   @Output() updateEvent = new EventEmitter<FormArray>()
   obiektForm = new FormGroup({
     obiekt: new FormArray([
@@ -56,10 +58,26 @@ export class ObiektWidokComponent implements OnInit {
             {id: 8, nazwa: "T3"},
             {id: 9, nazwa: "Delay"},
             {id: 10, nazwa: "Tp"}];
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private infoService:InfoService) { }
   resetMIMO(): void{
     this.obiektForm.get('obiekt')?.get([1])?.patchValue({ plik: null, liczbaWejsc: 1, liczbaWyjsc: 1 }); 
-    this.file=null
+    this.file=null;
+    this.czyError = false;
+  }
+  infoWejscieWyjscia(): void{
+    console.log("wchodze");
+    this.infoService.infoMIMOInOut(this.obiektForm.get('obiekt.1.plik')).subscribe({next: response =>{
+      this.czyError = false;
+      console.log("ok")
+      this.obiektForm.get('obiekt.1.liczbaWejsc')?.setValue(response.wejscia)
+      this.obiektForm.get('obiekt.1.liczbaWyjsc')?.setValue(response.wyjscia)
+    },
+    error: error => {
+      this.czyError = true;
+      this.obiektForm.get('obiekt')?.get([1])?.patchValue({ plik: null, liczbaWejsc: 1, liczbaWyjsc: 1 }); 
+      this.file=null
+    }})
+    
   }
   ngOnInit(): void {
     this.updateEvent.emit(this.obiektForm.controls.obiekt);

@@ -1,6 +1,7 @@
 package com.example.inzynierka.controller;
 
 import com.example.inzynierka.modele.*;
+import com.example.inzynierka.service.InfoService;
 import com.example.inzynierka.service.OdpowiedzService;
 import com.example.inzynierka.service.StrojenieService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +17,14 @@ public class Controller {
 
     private final StrojenieService strojenieService;
     private final OdpowiedzService odpowiedzService;
+    private final InfoService infoService;
 
     @Autowired
-    public Controller(StrojenieService strojenieService, OdpowiedzService odpowiedzService) {
+    public Controller(StrojenieService strojenieService, OdpowiedzService odpowiedzService,
+                      InfoService infoService) {
         this.strojenieService = strojenieService;
         this.odpowiedzService = odpowiedzService;
+        this.infoService = infoService;
     }
 
     @RequestMapping(value = "/strojenie/SISO", method = RequestMethod.POST)
@@ -36,10 +40,21 @@ public class Controller {
         }
 
     }
+    @RequestMapping(value = "/info/MIMO", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<OdpowiedzInfoMIMO> strojenieMIMO(@RequestPart("file") MultipartFile file) {
+        System.out.println("infoMIMO::start ");
+        OdpowiedzInfoMIMO odpowiedz = infoService.InfoWejsciaWyjscia(file);
+        if(odpowiedz == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } else {
+            return ResponseEntity.ok(odpowiedz);
+        }
+    }
 
     @RequestMapping(value = "/strojenie/MIMO", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<OdpowiedzStrojenieMIMO> strojenieMIMO(@RequestPart("file") MultipartFile file, @ModelAttribute ParRegulator parRegulator, @ModelAttribute ParWizualizacja parWizualizacja) {
+    public ResponseEntity<OdpowiedzStrojenieMIMO> strojenieMIMO(@RequestPart("file") MultipartFile[] file, @ModelAttribute ParRegulator parRegulator, @ModelAttribute ParWizualizacja parWizualizacja) {
         System.out.println("strojenieMIMO::start ");
         OdpowiedzStrojenieMIMO odpowiedz = strojenieService.MIMOStrojenie(file, parRegulator, parWizualizacja);
         if (odpowiedz == null) {
