@@ -87,6 +87,19 @@
           <label class="btn btn-secondary" for="option3-wizualizacja"
             >Parametry strojenia</label
           >
+          <input
+            mdbRadio
+            type="radio"
+            class="btn-check"
+            name="options-obiekt"
+            id="option4-zaklocenia"
+            autocomplete="off"
+            [checked]="zakladkaWizualizacja == 'zaklocenia'"
+            (change)="zakladkaWizualizacja = 'zaklocenia'"
+          />
+          <label class="btn btn-secondary" for="option4-zaklocenia"
+            >Zakłócenia mierzalne</label
+          >
         </div>
       </div>
       <div
@@ -134,6 +147,133 @@
           <label class="btn btn-secondary" for="option3-blad"
             >Mediana błędu</label
           >
+        </div>
+      </div>
+      <div class="zaklocenia"
+      [hidden]="this.zakladkaWizualizacja != 'zaklocenia'">
+        <div *ngIf="this.file==null"> <b>Ustaw proszę liczbę zakłóceń mierzalnych</b>
+        <div class="row mx-auto mb-3" style="width:50%;">
+          <div class="input-group">
+            <label class="input-group-text col-9">Liczba zakłóceń mierzalnych </label>
+            <select class="form-control col-1" (change)="zmienLiczbeZaklocen($event)">
+              <option *ngFor="let option of optionsZaklocenia" [value]="option">{{option}}</option>
+            </select>
+          </div>
+        </div>
+        <div class="mb-3" *ngIf="strojenie.get('zaklocenia.liczbaZaklocen')?.value!=0&&
+        strojenie.get('zaklocenia.liczbaZaklocen')?.value!=null">
+          {{ rownanie }}
+
+            <h5 class="mt-5">Wprowadź wartości transmitancji:</h5>
+            <div *ngFor="let zaklocenie of liczbaZaklocen">
+              <b>Zakłócenie nr {{zaklocenie+1}}</b>
+              <div class="container ml-0 mr-0 mx-auto">
+                <div class="form-group mb-5" [formGroup]="strojenie">
+                  <div
+                    class="form-row align-items-center"
+                    formGroupName="zaklocenia"
+                  >
+                    <div class="input-group col">
+                      <label class="input-group-text"> Gain &nbsp; </label>
+                      <input
+                        class="form-control"
+                        type="number"
+                        formControlName="gain"
+                        [disabled]="czyInnyObiekt"
+                      />
+                      <label class="input-group-text">R1</label>
+                      <input
+                        class="form-control"
+                        type="number"
+                        formControlName="r1"
+                        [disabled]="czyInnyObiekt"
+                      />
+                      <label class="input-group-text">Q1</label>
+                      <select
+                        class="form-control"
+                        formControlName="q1"
+                        [disabled]="czyInnyObiekt"
+                      >
+                        <option *ngFor="let option of optionsQ" [value]="option">
+                          {{ option }}
+                        </option>
+                      </select>
+                      <label class="input-group-text">R2</label>
+                      <input
+                        class="form-control"
+                        type="number"
+                        formControlName="r2"
+                        [disabled]="czyInnyObiekt"
+                      />
+                      <label class="input-group-text">Q2</label>
+                      <select
+                        class="form-control"
+                        formControlName="q2"
+                        [disabled]="czyInnyObiekt"
+                      >
+                        <option *ngFor="let option of optionsQ" [value]="option">
+                          {{ option }}
+                        </option>
+                      </select>
+                    </div>
+                    <div class="input-group col-3">
+                      <label class="input-group-text">{{
+                        zmienne[5].nazwa
+                      }}</label>
+                      <input
+                        class="form-control"
+                        type="number"
+                        formControlName="t1"
+                        [disabled]="czyInnyObiekt"
+                      />
+                      <label class="input-group-text">{{
+                        zmienne[6].nazwa
+                      }}</label>
+                      <input
+                        class="form-control"
+                        type="number"
+                        formControlName="t2"
+                        [disabled]="czyInnyObiekt"
+                      />
+                      <label class="input-group-text">{{
+                        zmienne[7].nazwa
+                      }}</label>
+                      <input
+                        class="form-control"
+                        type="number"
+                        formControlName="t3"
+                        [disabled]="czyInnyObiekt"
+                      />
+                      <label class="input-group-text">{{
+                        zmienne[8]!.nazwa
+                      }}</label>
+                      <input
+                        class="form-control"
+                        type="number"
+                        formControlName="delay"
+                        [disabled]="czyInnyObiekt"
+                      />
+                      <label class="input-group-text">{{
+                        zmienne[9]!.nazwa
+                      }}</label>
+                      <input
+                        class="form-control"
+                        type="number"
+                        formControlName="tp"
+                        [disabled]="czyInnyObiekt"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="this.file!=null">
+          <h5 class="mt-5" >Wprowadź plik przedstawiający zakłócenia mierzalne obiektu:</h5>
+          <span class="p-3">
+            {{ strojenie.get('zaklocenia.plikZaklocen')?.value?.name ? 'Wybrany plik to: ' +fileZaklocen!.name : 'Wybierz plik lub go tu przyciągnij i upuść ' }}</span>
+          <input class="file-input" type="file" #fileInput  (change)="onFileZaklocenChange($event)">
         </div>
       </div>
       <div
@@ -490,6 +630,7 @@
             </div>
           </div>
         </div>
+
           <div
             class="form-row align-items-center mb-3 justify-content-center"
             style="margin-left: 20%; margin-right: 20%; display: flex"
@@ -506,11 +647,9 @@
             </label>
           </div>
           <div *ngIf="
-          !this.strojenie.get('MIMO.plik')?.value &&
-          this.strojenie.get('MIMO.liczbaWejsc')?.value == 1 &&
-          this.strojenie.get('MIMO.liczbaWyjsc')?.value == 1
+          this.file==null
         ">
-            {{ rownanie }}
+            <!-- {{ rownanie }} -->
             <h5 class="mt-5">Wprowadź wartości transmitancji:</h5>
             <div class="container ml-0 mr-0 mx-auto">
               <div class="form-group mb-3" [formGroup]="strojenie">
@@ -612,11 +751,11 @@
               </div>
             </div>
           </div>
-          <div *ngIf="this.strojenie.get('MIMO.plik')?.value">
+          <div *ngIf="this.file!=null">
             <h5 class="mt-5" [ngClass]="{'text-muted': !czyInnyObiekt}">Wprowadź plik przedstawiający obiekt symulacji:</h5>
             <span class="p-3"  [ngClass]="{'text-muted': !czyInnyObiekt}">
               {{ strojenie.get('MIMO.plikWizualizacji')?.value?.name ? 'Wybrany plik to: ' +fileWizualizacji!.name : 'Wybierz plik lub go tu przyciągnij i upuść ' }}</span>
-            <input class="file-input" type="file" #fileInput [disabled]="!czyInnyObiekt" (change)="onFileChange($event)">
+            <input class="file-input" type="file" #fileInput [disabled]="!czyInnyObiekt" (change)="onFileWizualizacjiChange($event)">
           </div>
         
       </div>
