@@ -9,6 +9,7 @@ import { StrojenieService } from './service/strojenie.service';
 import { OdpowiedzSkokowaService } from './service/odpowiedz-skokowa.service';
 import { OdpowiedzSkokowa } from './model/odpowiedzSkokowa';
 import { HttpErrorResponse } from '@angular/common/http';
+import { InfoService } from './service/info.service';
  
 @Component({
   selector: 'app-root',
@@ -20,7 +21,8 @@ export class AppComponent {
   zakladka = "model"
   @ViewChild('fileInput') fileInput: ElementRef<HTMLInputElement>;
   
-  constructor(private strojenieService: StrojenieService, private odpowiedzSkokowaService: OdpowiedzSkokowaService,
+  
+  constructor(private strojenieService: StrojenieService, private infoService: InfoService, private odpowiedzSkokowaService: OdpowiedzSkokowaService,
      private cdRef: ChangeDetectorRef) 
   {Chart.register(...registerables);
     this.fileInput = new ElementRef(document.createElement('input'));
@@ -74,7 +76,8 @@ export class AppComponent {
           plik: new FormControl(this.file),
           liczbaWejsc: new FormControl(1),
           liczbaWyjsc: new FormControl(1),
-          plikWizualizacji: new FormControl(this.fileWizualizacji)
+          plikWizualizacji: new FormControl(this.fileWizualizacji),
+          plikZaklocen: new FormControl(this.fileZaklocen)
         }),
     parRegulator: new FormGroup({
       typ: new FormControl(),
@@ -104,7 +107,6 @@ export class AppComponent {
       delay: new FormControl(),
     }),
     zaklocenia: new FormGroup({
-      liczbaZaklocen: new FormControl(0),
       gain: new FormControl(),
       r1: new FormControl(),
       q1: new FormControl(),
@@ -113,9 +115,14 @@ export class AppComponent {
       t1: new FormControl(),
       t2: new FormControl(),
       t3: new FormControl(),
-      tp: new FormControl(),
       delay: new FormControl(),
-      plikZaklocen: new FormControl(this.fileZaklocen)
+      liczbaZaklocen: new FormControl(0),
+    }),
+    wizualizacjaZaklocen: new FormGroup({
+      uPP: new FormControl(),
+      skok: new FormControl(),
+      skokPowrotny: new FormControl(),
+      deltaU: new FormControl()
     })
     })
     liczbaWyjscArray = [0]
@@ -209,12 +216,46 @@ export class AppComponent {
     (<FormControl>this.strojenie.get('parWizualizacja.blad')).setValue(nazwa)
   }
   zmienLiczbeZaklocen(event: any) {
-    const liczbaZaklocenTemp = event.target.value;
-    this.strojenie.get('zaklocenia.liczbaZaklocen')?.setValue(liczbaZaklocenTemp);
+    const liczbaZaklocenTemp :number = event.target.value;
+    this.strojenie.get('zaklocenia.liczbaZaklocen')?.setValue(liczbaZaklocenTemp)
     this.liczbaZaklocen = [];
     for (let i = 0; i < liczbaZaklocenTemp; i++) {
       this.liczbaZaklocen.push(i);
     }
+    const tablicaZaklocen = Array.from({ length: liczbaZaklocenTemp }, () => 1);
+    console.log(liczbaZaklocenTemp)
+    console.log(tablicaZaklocen)
+    this.strojenie.controls.zaklocenia.controls.gain.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1));
+    this.strojenie.get('zaklocenia.r1')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    this.strojenie.get('zaklocenia.q1')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => -1))
+    this.strojenie.get('zaklocenia.r2')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    this.strojenie.get('zaklocenia.q2')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => -1))
+    this.strojenie.get('zaklocenia.t1')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    this.strojenie.get('zaklocenia.t2')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    this.strojenie.get('zaklocenia.t3')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    this.strojenie.get('zaklocenia.delay')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    console.log( this.strojenie.get('zaklocenia.gain')?.value)
+  }
+  updateZaklocenieValue(zaklocenie: number, fieldName: string, target: any) {
+    console.log(fieldName)
+    const currentValue = this.strojenie.get('zaklocenia.'+fieldName)!.value;
+    console.log(currentValue)
+    let nowaWartosc : number = target.value;
+    currentValue[zaklocenie] = nowaWartosc;
+    console.log(currentValue)
+    console.log(this.strojenie.get('zaklocenia.'+fieldName)?.value)
+    this.strojenie.get('zaklocenia.'+fieldName)!.setValue(currentValue);
+  }
+  infoZaklocenie() : void{
+    this.infoService.infoMIMOInOut(this.strojenie.get('MIMO.plik')).subscribe({next: response =>{
+    this.liczbaZaklocen = [];
+    for (let i = 0; i < response.wejscia; i++) {
+      this.liczbaZaklocen.push(i);
+    }},
+    error: () => {
+      this.fileZaklocen=null;
+      this.strojenie.get('MIMO.plikZaklocen')?.setValue(null)
+    }})
   }
   onYZadChange(index: number, value: any) {
     let yZad = this.strojenie.get('parWizualizacja.yZad')?.value;
@@ -596,7 +637,7 @@ export class AppComponent {
   onFileZaklocenChange(event: any) {
     const file = event.target.files[0];
     this.fileZaklocen = file;
-    this.strojenie.get('zaklocenia.plikZaklocen')?.patchValue(file);
+    this.strojenie.get('MIMO.plikZaklocen')?.patchValue(file);
     this.cdRef.detectChanges();
   }
   obiektSymulacjiInputs() {

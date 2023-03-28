@@ -32,7 +32,9 @@ export class StrojenieService {
   public dobierzStrojenieMIMO(form: any): Observable<OdpowiedzMIMO> {
     const formData = new FormData();
     formData.append('file', form.controls.MIMO.controls['plik'].value);
-    formData.append('file', form.controls.MIMO.controls['plikWizualizacji'].value);
+    const plikWizualizacji = form.controls.MIMO.controls['plikWizualizacji'].value ? form.controls.MIMO.controls['plikWizualizacji'].value : form.controls.MIMO.controls['plik'].value;
+    formData.append('file', plikWizualizacji);
+    formData.append('file', form.controls.MIMO.controls['plikZaklocen'].value);
     formData.append('typ', form.controls.parRegulator.value.typ);
     formData.append('duMax', form.controls.parRegulator.value.duMax);
     formData.append('uMin', form.controls.parRegulator.value.uMin);
@@ -44,10 +46,7 @@ export class StrojenieService {
     formData.append('dlugosc', form.controls.parWizualizacja.value.dlugosc);
     formData.append('strojenie', form.controls.parWizualizacja.value.strojenie);
     formData.append('blad', form.controls.parWizualizacja.value.blad);
-
-    const headers2 =  new HttpHeaders({'Content-Type' : 'application/json; charset=utf-8'});
-
-    const headers = new HttpHeaders({ 'Content-Type': 'multipart/form-data' });    
+    
     return this.http.post<OdpowiedzMIMO>(
       this.api+'/MIMO',
       formData

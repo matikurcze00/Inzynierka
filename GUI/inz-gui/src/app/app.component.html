@@ -160,109 +160,87 @@
             </select>
           </div>
         </div>
-        <div class="mb-3" *ngIf="strojenie.get('zaklocenia.liczbaZaklocen')?.value!=0&&
-        strojenie.get('zaklocenia.liczbaZaklocen')?.value!=null">
-          {{ rownanie }}
+        <div class="mb-3" *ngIf="this.liczbaZaklocen.length!=0">
 
             <h5 class="mt-5">Wprowadź wartości transmitancji:</h5>
-            <div *ngFor="let zaklocenie of liczbaZaklocen">
+            <div *ngFor="let zaklocenie of this.liczbaZaklocen">
               <b>Zakłócenie nr {{zaklocenie+1}}</b>
               <div class="container ml-0 mr-0 mx-auto">
-                <div class="form-group mb-5" [formGroup]="strojenie">
-                  <div
-                    class="form-row align-items-center"
-                    formGroupName="zaklocenia"
-                  >
-                    <div class="input-group col">
-                      <label class="input-group-text"> Gain &nbsp; </label>
-                      <input
-                        class="form-control"
-                        type="number"
-                        formControlName="gain"
-                        [disabled]="czyInnyObiekt"
+                <div
+                  class="form-row align-items-center"
+                >
+                  <div class="input-group col">
+                    <label class="input-group-text"> Gain &nbsp; </label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      (input)="updateZaklocenieValue(zaklocenie, 'gain', $event.target)"                        
+                      placeholder="1.0"
+                    />
+                    <label class="input-group-text">R1</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      (input)="updateZaklocenieValue(zaklocenie, 'r1', $event.target)"  
+                      placeholder="1.0"
+                    />
+                    <label class="input-group-text">Q1</label>
+                    <select
+                      class="form-control"
+                      (input)="updateZaklocenieValue(zaklocenie, 'q1', $event.target)"  
+                      placeholder="1"
+                    >
+                      <option *ngFor="let option of optionsQ" [value]="option">
+                        {{ option }}
+                      </option>
+                    </select>
+                    <label class="input-group-text">R2</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      (input)="updateZaklocenieValue(zaklocenie, 'r2', $event.target)"  
+                      placeholder="1.0"
+                    />
+                    <label class="input-group-text">Q2</label>
+                    <select
+                      class="form-control"
+                      (input)="updateZaklocenieValue(zaklocenie, 'q2', $event.target)"  
+                      placeholder="1"
+                    >
+                      <option *ngFor="let option of optionsQ" [value]="option">
+                        {{ option }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="input-group col-3">
+                    <label class="input-group-text">T1</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      (input)="updateZaklocenieValue(zaklocenie, 't1', $event.target)"  
+                      placeholder="1.0"
                       />
-                      <label class="input-group-text">R1</label>
-                      <input
-                        class="form-control"
-                        type="number"
-                        formControlName="r1"
-                        [disabled]="czyInnyObiekt"
+                    <label class="input-group-text">T2</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      (input)="updateZaklocenieValue(zaklocenie, 't2', $event.target)"  
+                      placeholder="1.0"
                       />
-                      <label class="input-group-text">Q1</label>
-                      <select
-                        class="form-control"
-                        formControlName="q1"
-                        [disabled]="czyInnyObiekt"
-                      >
-                        <option *ngFor="let option of optionsQ" [value]="option">
-                          {{ option }}
-                        </option>
-                      </select>
-                      <label class="input-group-text">R2</label>
-                      <input
-                        class="form-control"
-                        type="number"
-                        formControlName="r2"
-                        [disabled]="czyInnyObiekt"
+                    <label class="input-group-text">T3</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      (input)="updateZaklocenieValue(zaklocenie, 't3', $event.target)"  
+                      placeholder="1.0"
                       />
-                      <label class="input-group-text">Q2</label>
-                      <select
-                        class="form-control"
-                        formControlName="q2"
-                        [disabled]="czyInnyObiekt"
-                      >
-                        <option *ngFor="let option of optionsQ" [value]="option">
-                          {{ option }}
-                        </option>
-                      </select>
-                    </div>
-                    <div class="input-group col-3">
-                      <label class="input-group-text">{{
-                        zmienne[5].nazwa
-                      }}</label>
-                      <input
-                        class="form-control"
-                        type="number"
-                        formControlName="t1"
-                        [disabled]="czyInnyObiekt"
+                    <label class="input-group-text">Delay</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      (input)="updateZaklocenieValue(zaklocenie, 'delay', $event.target)"  
+                      placeholder="1.0"
                       />
-                      <label class="input-group-text">{{
-                        zmienne[6].nazwa
-                      }}</label>
-                      <input
-                        class="form-control"
-                        type="number"
-                        formControlName="t2"
-                        [disabled]="czyInnyObiekt"
-                      />
-                      <label class="input-group-text">{{
-                        zmienne[7].nazwa
-                      }}</label>
-                      <input
-                        class="form-control"
-                        type="number"
-                        formControlName="t3"
-                        [disabled]="czyInnyObiekt"
-                      />
-                      <label class="input-group-text">{{
-                        zmienne[8]!.nazwa
-                      }}</label>
-                      <input
-                        class="form-control"
-                        type="number"
-                        formControlName="delay"
-                        [disabled]="czyInnyObiekt"
-                      />
-                      <label class="input-group-text">{{
-                        zmienne[9]!.nazwa
-                      }}</label>
-                      <input
-                        class="form-control"
-                        type="number"
-                        formControlName="tp"
-                        [disabled]="czyInnyObiekt"
-                      />
-                    </div>
                   </div>
                 </div>
               </div>
@@ -272,8 +250,11 @@
         <div *ngIf="this.file!=null">
           <h5 class="mt-5" >Wprowadź plik przedstawiający zakłócenia mierzalne obiektu:</h5>
           <span class="p-3">
-            {{ strojenie.get('zaklocenia.plikZaklocen')?.value?.name ? 'Wybrany plik to: ' +fileZaklocen!.name : 'Wybierz plik lub go tu przyciągnij i upuść ' }}</span>
+            {{ strojenie.get('MIMO.plikZaklocen')?.value?.name ? 'Wybrany plik to: ' +fileZaklocen!.name : 'Wybierz plik lub go tu przyciągnij i upuść ' }}</span>
           <input class="file-input" type="file" #fileInput  (change)="onFileZaklocenChange($event)">
+          <div class="container ml-0 mr-0 mt-5 mx-auto">
+            <button class="btn btn-secondary" (click)="infoZaklocenie()" [disabled]="this.strojenie.get('MIMO.plikZaklocenia')?.value==null" type="button"> Wyślij obiekt </button>
+          </div>
         </div>
       </div>
       <div
