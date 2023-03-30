@@ -115,13 +115,14 @@ export class AppComponent {
       t1: new FormControl(),
       t2: new FormControl(),
       t3: new FormControl(),
+      tp: new FormControl(),
       delay: new FormControl(),
       liczbaZaklocen: new FormControl(0),
     }),
     wizualizacjaZaklocen: new FormGroup({
-      uPP: new FormControl(),
-      skok: new FormControl(),
-      skokPowrotny: new FormControl(),
+      uSkok: new FormControl(),
+      skokZaklocenia: new FormControl(),
+      skokPowrotnyZaklocenia: new FormControl(),
       deltaU: new FormControl()
     })
     })
@@ -223,8 +224,6 @@ export class AppComponent {
       this.liczbaZaklocen.push(i);
     }
     const tablicaZaklocen = Array.from({ length: liczbaZaklocenTemp }, () => 1);
-    console.log(liczbaZaklocenTemp)
-    console.log(tablicaZaklocen)
     this.strojenie.controls.zaklocenia.controls.gain.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1));
     this.strojenie.get('zaklocenia.r1')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
     this.strojenie.get('zaklocenia.q1')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => -1))
@@ -233,25 +232,39 @@ export class AppComponent {
     this.strojenie.get('zaklocenia.t1')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
     this.strojenie.get('zaklocenia.t2')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
     this.strojenie.get('zaklocenia.t3')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    this.strojenie.get('zaklocenia.tp')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
     this.strojenie.get('zaklocenia.delay')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
-    console.log( this.strojenie.get('zaklocenia.gain')?.value)
+    this.strojenie.get('wizualizacjaZaklocen.uSkok')!.setValue(Array.from({length: liczbaZaklocenTemp}, () => 0.0))
+    this.strojenie.get('wizualizacjaZaklocen.skokZaklocenia')!.setValue(Array.from({length: liczbaZaklocenTemp}, () => 0.0))
+    this.strojenie.get('wizualizacjaZaklocen.skokPowrotnyZaklocenia')!.setValue(Array.from({length: liczbaZaklocenTemp}, () => 0.0))
+    this.strojenie.get('wizualizacjaZaklocen.deltaU')!.setValue(Array.from({length: liczbaZaklocenTemp}, () => 0.0))
+    
   }
   updateZaklocenieValue(zaklocenie: number, fieldName: string, target: any) {
-    console.log(fieldName)
     const currentValue = this.strojenie.get('zaklocenia.'+fieldName)!.value;
-    console.log(currentValue)
     let nowaWartosc : number = target.value;
     currentValue[zaklocenie] = nowaWartosc;
-    console.log(currentValue)
-    console.log(this.strojenie.get('zaklocenia.'+fieldName)?.value)
     this.strojenie.get('zaklocenia.'+fieldName)!.setValue(currentValue);
+  }
+  updateWizualizacjiaZaklocenieValue(zaklocenie: number, fieldName: string, target: any) {
+    const currentValue = this.strojenie.get('wizualizacjaZaklocen.'+fieldName)!.value;
+    let nowaWartosc : number = target.value;
+    currentValue[zaklocenie] = nowaWartosc;
+    this.strojenie.get('wizualizacjaZaklocen.'+fieldName)!.setValue(currentValue);
+    console.log(this.strojenie.get('wizualizacjaZaklocen.'+fieldName)!.value)
   }
   infoZaklocenie() : void{
     this.infoService.infoMIMOInOut(this.strojenie.get('MIMO.plik')).subscribe({next: response =>{
     this.liczbaZaklocen = [];
     for (let i = 0; i < response.wejscia; i++) {
       this.liczbaZaklocen.push(i);
-    }},
+    }
+    this.strojenie.get('wizualizacjaZaklocen.uSkok')!.setValue(Array.from({length: response.wejscia}, () => 0.0))
+    this.strojenie.get('wizualizacjaZaklocen.skokZaklocenia')!.setValue(Array.from({length: response.wejscia}, () => 0.0))
+    this.strojenie.get('wizualizacjaZaklocen.skokPowrotnyZaklocenia')!.setValue(Array.from({length: response.wejscia}, () => 0.0))
+    this.strojenie.get('wizualizacjaZaklocen.deltaU')!.setValue(Array.from({length: response.wejscia}, () => 0.0))
+    
+  },
     error: () => {
       this.fileZaklocen=null;
       this.strojenie.get('MIMO.plikZaklocen')?.setValue(null)

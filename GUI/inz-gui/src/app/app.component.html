@@ -234,6 +234,13 @@
                       (input)="updateZaklocenieValue(zaklocenie, 't3', $event.target)"  
                       placeholder="1.0"
                       />
+                      <label class="input-group-text">Tp</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      (input)="updateZaklocenieValue(zaklocenie, 'tp', $event.target)"  
+                      placeholder="1.0"
+                      />
                     <label class="input-group-text">Delay</label>
                     <input
                       class="form-control"
@@ -253,7 +260,93 @@
             {{ strojenie.get('MIMO.plikZaklocen')?.value?.name ? 'Wybrany plik to: ' +fileZaklocen!.name : 'Wybierz plik lub go tu przyciągnij i upuść ' }}</span>
           <input class="file-input" type="file" #fileInput  (change)="onFileZaklocenChange($event)">
           <div class="container ml-0 mr-0 mt-5 mx-auto">
-            <button class="btn btn-secondary" (click)="infoZaklocenie()" [disabled]="this.strojenie.get('MIMO.plikZaklocenia')?.value==null" type="button"> Wyślij obiekt </button>
+            <button class="btn btn-secondary" (click)="infoZaklocenie()" [disabled]="fileZaklocen==null" type="button"> Wyślij obiekt </button>
+          </div>
+        </div>
+        <div *ngIf="liczbaZaklocen.length!=0">
+          <div class="text-center mt-5">
+            <b>Ustaw proszę na jaką wartość ma być ustawione sterowanie zakłócenia: </b>
+            <div class="form-row align-items-center mb-3">
+              <div class="input-group col align-items-center">
+                <div
+                  *ngFor="let zaklocenie of liczbaZaklocen; let i = index"
+                  class="mx-auto"
+                  style="margin-left: 20%; margin-right: 20%"
+                >
+                  <label class="input-group-text mx-auto d-block text-center">
+                    Zakłócenie {{ i + 1 }}
+                  </label>
+                  <input
+                    placeholder="0"
+                    class="form-control mx-auto d-block text-center"
+                    (input)="updateWizualizacjiaZaklocenieValue(zaklocenie, 'uSkok', $event.target)"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="text-center mt-5">
+            <b>Ustaw proszę maksymalną wartość zmiany sterowania zakłócenia w jednym kroku: </b>
+            <div class="form-row align-items-center mb-3">
+              <div class="input-group col align-items-center">
+                <div
+                  *ngFor="let zaklocenie of liczbaZaklocen; let i = index"
+                  class="mx-auto"
+                  style="margin-left: 20%; margin-right: 20%"
+                >
+                  <label class="input-group-text mx-auto d-block text-center">
+                    Zakłócenie {{ i + 1 }}
+                  </label>
+                  <input
+                    placeholder="0"
+                    class="form-control mx-auto d-block text-center"
+                    (input)="updateWizualizacjiaZaklocenieValue(zaklocenie, 'deltaU', $event.target)"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="text-center mt-5">
+            <b>Ustaw proszę krok w którym ma nastąpić skok wartości sterowania zakłócenia: </b>
+            <div class="form-row align-items-center mb-3">
+              <div class="input-group col align-items-center">
+                <div
+                  *ngFor="let zaklocenie of liczbaZaklocen; let i = index"
+                  class="mx-auto"
+                  style="margin-left: 20%; margin-right: 20%"
+                >
+                  <label class="input-group-text mx-auto d-block text-center">
+                    Zakłócenie {{ i + 1 }}
+                  </label>
+                  <input
+                    placeholder="0"
+                    class="form-control mx-auto d-block text-center"
+                    (input)="updateWizualizacjiaZaklocenieValue(zaklocenie, 'skokZaklocenia', $event.target)"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="text-center mt-5">
+            <b>Ustaw proszę krok w którym ma nastąpić koniec skoku sterowania zakłócenia: </b>
+            <div class="form-row align-items-center mb-3">
+              <div class="input-group col align-items-center">
+                <div
+                  *ngFor="let zaklocenie of liczbaZaklocen; let i = index"
+                  class="mx-auto"
+                  style="margin-left: 20%; margin-right: 20%"
+                >
+                  <label class="input-group-text mx-auto d-block text-center">
+                    Zakłócenie {{ i + 1 }}
+                  </label>
+                  <input
+                  placeholder="0"
+                    class="form-control mx-auto d-block text-center"
+                    (input)="updateWizualizacjiaZaklocenieValue(zaklocenie, 'skokPowrotnyZaklocenia', $event.target)"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
