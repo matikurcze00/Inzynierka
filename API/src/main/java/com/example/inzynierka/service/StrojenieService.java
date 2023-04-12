@@ -49,10 +49,12 @@ public class StrojenieService {
 
     private void obliczBladSISO(ParWizualizacja parWizualizacja, Regulator regulator, double[] Y) {
         double blad = 0.0;
+        for(int i = 0; i < parWizualizacja.getSkok()[0]; i ++)
+            blad += Math.pow(Y[i] - parWizualizacja.getYPP()[0], 2);
         for (int i = parWizualizacja.getSkok()[0]; i < parWizualizacja.getDlugosc(); i++) {
             blad += Math.pow(Y[i] - regulator.getCel()[0], 2);
         }
-        blad = blad / (parWizualizacja.getDlugosc() - parWizualizacja.getSkok()[0]);
+        blad = blad / parWizualizacja.getDlugosc() ;
         System.out.println("BLAD:" + blad);
     }
 

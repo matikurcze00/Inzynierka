@@ -82,13 +82,39 @@ public class SISO {
     public double obliczPraceObiektu(Regulator regulator, double[] cel) {
         resetObiektu();
         regulator.setCel(cel);
-        double[] Y = new double[dlugosc];
-        for (int i = 0; i < this.dlugosc; i++) {
-            Y[i] = obliczKrok(regulator.policzOutput(getAktualna()));
-
+        double[] Y ;
+        if(zaklocenia!=null && !zaklocenia.isEmpty()) {
+            Y = obliczPraceZZakloceniem(regulator);
+        } else {
+            Y = obliczPraceBezZaklocen(regulator);
         }
         resetObiektu();
         return obliczBlad(Y, cel[0]);
+    }
+
+    private double[] obliczPraceBezZaklocen(Regulator regulator) {
+        double[] Y = new double[dlugosc];
+        for (int i = 0; i < this.dlugosc; i++) {
+            Y[i] = obliczKrok(regulator.policzOutput(getAktualna()));
+        }
+        return Y;
+    }
+
+    public double[] obliczPraceZZakloceniem(Regulator regulator) {
+        double[] Y = new double[dlugosc];
+        for (int i = 0; i < Math.floorDiv(this.dlugosc,2); i++)
+            Y[i] = obliczKrok(regulator.policzOutput(getAktualna()));
+        double[] zakloceniaU = new double[zaklocenia.size()];
+        for(int i = 0; i< zakloceniaU.length; i++)
+            zakloceniaU[i] = 3 * zaklocenia.get(i).getGain() / transmitancja.getGain() ;
+        for (int i = Math.floorDiv(this.dlugosc,2); i < Math.floorDiv(this.dlugosc*3,4); i++)
+            Y[i] = obliczKrok(regulator.policzOutput(getAktualna(), zakloceniaU), zakloceniaU);
+        for(int i = 0; i< zakloceniaU.length; i++)
+            zakloceniaU[i] = 0.0;
+        for (int i = Math.floorDiv(this.dlugosc*3,4); i < dlugosc; i++)
+            Y[i] = obliczKrok(regulator.policzOutput(getAktualna(),zakloceniaU),zakloceniaU);
+
+        return Y;
     }
 
     public double obliczKrok(double du) {

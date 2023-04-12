@@ -97,7 +97,7 @@ public class DMCAnalityczny extends Regulator {
         Arrays.fill(yTemp, aktualna);
         Matrix y = new Matrix(yTemp, 1);
         Matrix Utemp = K.times(yZad.transpose().minus(y.transpose()).minus(Mp.times(dU.transpose()))
-            .minus(Mpz.times(dUz.transpose())));
+            .minus(Mpz.plus(Mz).times(dUz.transpose())));
         poprawaUTemp(Utemp, 0);
         dodajdU(Utemp.get(0, 0));
         return Utemp.get(0, 0);
@@ -326,29 +326,33 @@ public class DMCAnalityczny extends Regulator {
         }
     }
     protected void policzMz(int IN, int OUT) {
-        Matrix Mz = new Matrix(N * OUT, (D - 1) * IN);
-        for (int i = 0; i < D - 1; i++) { //wszerz
+        Matrix Mz = new Matrix(N * OUT, (D) * IN);
+        for (int i = 0; i < D ; i++) { //wszerz
             for (int j = -1; j < N-1; j++) { //wzdłuż
-                if (j >= i)
+                if(i>Nu-1) {
                     for (int k = 0; k < OUT; k++)
                         for (int m = 0; m < IN; m++)
-                            if(j - i +1 >= D-1) {
-                                Mz.set((j+1) * OUT + k, i * IN + m, Sz.get(k * IN + m).get(D-1));
+                            if(j - Nu +1 >= D) {
+                                Mz.set((j+1) * OUT + k, i * IN + m, Sz.get(k * IN + m).get(D) * 0.6);
+                            } else {
+                                if(j<Nu) {
+                                    Mz.set((j+1) * OUT + k, i * IN + m, 0.0);
+                                } else {
+                                    Mz.set((j+1) * OUT + k, i * IN + m, Sz.get(k * IN + m).get(j - Nu +1) * 0.6);
+                                }
+                            }
+                } else if (j >= i)
+                    for (int k = 0; k < OUT; k++)
+                        for (int m = 0; m < IN; m++)
+                            if(j - i +1 >= D) {
+                                Mz.set((j+1) * OUT + k, i * IN + m, Sz.get(k * IN + m).get(D));
                             } else {
                                 Mz.set((j+1) * OUT + k, i * IN + m, Sz.get(k * IN + m).get(j - i +1));
                             }
+
             }
         }
         this.Mz = Mz;
-//        Matrix M = new Matrix(N * OUT, Nu * IN);
-//        for (int i = 0; i < Nu; i++) {
-//            for (int j = 0; j < N; j++) {
-//                if (j >= i)
-//                    for (int k = 0; k < OUT; k++)
-//                        for (int m = 0; m < IN; m++)
-//                            M.set(j * OUT + k, i * IN + m, S.get(k * IN + m).get(j - i));
-//            }
-//        }
     }
     protected void policzMpz(int IN, int OUT) {
         Mpz = new Matrix(N * OUT, (D) * IN);
@@ -357,9 +361,9 @@ public class DMCAnalityczny extends Regulator {
             for (int k = 0; k < OUT; k++) {
                 for (int m = 0; m < IN; m++) {
                     if (j  <  D+1 ) {
-                        Mpz.set(j * OUT + k, m, Sz.get(k * IN + m).get(j ) );
+                        Mpz.set(j * OUT + k, m, Sz.get(k * IN + m).get(j ) * 1.5);
                     } else
-                        Mpz.set(j * OUT + k,  m, Sz.get(k * IN + m).get(D) );
+                        Mpz.set(j * OUT + k,  m, Sz.get(k * IN + m).get(D) * 1.5);
                 }
             }
         }
@@ -369,9 +373,9 @@ public class DMCAnalityczny extends Regulator {
                 for (int k = 0; k < OUT; k++) {
                     for (int m = 0; m < IN; m++) {
                         if ((j + i + 2) < D+1) {
-                            Mpz.set(j * OUT + k, (i + 1) * IN + m, Sz.get(k * IN + m).get(j + i + 2) - Sz.get(k * IN + m).get(i));
+                            Mpz.set(j * OUT + k, (i + 1) * IN + m, (Sz.get(k * IN + m).get(j + i + 2) - Sz.get(k * IN + m).get(i)));
                         } else
-                            Mpz.set(j * OUT + k, (i + 1) * IN + m, Sz.get(k * IN + m).get(D) - Sz.get(k * IN + m).get(i));
+                            Mpz.set(j * OUT + k, (i + 1) * IN + m, (Sz.get(k * IN + m).get(D) - Sz.get(k * IN + m).get(i)));
                     }
                 }
             }
