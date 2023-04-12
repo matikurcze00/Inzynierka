@@ -37,6 +37,10 @@ public class ZbiorPID extends Regulator {
         return 0;
     }
 
+    @Override
+    public double policzOutput(double aktualna, double[] UZ) { return 0;}
+
+    @Override
     public double[] policzOutput(double[] aktualne) {
         double[] output = new double[PV.length];
         for (int i = 0; i < PV.length; i++) {
@@ -45,6 +49,10 @@ public class ZbiorPID extends Regulator {
         return output;
     }
 
+    @Override
+    public double[] policzOutput(double[] aktualna ,double[] UZ) {
+        return policzOutput(aktualna);
+    }
     @Override
     public void setCel(double[] cel) {
         this.cel = cel;

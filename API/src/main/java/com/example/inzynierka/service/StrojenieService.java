@@ -20,19 +20,28 @@ public class StrojenieService {
         ParObiekt parObiekt = parStrojenie.getParObiekt();
         ParRegulator parRegulator = parStrojenie.getParRegulator();
         ParWizualizacja parWizualizacja = parStrojenie.getParWizualizacja();
+        Zaklocenia zaklocenie = new Zaklocenia();
+        if(parStrojenie.getZaklocenia().getGain().length!=0) {
+            zaklocenie = parStrojenie.getZaklocenia();
+        }
         Integer[] PIE = new Integer[3];
         OdpowiedzStrojenie odpowiedzStrojenie = new OdpowiedzStrojenie();
 
-        SISO obiekt = dobierzObiektSISO(parObiekt, parRegulator, parWizualizacja);
+        SISO obiekt = dobierzObiektSISO(parObiekt, parRegulator, parWizualizacja, zaklocenie);
         if (obiekt == null) return null;
         Regulator regulator;
         regulator = dobierzRegulatorSISO(parObiekt, parRegulator, parWizualizacja, obiekt, PIE);
         if (regulator == null) return null;
         AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(PIE[0], PIE[1], PIE[2], 0.3, 0.2);
         dobierzStrojenieSISO(parWizualizacja, obiekt, regulator, GA, odpowiedzStrojenie);
-        if(parStrojenie.getParObiektSymulacji()!=null)
-            obiekt = new SISO (parStrojenie.getParObiektSymulacji(), parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
-        double[] Y = symulacjaRegulacjiSISO(parWizualizacja, obiekt, regulator, odpowiedzStrojenie);
+        if(parStrojenie.getParObiektSymulacji()!=null) {
+            if(zaklocenie!=null) {
+                obiekt = new SISO (parStrojenie.getParObiektSymulacji(), parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad(), zaklocenie);
+            } else {
+                obiekt = new SISO (parStrojenie.getParObiektSymulacji(), parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
+            }
+        }
+        double[] Y = symulacjaRegulacjiSISO(parWizualizacja, obiekt, regulator, odpowiedzStrojenie, parStrojenie.getWizualizacjaZaklocen());
         System.out.println("strojenie::OK");
         obliczBladSISO(parWizualizacja, regulator, Y);
         return odpowiedzStrojenie;
@@ -47,10 +56,15 @@ public class StrojenieService {
         System.out.println("BLAD:" + blad);
     }
 
-    private double[] symulacjaRegulacjiSISO(ParWizualizacja parWizualizacja, SISO obiekt, Regulator regulator, OdpowiedzStrojenie odpowiedzStrojenie) {
+    private double[] symulacjaRegulacjiSISO(ParWizualizacja parWizualizacja, SISO obiekt, Regulator regulator, OdpowiedzStrojenie odpowiedzStrojenie, WizualizacjaZaklocen wizualizacjaZaklocen) {
         ustawCelSISO(parWizualizacja, regulator, odpowiedzStrojenie);
-        double[] Y = dodajWartosciWykresowSISO(parWizualizacja, obiekt, regulator, odpowiedzStrojenie);
-        return Y;
+        if(wizualizacjaZaklocen.getUSkok().length!=0) {
+            return dodajWartosciWykresowSISO(parWizualizacja, obiekt, regulator, odpowiedzStrojenie,
+                ustawSterowanieZaklocen(parWizualizacja, wizualizacjaZaklocen));
+        } else {
+            return dodajWartosciWykresowSISO(parWizualizacja, obiekt, regulator, odpowiedzStrojenie);
+        }
+
     }
 
     private void ustawCelSISO(ParWizualizacja parWizualizacja, Regulator regulator, OdpowiedzStrojenie odpowiedzStrojenie) {
@@ -65,6 +79,53 @@ public class StrojenieService {
         }
         odpowiedzStrojenie.setCel(celTemp);
     }
+    private double[][] ustawSterowanieZaklocen(ParWizualizacja parWizualizacja, WizualizacjaZaklocen wizualizacjaZaklocen) {
+        double[][] dUZTemp = new double[parWizualizacja.getDlugosc()][wizualizacjaZaklocen.getUSkok().length];
+        double[] uSkok = wizualizacjaZaklocen.getUSkok().clone();
+        double[] uPowrot = wizualizacjaZaklocen.getUSkok().clone();
+        for (int i = 0; i < wizualizacjaZaklocen.getUSkok().length; i++) {
+            for (int j = 0; j < parWizualizacja.getDlugosc(); j++) {
+                if (j < wizualizacjaZaklocen.getSkokZaklocenia()[i])
+                    dUZTemp[j][i] = 0.0;
+                else {
+                    if(j < wizualizacjaZaklocen.getSkokPowrotnyZaklocenia()[i]) {
+                        if(j>0) {
+                            if(uSkok[i] != 0.0) {
+                                if(uSkok[i] - wizualizacjaZaklocen.getDeltaU()[i] <0) {
+                                    dUZTemp[j][i] = uSkok[i];
+                                    uSkok[i] = 0.0;
+                                } else {
+                                    dUZTemp[j][i] = wizualizacjaZaklocen.getDeltaU()[i];
+                                    uSkok[i] -= wizualizacjaZaklocen.getDeltaU()[i];
+                                }
+                            } else {
+                                dUZTemp[j][i] = 0.0;
+                            }
+                        }  else {
+                            dUZTemp[j][i] = wizualizacjaZaklocen.getDeltaU()[i];
+                        }
+                    } else {
+                        if (j > 0) {
+                            if (uPowrot[i] != 0.0) {
+                                if (uPowrot[i] - wizualizacjaZaklocen.getDeltaU()[i] < 0) {
+                                    dUZTemp[j][i] = -uPowrot[i];
+                                    uPowrot[i] = 0.0;
+                                } else {
+                                    dUZTemp[j][i] = -wizualizacjaZaklocen.getDeltaU()[i];
+                                    uPowrot[i] -= wizualizacjaZaklocen.getDeltaU()[i];
+                                }
+                            } else {
+                                dUZTemp[j][i] = 0.0;
+                            }
+                        } else {
+                            dUZTemp[j][i] = wizualizacjaZaklocen.getDeltaU()[i];
+                        }
+                    }
+                }
+            }
+        }
+        return dUZTemp;
+    }
 
     private void dobierzStrojenieSISO(ParWizualizacja parWizualizacja, SISO obiekt, Regulator regulator, AlgorytmEwolucyjny GA, OdpowiedzStrojenie odpowiedzStrojenie) {
         double[] tempWartosciGA = GA.dobierzWartosci(regulator.liczbaZmiennych(), regulator, obiekt);
@@ -73,15 +134,18 @@ public class StrojenieService {
         regulator.zmienWartosci(tempStrojenie);
     }
 
-    private SISO dobierzObiektSISO(ParObiekt parObiekt, ParRegulator parRegulator, ParWizualizacja parWizualizacja) {
+    private SISO dobierzObiektSISO(ParObiekt parObiekt, ParRegulator parRegulator, ParWizualizacja parWizualizacja, Zaklocenia zaklocenie) {
         SISO obiekt;
         try{
-            obiekt = new SISO(parObiekt, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
+            if(zaklocenie!=null) {
+                return new SISO(parObiekt, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad(), zaklocenie);
+            } else {
+                return new SISO(parObiekt, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
+            }
         } catch (Exception ex) {
             ex.printStackTrace();
             return null;
         }
-        return obiekt;
     }
 
     private Regulator dobierzRegulatorSISO(ParObiekt parObiekt, ParRegulator parRegulator, ParWizualizacja parWizualizacja, SISO obiekt, Integer[] PIE) {
@@ -117,6 +181,31 @@ public class StrojenieService {
         for (int i = parWizualizacja.getSkok()[0]; i < parWizualizacja.getDlugosc(); i++) {
             {
                 Y[i] = obiekt.obliczKrok(regulator.policzOutput(obiekt.getAktualna()));
+                U[i] = obiekt.getU().get(0);
+            }
+        }
+        odpowiedzStrojenie.setWykres(Y);
+        odpowiedzStrojenie.setSterowanie(U);
+        return Y;
+    }
+
+    private double[] dodajWartosciWykresowSISO(ParWizualizacja parWizualizacja, SISO obiekt, Regulator regulator,
+                   OdpowiedzStrojenie odpowiedzStrojenie, double[][] dUZ) {
+        double[] Y = new double[parWizualizacja.getDlugosc()];
+        double[] U = new double[parWizualizacja.getDlugosc()];
+        obiekt.resetObiektu();
+        regulator.resetujRegulator();
+        Y[0] = obiekt.getYpp();
+        U[0] = parWizualizacja.getUPP()[0];
+        regulator.setCel(new double[]{obiekt.getYpp()});
+        for (int i = 0; i < parWizualizacja.getSkok()[0]; i++) {
+            Y[i] = obiekt.obliczKrok(regulator.policzOutput(obiekt.getAktualna(), dUZ[i]), dUZ[i]);
+            U[i] = obiekt.getU().get(0);
+        }
+        regulator.setCel(new double[]{parWizualizacja.getYZad()[0]});
+        for (int i = parWizualizacja.getSkok()[0]; i < parWizualizacja.getDlugosc(); i++) {
+            {
+                Y[i] = obiekt.obliczKrok(regulator.policzOutput(obiekt.getAktualna(), dUZ[i]), dUZ[i]);
                 U[i] = obiekt.getU().get(0);
             }
         }

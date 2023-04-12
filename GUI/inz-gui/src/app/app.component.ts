@@ -317,7 +317,7 @@ export class AppComponent {
 
   onSubmit(){
     console.log("click")
-    console.log(this.strojenie.controls.parWizualizacja)
+    console.log(this.strojenie)
     this.odpowiedzMIMO = null;
     this.odpowiedz = null;
     this.czyLaduje=true;

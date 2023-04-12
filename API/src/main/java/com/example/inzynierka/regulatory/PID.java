@@ -38,9 +38,20 @@ public class PID extends Regulator {
     }
 
     @Override
+    public double policzOutput(double aktualna, double[] UZ) {
+        return policzOutput(aktualna);
+    }
+
+        @Override
     public double[] policzOutput(double[] aktualna) {
         return new double[0];
     }
+
+    @Override
+    public double[] policzOutput(double[] aktualna, double[] UZ) {
+        return new double[0];
+    }
+
 
     public PID(double P, double I, double D, double Ts, double[] cel, double duMax, double uMax, Double[] strojenieZadane) {
 

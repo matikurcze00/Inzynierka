@@ -13,5 +13,5 @@ public class Zaklocenia {
     private Double[] T2;
     private Double[] T3;
     private Double[] Tp;
-    private Double[] delay;
+    private Integer[] delay;
 }

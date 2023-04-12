@@ -46,7 +46,10 @@ export class StrojenieService {
     formData.append('dlugosc', form.controls.parWizualizacja.value.dlugosc);
     formData.append('strojenie', form.controls.parWizualizacja.value.strojenie);
     formData.append('blad', form.controls.parWizualizacja.value.blad);
-    
+    formData.append('uSkok', form.controls.wizualizacjaZaklocen.value.uSkok)
+    formData.append('skokZaklocenia', form.controls.wizualizacjaZaklocen.value.skokZaklocenia)
+    formData.append('skokPowrotnyZaklocenia', form.controls.wizualizacjaZaklocen.value.skokPowrotnyZaklocenia)
+    formData.append('deltaU', form.controls.wizualizacjaZaklocen.value.deltaU)
     return this.http.post<OdpowiedzMIMO>(
       this.api+'/MIMO',
       formData
