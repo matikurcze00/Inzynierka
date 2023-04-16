@@ -9,6 +9,7 @@ import { StrojenieService } from './service/strojenie.service';
 import { OdpowiedzSkokowaService } from './service/odpowiedz-skokowa.service';
 import { OdpowiedzSkokowa } from './model/odpowiedzSkokowa';
 import { HttpErrorResponse } from '@angular/common/http';
+import { InfoService } from './service/info.service';
  
 @Component({
   selector: 'app-root',
@@ -20,12 +21,17 @@ export class AppComponent {
   zakladka = "model"
   @ViewChild('fileInput') fileInput: ElementRef<HTMLInputElement>;
   
-  constructor(private strojenieService: StrojenieService, private odpowiedzSkokowaService: OdpowiedzSkokowaService,
+  
+  constructor(private strojenieService: StrojenieService, private infoService: InfoService, private odpowiedzSkokowaService: OdpowiedzSkokowaService,
      private cdRef: ChangeDetectorRef) 
   {Chart.register(...registerables);
     this.fileInput = new ElementRef(document.createElement('input'));
   this.fileInput.nativeElement.type = 'file';
-  this.fileInput.nativeElement.style.display = 'none';}
+  this.fileInput.nativeElement.style.display = 'none';
+  for (let i = 0; i < 10; i++) {
+      this.optionsZaklocenia.push(i);
+    }
+  }
   odpowiedz?: Odpowiedz|null;
   OdpowiedzSkokowa?: OdpowiedzSkokowa|null;
   odpowiedzMIMO?: OdpowiedzMIMO|null;
@@ -35,6 +41,7 @@ export class AppComponent {
   liczbaRegulatorow?: any;
   file: File | null = null;
   fileWizualizacji: File | null = null;
+  fileZaklocen: File | null = null;
   primaryXAxis = {valueType: 'krok'}
   title = 'Symulacje obiektu regulowanego'
   rownanie = " $ \\large G(s) = Gain * \\frac{(R1*s + Q1)(R2*s + Q2)}{(T1*s+1)(T2*s+1)(T3+3)}*e^{Delay}$  ";
@@ -49,7 +56,8 @@ export class AppComponent {
   {id: 9, nazwa: "Delay"},
   {id: 10, nazwa: "Tp"}];
   optionsQ = [-1, 0 ,1]
-
+  optionsZaklocenia: number[] = [];
+  liczbaZaklocen: number[] = [];
   chartData?: WykresDane;
   strojenie = new FormGroup({
     parObiekt: new FormGroup({
@@ -68,7 +76,8 @@ export class AppComponent {
           plik: new FormControl(this.file),
           liczbaWejsc: new FormControl(1),
           liczbaWyjsc: new FormControl(1),
-          plikWizualizacji: new FormControl(this.fileWizualizacji)
+          plikWizualizacji: new FormControl(this.fileWizualizacji),
+          plikZaklocen: new FormControl(this.fileZaklocen)
         }),
     parRegulator: new FormGroup({
       typ: new FormControl(),
@@ -97,6 +106,25 @@ export class AppComponent {
       tp: new FormControl(),
       delay: new FormControl(),
     }),
+    zaklocenia: new FormGroup({
+      gain: new FormControl(),
+      r1: new FormControl(),
+      q1: new FormControl(),
+      r2: new FormControl(),
+      q2: new FormControl(),
+      t1: new FormControl(),
+      t2: new FormControl(),
+      t3: new FormControl(),
+      tp: new FormControl(),
+      delay: new FormControl(),
+      liczbaZaklocen: new FormControl(0),
+    }),
+    wizualizacjaZaklocen: new FormGroup({
+      uSkok: new FormControl(),
+      skokZaklocenia: new FormControl(),
+      skokPowrotnyZaklocenia: new FormControl(),
+      deltaU: new FormControl()
+    })
     })
     liczbaWyjscArray = [0]
     liczbaWejscArray = [0]
@@ -119,7 +147,7 @@ export class AppComponent {
       if(updatedObiekt.controls['0']!=undefined){
           this.strojenie.controls.parObiekt.patchValue(updatedObiekt.controls['0'].value)
           this.strojenie.controls.MIMO.patchValue(updatedObiekt.controls['1'].value)
-          this.file=updatedObiekt.controls['1'].value;
+          this.file=updatedObiekt.controls['1'].value.plik;
           if(this.file==null)
           {
             this.fileWizualizacji = null
@@ -156,6 +184,10 @@ export class AppComponent {
               this.liczbaWyjscArray = Array.from({length:this.strojenie.controls.MIMO.controls.liczbaWyjsc.value}, (_,i) => i);
               this.liczbaWejscArray = Array.from({length:this.strojenie.controls.MIMO.controls.liczbaWejsc.value}, (_,i) => i);
             }
+            if(this.file) {
+              this.strojenie.controls.zaklocenia.reset();
+              this.liczbaZaklocen = [];
+            }
           }      
         console.log(this.strojenie.controls.parWizualizacja)
       }
@@ -183,6 +215,61 @@ export class AppComponent {
   setBlad(nazwa: string)
   {
     (<FormControl>this.strojenie.get('parWizualizacja.blad')).setValue(nazwa)
+  }
+  zmienLiczbeZaklocen(event: any) {
+    const liczbaZaklocenTemp :number = event.target.value;
+    this.strojenie.get('zaklocenia.liczbaZaklocen')?.setValue(liczbaZaklocenTemp)
+    this.liczbaZaklocen = [];
+    for (let i = 0; i < liczbaZaklocenTemp; i++) {
+      this.liczbaZaklocen.push(i);
+    }
+    const tablicaZaklocen = Array.from({ length: liczbaZaklocenTemp }, () => 1);
+    this.strojenie.controls.zaklocenia.controls.gain.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1));
+    this.strojenie.get('zaklocenia.r1')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    this.strojenie.get('zaklocenia.q1')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => -1))
+    this.strojenie.get('zaklocenia.r2')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    this.strojenie.get('zaklocenia.q2')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => -1))
+    this.strojenie.get('zaklocenia.t1')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    this.strojenie.get('zaklocenia.t2')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    this.strojenie.get('zaklocenia.t3')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    this.strojenie.get('zaklocenia.tp')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    this.strojenie.get('zaklocenia.delay')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    this.strojenie.get('wizualizacjaZaklocen.uSkok')!.setValue(Array.from({length: liczbaZaklocenTemp}, () => 0.0))
+    this.strojenie.get('wizualizacjaZaklocen.skokZaklocenia')!.setValue(Array.from({length: liczbaZaklocenTemp}, () => 0.0))
+    this.strojenie.get('wizualizacjaZaklocen.skokPowrotnyZaklocenia')!.setValue(Array.from({length: liczbaZaklocenTemp}, () => 0.0))
+    this.strojenie.get('wizualizacjaZaklocen.deltaU')!.setValue(Array.from({length: liczbaZaklocenTemp}, () => 0.0))
+    
+  }
+  updateZaklocenieValue(zaklocenie: number, fieldName: string, target: any) {
+    const currentValue = this.strojenie.get('zaklocenia.'+fieldName)!.value;
+    let nowaWartosc : number = target.value;
+    currentValue[zaklocenie] = nowaWartosc;
+    this.strojenie.get('zaklocenia.'+fieldName)!.setValue(currentValue);
+  }
+  updateWizualizacjiaZaklocenieValue(zaklocenie: number, fieldName: string, target: any) {
+    const currentValue = this.strojenie.get('wizualizacjaZaklocen.'+fieldName)!.value;
+    let nowaWartosc : number = target.value;
+    currentValue[zaklocenie] = nowaWartosc;
+    this.strojenie.get('wizualizacjaZaklocen.'+fieldName)!.setValue(currentValue);
+    console.log(this.strojenie.get('wizualizacjaZaklocen.'+fieldName)!.value)
+  }
+  infoZaklocenie() : void{
+    this.infoService.infoMIMOInOut(this.strojenie.get('MIMO.plikZaklocen')).subscribe({next: response =>{
+    this.liczbaZaklocen = [];
+    console.log(response)
+    for (let i = 0; i < response.wejscia; i++) {
+      this.liczbaZaklocen.push(i);
+    }
+    this.strojenie.get('wizualizacjaZaklocen.uSkok')!.setValue(Array.from({length: response.wejscia}, () => 0.0))
+    this.strojenie.get('wizualizacjaZaklocen.skokZaklocenia')!.setValue(Array.from({length: response.wejscia}, () => 0.0))
+    this.strojenie.get('wizualizacjaZaklocen.skokPowrotnyZaklocenia')!.setValue(Array.from({length: response.wejscia}, () => 0.0))
+    this.strojenie.get('wizualizacjaZaklocen.deltaU')!.setValue(Array.from({length: response.wejscia}, () => 0.0))
+    
+  },
+    error: () => {
+      this.fileZaklocen=null;
+      this.strojenie.get('MIMO.plikZaklocen')?.setValue(null)
+    }})
   }
   onYZadChange(index: number, value: any) {
     let yZad = this.strojenie.get('parWizualizacja.yZad')?.value;
@@ -231,7 +318,7 @@ export class AppComponent {
 
   onSubmit(){
     console.log("click")
-    console.log(this.strojenie.controls.parWizualizacja)
+    console.log(this.strojenie)
     this.odpowiedzMIMO = null;
     this.odpowiedz = null;
     this.czyLaduje=true;
@@ -298,7 +385,7 @@ export class AppComponent {
       }
       console.log(this.chartData)
     }}
-    createChart()
+  createChart()
     {
       console.log("createChart")
       console.log(this.chartData)
@@ -555,15 +642,23 @@ export class AppComponent {
     else
       return true;
   }
-  onFileChange(event: any) {
+  onFileWizualizacjiChange(event: any) {
     const file = event.target.files[0];
     this.fileWizualizacji = file;
     this.strojenie.get('MIMO.plikWizualizacji')?.patchValue(file);
     this.cdRef.detectChanges();
   }
+  onFileZaklocenChange(event: any) {
+    const file = event.target.files[0];
+    this.fileZaklocen = file;
+    this.strojenie.get('MIMO.plikZaklocen')?.patchValue(file);
+    this.cdRef.detectChanges();
+  }
   obiektSymulacjiInputs() {
+    console.log(this.file)
     if(this.czyInnyObiekt)
     {
+      console.log("pierwsze")
       this.strojenie.get('parObiektSymulacji')?.reset();
       this.strojenie.get('parObiektSymulacji')?.disable();
       this.fileWizualizacji=null;
@@ -572,6 +667,7 @@ export class AppComponent {
     }
     else
     {
+      console.log("drugie")
       this.strojenie.get('parObiektSymulacji')?.enable();
       this.strojenie.get('parObiektSymulacji')?.patchValue(this.strojenie.get('parObiekt')!.value);
     }

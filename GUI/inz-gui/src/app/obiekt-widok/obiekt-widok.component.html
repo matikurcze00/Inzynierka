@@ -33,20 +33,6 @@
         <div class="container ml-0 mr-0 mt-5 mx-auto">
           <button class="btn btn-secondary" (click)="infoWejscieWyjscia()" [disabled]="this.obiektForm.get('obiekt.1.plik')?.value==null" type="button"> Wyślij obiekt </button>
         </div>
-        <!-- <form [formGroup]="obiektForm" >
-          <div class="container ml-0 mr-0 mx-auto">
-            <div class="form-group mb-3" formArrayName="obiekt">
-              <div class="form-row align-items-center" [formGroupName]="1">
-                <div class="input-group col">
-                  <label class="input-group-text"> Liczba wejść:  </label>
-                  <input class="form-control" type="number" placeholder="1" formControlName="liczbaWejsc"/>
-                  <label class="input-group-text"> Liczba wyjść:   </label>
-                  <input class="form-control" type="number" placeholder="1" formControlName="liczbaWyjsc"/>
-                </div>
-              </div>
-            </div>
-          </div>
-        </form>  -->
       <div *ngIf="this.obiektForm.get('obiekt.1.liczbaWejsc')?.value!=1||
         this.obiektForm.get('obiekt.1.liczbaWyjsc')?.value!=1">
         <h2>

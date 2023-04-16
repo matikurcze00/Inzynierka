@@ -22,6 +22,7 @@ public class MIMO {
     private int liczbaIN;
     private int delayMax = 0;
     private int dlugosc;
+    private MIMO zakloceniaMierzalne;
 
     public MIMO() {
     }
@@ -45,6 +46,7 @@ public class MIMO {
         obliczDlugosc();
         obliczYMax();
     }
+
     public MIMO(ParObiektMIMO[] parObiektMIMOS, String blad) {
         stworzTransmitancje(parObiektMIMOS);
         liczbaOUT = transmitancja.get(0).size();
@@ -84,11 +86,28 @@ public class MIMO {
         }
         return Yakt;
     }
-
+    public double[] obliczKrok(double[] du, double[] dUz) {
+        obliczU(du);
+        double[] Yakt = zakloceniaMierzalne.obliczKrok(dUz);
+        for (int i = 0; i < liczbaOUT; i++) {
+            double YaktIN = 0.0;
+            for (int j = 0; j < liczbaIN; j++) {
+                YaktIN += transmitancja.get(j).get(i).obliczKrok(U.get(j));
+            }
+            Yakt[i] += YaktIN;
+        }
+        for (int i = 0; i < liczbaOUT; i++) {
+            List<Double> Ytemp = Y.get(i);
+            for (int j = Y.get(i).size() - 1; j > 0; j--)
+                Ytemp.set(j, Ytemp.get(j - 1));
+            Ytemp.set(0, Yakt[i]);
+            Y.set(i, Ytemp);
+        }
+        return Yakt;
+    }
     public double obliczKrok(double du, int IN, int OUT) {
         obliczU(du, IN);
-        double YaktIN = 0.0;
-        YaktIN += transmitancja.get(IN).get(OUT).obliczKrok(U.get(IN));
+        double YaktIN = transmitancja.get(IN).get(OUT).obliczKrok(U.get(IN));
         List<Double> Ytemp = Y.get(OUT);
         for (int j = Y.get(OUT).size() - 1; j > 0; j--)
             Ytemp.set(j, Ytemp.get(j - 1));
@@ -96,6 +115,10 @@ public class MIMO {
         Y.set(OUT, Ytemp);
 
         return YaktIN;
+    }
+
+    public double obliczKrokZaklocenia(double du, int IN, int OUT) {
+        return zakloceniaMierzalne.obliczKrok(du, IN, OUT);
     }
 
     public void stworzTransmitancje(ParObiektMIMO[] parObiektMIMOS) {
@@ -170,9 +193,18 @@ public class MIMO {
 
         resetObiektu();
         double blad = 0.0;
+        if(zakloceniaMierzalne !=null) {
+            blad = obliczPraceZZakloceniem(regulator, cel, blad);
+        } else {
+            blad = obliczPraceBezZaklocen(regulator, cel, blad);
+        }
+        blad = blad / this.dlugosc * liczbaOUT * liczbaOUT;
+        resetObiektu();
+        return blad;
+    }
+
+    private double obliczPraceBezZaklocen(Regulator regulator, double[] cel, double blad) {
         double[] tempCel = new double[liczbaOUT];
-
-
         for (int k = 0; k < liczbaOUT; k++) {
             for (int i = 0; i < liczbaOUT; i++)
                 tempCel[i] = 0;
@@ -190,8 +222,53 @@ public class MIMO {
                 }
             }
         }
-        blad = blad / this.dlugosc * liczbaOUT * liczbaOUT;
-        resetObiektu();
+        return blad;
+    }
+
+    private double obliczPraceZZakloceniem(Regulator regulator, double[] cel, double blad) {
+        double[] tempCel = new double[liczbaOUT];
+        for (int k = 0; k < liczbaOUT; k++) {
+            for (int i = 0; i < liczbaOUT; i++)
+                tempCel[i] = 0;
+            tempCel[k] = cel[k];
+            regulator.setCel(tempCel);
+            resetObiektu();
+            regulator.resetujRegulator();
+            for (int i = 0; i < Math.floorDiv(this.dlugosc,2); i++) {
+                double[] Ytepm = obliczKrok(regulator.policzOutput(getAktualne()));
+                for (int j = 0; j < Ytepm.length; j++) {
+                    if (this.blad.equals("srednio"))
+                        blad += Math.pow(Ytepm[j] - tempCel[j], 2);
+                    else if (this.blad.equals("absolutny"))
+                        blad += Math.abs(Ytepm[j] - tempCel[j]);
+                }
+            }
+            double[] zakloceniaU = new double[zakloceniaMierzalne.getTransmitancja().size()];
+            for(int i = 0; i < zakloceniaMierzalne.getTransmitancja().size(); i++)
+                zakloceniaU[i] = zakloceniaMierzalne.getUMax(i)/Math.floorDiv(this.dlugosc,400);
+
+            for (int i = 0; i < Math.floorDiv(this.dlugosc,4); i++) {
+                double[] Ytepm = obliczKrok(regulator.policzOutput(getAktualne(), zakloceniaU),zakloceniaU);
+                for (int j = 0; j < Ytepm.length; j++) {
+                    if (this.blad.equals("srednio"))
+                        blad += Math.pow(Ytepm[j] - tempCel[j], 2);
+                    else if (this.blad.equals("absolutny"))
+                        blad += Math.abs(Ytepm[j] - tempCel[j]);
+                }
+            }
+            for(int i = 0; i < zakloceniaMierzalne.getTransmitancja().size(); i++)
+                zakloceniaU[i] = 0.0;
+
+            for (int i = 0; i < Math.floorDiv(this.dlugosc,4); i++) {
+                double[] Ytepm = obliczKrok(regulator.policzOutput(getAktualne(), zakloceniaU),zakloceniaU);
+                for (int j = 0; j < Ytepm.length; j++) {
+                    if (this.blad.equals("srednio"))
+                        blad += Math.pow(Ytepm[j] - tempCel[j], 2);
+                    else if (this.blad.equals("absolutny"))
+                        blad += Math.abs(Ytepm[j] - tempCel[j]);
+                }
+            }
+        }
         return blad;
     }
 
@@ -268,6 +345,9 @@ public class MIMO {
         for (List<TransmitancjaCiagla> ListaTransmitancji : transmitancja)
             for (TransmitancjaCiagla tran : ListaTransmitancji)
                 tran.reset();
+        if(zakloceniaMierzalne !=null) {
+            zakloceniaMierzalne.resetObiektu();
+        }
     }
 
     public void obliczDelayMax() {
@@ -292,7 +372,8 @@ public class MIMO {
                 List<Double> dlugoscTemp = new ArrayList<Double>();
                 dlugoscTemp.add((this.obliczKrok(U, j, i) - this.getYpp(i)) / U);
                 dlugoscTemp.add((this.obliczKrok(Utemp, j, i) - this.getYpp(i)) / U);
-                while (!(Math.abs(dlugoscTemp.get(k - 1) - dlugoscTemp.get(k - 2)) < 0.005) || dlugoscTemp.get(k - 2) == 0.0) {
+                while ((!(Math.abs(dlugoscTemp.get(k - 1) - dlugoscTemp.get(k - 2)) < 0.005) || dlugoscTemp.get(k - 2) == 0.0)
+                    &&((k<=10) || (k>10 && dlugoscTemp.get(k - 2) != 0.0))) {
                     dlugoscTemp.add((this.obliczKrok(Utemp, j, i) - this.getYpp(i)) / U);
                     k++;
                 }
@@ -308,5 +389,10 @@ public class MIMO {
         this.dlugosc = dlugoscInt;
         if (this.dlugosc < 40)
             this.dlugosc = 40;
+    }
+
+    public void setZakloceniaMierzalne(MIMO zaklocenieMierzalne) {
+        this.zakloceniaMierzalne = zaklocenieMierzalne;
+        zaklocenieMierzalne.resetObiektu();
     }
 }

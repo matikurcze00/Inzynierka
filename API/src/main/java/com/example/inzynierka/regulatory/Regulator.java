@@ -9,8 +9,10 @@ abstract public class Regulator {
     double uMax;
 
     abstract public double policzOutput(double aktualna);
+    abstract public double policzOutput(double aktualna, double[] sterowanieZaklocenia);
 
     abstract public double[] policzOutput(double[] aktualna);
+    abstract public double[] policzOutput(double[] aktualna, double[] sterowanieZaklocenia);
 
     abstract public void zmienWartosci(double[] wartosci);
 

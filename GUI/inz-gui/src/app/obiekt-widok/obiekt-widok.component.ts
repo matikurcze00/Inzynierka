@@ -65,10 +65,8 @@ export class ObiektWidokComponent implements OnInit {
     this.czyError = false;
   }
   infoWejscieWyjscia(): void{
-    console.log("wchodze");
     this.infoService.infoMIMOInOut(this.obiektForm.get('obiekt.1.plik')).subscribe({next: response =>{
       this.czyError = false;
-      console.log("ok")
       this.obiektForm.get('obiekt.1.liczbaWejsc')?.setValue(response.wejscia)
       this.obiektForm.get('obiekt.1.liczbaWyjsc')?.setValue(response.wyjscia)
     },
@@ -77,7 +75,6 @@ export class ObiektWidokComponent implements OnInit {
       this.obiektForm.get('obiekt')?.get([1])?.patchValue({ plik: null, liczbaWejsc: 1, liczbaWyjsc: 1 }); 
       this.file=null
     }})
-    
   }
   ngOnInit(): void {
     this.updateEvent.emit(this.obiektForm.controls.obiekt);

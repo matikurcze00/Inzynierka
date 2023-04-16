@@ -58,7 +58,13 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.example.inzynierka</groupId>
+            <artifactId>Jama</artifactId>
+            <version>1.0.3</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/Jama-1.0.3.jar</systemPath>
+        </dependency>
     </dependencies>
 
     <build>

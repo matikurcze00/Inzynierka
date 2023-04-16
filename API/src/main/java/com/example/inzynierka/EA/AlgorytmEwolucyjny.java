@@ -41,6 +41,7 @@ public class AlgorytmEwolucyjny {
             }
             regulator.zmienWartosci(osobnikTemp.getParametry());
             SISO.resetObiektu();
+            regulator.resetujRegulator();
             osobnikTemp.setWartosc(SISO.obliczPraceObiektu(regulator, cel));
             populacja.add(osobnikTemp);
         }
@@ -73,6 +74,7 @@ public class AlgorytmEwolucyjny {
             }
             regulator.zmienWartosci(osobnikTemp.getParametry());
             SISO.resetObiektu();
+            regulator.resetujRegulator();
             osobnikTemp.setWartosc(SISO.obliczPraceObiektu(regulator, cel));
             reprodukcja.add(osobnikTemp);
         }
@@ -88,6 +90,7 @@ public class AlgorytmEwolucyjny {
             }
             regulator.zmienWartosci(osobnikTemp.getParametry());
             SISO.resetObiektu();
+            regulator.resetujRegulator();
             osobnikTemp.setWartosc(SISO.obliczPraceObiektu(regulator, cel));
             reprodukcja.add(osobnikTemp);
         }

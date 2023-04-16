@@ -1,6 +1,7 @@
 package com.example.inzynierka.obiekty;
 
 import com.example.inzynierka.modele.ParObiekt;
+import com.example.inzynierka.modele.Zaklocenia;
 import com.example.inzynierka.regulatory.Regulator;
 import lombok.Data;
 
@@ -13,6 +14,7 @@ public class SISO {
 
     private TransmitancjaCiagla transmitancja;
     private List<Double> U;
+    private List<List<Double>> Uz;
     private List<Double> Y;
     private double uMin;
     private double uMax;
@@ -20,9 +22,24 @@ public class SISO {
     private int dlugosc;
     private String blad;
 
+    private List<TransmitancjaCiagla> zakloceniaMierzalne;
+
     public SISO() {
     }
 
+    public SISO(ParObiekt parObiekt, double uMax, double uMin, String blad, Zaklocenia zakloceniaMierzalne) {
+        this(parObiekt.getGain(), parObiekt.getR1(), parObiekt.getQ1(), parObiekt.getR2(),
+            parObiekt.getQ2(), parObiekt.getT1(), parObiekt.getT2(), parObiekt.getT3()
+            , parObiekt.getDelay(), parObiekt.getTp(), uMax, uMin, blad);
+        this.zakloceniaMierzalne = new ArrayList<>();
+        if(zakloceniaMierzalne.getGain()!=null){
+            for(int i = 0; i < zakloceniaMierzalne.getGain().length; i++) {
+                this.zakloceniaMierzalne.add(new TransmitancjaCiagla(zakloceniaMierzalne.getGain()[i], zakloceniaMierzalne.getR1()[i], zakloceniaMierzalne.getQ1()[i],
+                    zakloceniaMierzalne.getR2()[i], zakloceniaMierzalne.getQ2()[i], zakloceniaMierzalne.getT1()[i], zakloceniaMierzalne.getT2()[i],
+                    zakloceniaMierzalne.getT3()[i], zakloceniaMierzalne.getDelay()[i], zakloceniaMierzalne.getTp()[i]));
+        }}
+        resetObiektu();
+    }
     public SISO(ParObiekt parObiekt, double uMax, double uMin, String blad) {
         this(parObiekt.getGain(), parObiekt.getR1(), parObiekt.getQ1(), parObiekt.getR2(),
                 parObiekt.getQ2(), parObiekt.getT1(), parObiekt.getT2(), parObiekt.getT3()
@@ -43,7 +60,6 @@ public class SISO {
 
     public Double getAktualna() {
         try {
-
             return Y.get(0);
         } catch (Exception ex) {
             return 0.0;
@@ -54,18 +70,51 @@ public class SISO {
         setU(new ArrayList<Double>(Collections.nCopies(U.size(), transmitancja.getUpp())));
         setY(new ArrayList<Double>(Collections.nCopies(Y.size(), transmitancja.getYpp())));
         transmitancja.reset();
+        if(zakloceniaMierzalne !=null && !zakloceniaMierzalne.isEmpty()) {
+            this.Uz = new ArrayList();
+            for(TransmitancjaCiagla zaklocenie: zakloceniaMierzalne) {
+                Uz.add(new ArrayList<>(Collections.nCopies(3 + zaklocenie.getDelay(), 0.0)));
+                zaklocenie.reset();
+            }
+        }
     }
 
     public double obliczPraceObiektu(Regulator regulator, double[] cel) {
         resetObiektu();
         regulator.setCel(cel);
-        double[] Y = new double[dlugosc];
-        for (int i = 0; i < this.dlugosc; i++) {
-            Y[i] = obliczKrok(regulator.policzOutput(getAktualna()));
-//            blad+=Math.pow(obliczKrok(regulator.policzOutput(getAktualna()))-cel[0],2);
+        double[] Y ;
+        if(zakloceniaMierzalne !=null && !zakloceniaMierzalne.isEmpty()) {
+            Y = obliczPraceZZakloceniem(regulator);
+        } else {
+            Y = obliczPraceBezZaklocen(regulator);
         }
         resetObiektu();
         return obliczBlad(Y, cel[0]);
+    }
+
+    private double[] obliczPraceBezZaklocen(Regulator regulator) {
+        double[] Y = new double[dlugosc];
+        for (int i = 0; i < this.dlugosc; i++) {
+            Y[i] = obliczKrok(regulator.policzOutput(getAktualna()));
+        }
+        return Y;
+    }
+
+    public double[] obliczPraceZZakloceniem(Regulator regulator) {
+        double[] Y = new double[dlugosc];
+        for (int i = 0; i < Math.floorDiv(this.dlugosc,2); i++)
+            Y[i] = obliczKrok(regulator.policzOutput(getAktualna()));
+        double[] zakloceniaU = new double[zakloceniaMierzalne.size()];
+        for(int i = 0; i< zakloceniaU.length; i++)
+            zakloceniaU[i] = 3 * transmitancja.getGain() / zakloceniaMierzalne.get(i).getGain();
+        for (int i = Math.floorDiv(this.dlugosc,2); i < Math.floorDiv(this.dlugosc*3,4); i++)
+            Y[i] = obliczKrok(regulator.policzOutput(getAktualna(), zakloceniaU), zakloceniaU);
+        for(int i = 0; i< zakloceniaU.length; i++)
+            zakloceniaU[i] = 0.0;
+        for (int i = Math.floorDiv(this.dlugosc*3,4); i < dlugosc; i++)
+            Y[i] = obliczKrok(regulator.policzOutput(getAktualna(),zakloceniaU),zakloceniaU);
+
+        return Y;
     }
 
     public double obliczKrok(double du) {
@@ -78,7 +127,38 @@ public class SISO {
         Y.set(0, Yakt);
         return Yakt;
     }
+    public double obliczKrok(double du, double[] duZ) {
+        obliczU(du);
+        double Yakt;
+        Yakt = transmitancja.obliczKrok(U);
+        for(int i = 0; i < duZ.length; i++) {
+            Yakt+=obliczKrokZaklocenia(duZ[i], i);
+        }
+        for (int i = Y.size() - 1; i > 0; i--)
+            Y.set(i, Y.get(i - 1));
+        Y.set(0, Yakt);
+        return Yakt;
+    }
+    public double obliczKrokZaklocenia(double du, int zaklocenie) {
+        double Yakt;
+        obliczUZ(du,zaklocenie);
+        Yakt = this.zakloceniaMierzalne.get(zaklocenie).obliczKrok(Uz.get(zaklocenie));
 
+        for (int i = Y.size() - 1; i > 0; i--)
+            Y.set(i, Y.get(i - 1));
+        Y.set(0, Yakt);
+        return Yakt;
+    }
+    public void obliczUZ(double du, int zaklocenie) {
+        double Uakt = Uz.get(zaklocenie).get(0) + du;
+        if (Uakt > uMax)
+            Uakt = uMax;
+        else if (Uakt < uMin)
+            Uakt = uMin;
+        for (int i = Uz.get(zaklocenie).size() - 1; i > 0; i--)
+            Uz.get(zaklocenie).set(i, Uz.get(zaklocenie).get(i - 1));
+        Uz.get(zaklocenie).set(0, Uakt);
+    }
     public void obliczU(double du) {
         double Uakt = U.get(0) + du;
         if (Uakt > uMax)

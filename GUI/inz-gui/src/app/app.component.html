@@ -87,6 +87,19 @@
           <label class="btn btn-secondary" for="option3-wizualizacja"
             >Parametry strojenia</label
           >
+          <input
+            mdbRadio
+            type="radio"
+            class="btn-check"
+            name="options-obiekt"
+            id="option4-zaklocenia"
+            autocomplete="off"
+            [checked]="zakladkaWizualizacja == 'zaklocenia'"
+            (change)="zakladkaWizualizacja = 'zaklocenia'"
+          />
+          <label class="btn btn-secondary" for="option4-zaklocenia"
+            >Zakłócenia mierzalne</label
+          >
         </div>
       </div>
       <div
@@ -134,6 +147,207 @@
           <label class="btn btn-secondary" for="option3-blad"
             >Mediana błędu</label
           >
+        </div>
+      </div>
+      <div class="zaklocenia"
+      [hidden]="this.zakladkaWizualizacja != 'zaklocenia'">
+        <div *ngIf="this.file==null"> <b>Ustaw proszę liczbę zakłóceń mierzalnych</b>
+        <div class="row mx-auto mb-3" style="width:50%;">
+          <div class="input-group">
+            <label class="input-group-text col-9">Liczba zakłóceń mierzalnych </label>
+            <select class="form-control col-1" (change)="zmienLiczbeZaklocen($event)">
+              <option *ngFor="let option of optionsZaklocenia" [value]="option">{{option}}</option>
+            </select>
+          </div>
+        </div>
+        <div class="mb-3" *ngIf="this.liczbaZaklocen.length!=0">
+
+            <h5 class="mt-5">Wprowadź wartości transmitancji:</h5>
+            <div *ngFor="let zaklocenie of this.liczbaZaklocen">
+              <b>Zakłócenie nr {{zaklocenie+1}}</b>
+              <div class="container ml-0 mr-0 mx-auto">
+                <div
+                  class="form-row align-items-center"
+                >
+                  <div class="input-group col">
+                    <label class="input-group-text"> Gain &nbsp; </label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      (input)="updateZaklocenieValue(zaklocenie, 'gain', $event.target)"                        
+                      placeholder="1.0"
+                    />
+                    <label class="input-group-text">R1</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      (input)="updateZaklocenieValue(zaklocenie, 'r1', $event.target)"  
+                      placeholder="1.0"
+                    />
+                    <label class="input-group-text">Q1</label>
+                    <select
+                      class="form-control"
+                      (input)="updateZaklocenieValue(zaklocenie, 'q1', $event.target)"  
+                      placeholder="1"
+                    >
+                      <option *ngFor="let option of optionsQ" [value]="option">
+                        {{ option }}
+                      </option>
+                    </select>
+                    <label class="input-group-text">R2</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      (input)="updateZaklocenieValue(zaklocenie, 'r2', $event.target)"  
+                      placeholder="1.0"
+                    />
+                    <label class="input-group-text">Q2</label>
+                    <select
+                      class="form-control"
+                      (input)="updateZaklocenieValue(zaklocenie, 'q2', $event.target)"  
+                      placeholder="1"
+                    >
+                      <option *ngFor="let option of optionsQ" [value]="option">
+                        {{ option }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="input-group col-3">
+                    <label class="input-group-text">T1</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      (input)="updateZaklocenieValue(zaklocenie, 't1', $event.target)"  
+                      placeholder="1.0"
+                      />
+                    <label class="input-group-text">T2</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      (input)="updateZaklocenieValue(zaklocenie, 't2', $event.target)"  
+                      placeholder="1.0"
+                      />
+                    <label class="input-group-text">T3</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      (input)="updateZaklocenieValue(zaklocenie, 't3', $event.target)"  
+                      placeholder="1.0"
+                      />
+                      <label class="input-group-text">Tp</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      (input)="updateZaklocenieValue(zaklocenie, 'tp', $event.target)"  
+                      placeholder="1.0"
+                      />
+                    <label class="input-group-text">Delay</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      (input)="updateZaklocenieValue(zaklocenie, 'delay', $event.target)"  
+                      placeholder="1.0"
+                      />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="this.file!=null">
+          <h5 class="mt-5" >Wprowadź plik przedstawiający zakłócenia mierzalne obiektu:</h5>
+          <span class="p-3">
+            {{ strojenie.get('MIMO.plikZaklocen')?.value?.name ? 'Wybrany plik to: ' +fileZaklocen!.name : 'Wybierz plik lub go tu przyciągnij i upuść ' }}</span>
+          <input class="file-input" type="file" #fileInput  (change)="onFileZaklocenChange($event)">
+          <div class="container ml-0 mr-0 mt-5 mx-auto">
+            <button class="btn btn-secondary" (click)="infoZaklocenie()" [disabled]="fileZaklocen==null" type="button"> Wyślij obiekt </button>
+          </div>
+        </div>
+        <div *ngIf="liczbaZaklocen.length!=0">
+          <div class="text-center mt-5">
+            <b>Ustaw proszę na jaką wartość ma być ustawione sterowanie zakłócenia: </b>
+            <div class="form-row align-items-center mb-3">
+              <div class="input-group col align-items-center">
+                <div
+                  *ngFor="let zaklocenie of liczbaZaklocen; let i = index"
+                  class="mx-auto"
+                  style="margin-left: 20%; margin-right: 20%"
+                >
+                  <label class="input-group-text mx-auto d-block text-center">
+                    Zakłócenie {{ i + 1 }}
+                  </label>
+                  <input
+                    placeholder="0"
+                    class="form-control mx-auto d-block text-center"
+                    (input)="updateWizualizacjiaZaklocenieValue(zaklocenie, 'uSkok', $event.target)"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="text-center mt-5">
+            <b>Ustaw proszę maksymalną wartość zmiany sterowania zakłócenia w jednym kroku: </b>
+            <div class="form-row align-items-center mb-3">
+              <div class="input-group col align-items-center">
+                <div
+                  *ngFor="let zaklocenie of liczbaZaklocen; let i = index"
+                  class="mx-auto"
+                  style="margin-left: 20%; margin-right: 20%"
+                >
+                  <label class="input-group-text mx-auto d-block text-center">
+                    Zakłócenie {{ i + 1 }}
+                  </label>
+                  <input
+                    placeholder="0"
+                    class="form-control mx-auto d-block text-center"
+                    (input)="updateWizualizacjiaZaklocenieValue(zaklocenie, 'deltaU', $event.target)"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="text-center mt-5">
+            <b>Ustaw proszę krok w którym ma nastąpić skok wartości sterowania zakłócenia: </b>
+            <div class="form-row align-items-center mb-3">
+              <div class="input-group col align-items-center">
+                <div
+                  *ngFor="let zaklocenie of liczbaZaklocen; let i = index"
+                  class="mx-auto"
+                  style="margin-left: 20%; margin-right: 20%"
+                >
+                  <label class="input-group-text mx-auto d-block text-center">
+                    Zakłócenie {{ i + 1 }}
+                  </label>
+                  <input
+                    placeholder="0"
+                    class="form-control mx-auto d-block text-center"
+                    (input)="updateWizualizacjiaZaklocenieValue(zaklocenie, 'skokZaklocenia', $event.target)"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="text-center mt-5">
+            <b>Ustaw proszę krok w którym ma nastąpić koniec skoku sterowania zakłócenia: </b>
+            <div class="form-row align-items-center mb-3">
+              <div class="input-group col align-items-center">
+                <div
+                  *ngFor="let zaklocenie of liczbaZaklocen; let i = index"
+                  class="mx-auto"
+                  style="margin-left: 20%; margin-right: 20%"
+                >
+                  <label class="input-group-text mx-auto d-block text-center">
+                    Zakłócenie {{ i + 1 }}
+                  </label>
+                  <input
+                  placeholder="0"
+                    class="form-control mx-auto d-block text-center"
+                    (input)="updateWizualizacjiaZaklocenieValue(zaklocenie, 'skokPowrotnyZaklocenia', $event.target)"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <div
@@ -490,6 +704,7 @@
             </div>
           </div>
         </div>
+
           <div
             class="form-row align-items-center mb-3 justify-content-center"
             style="margin-left: 20%; margin-right: 20%; display: flex"
@@ -506,11 +721,9 @@
             </label>
           </div>
           <div *ngIf="
-          !this.strojenie.get('MIMO.plik')?.value &&
-          this.strojenie.get('MIMO.liczbaWejsc')?.value == 1 &&
-          this.strojenie.get('MIMO.liczbaWyjsc')?.value == 1
+          this.file==null
         ">
-            {{ rownanie }}
+            <!-- {{ rownanie }} -->
             <h5 class="mt-5">Wprowadź wartości transmitancji:</h5>
             <div class="container ml-0 mr-0 mx-auto">
               <div class="form-group mb-3" [formGroup]="strojenie">
@@ -612,11 +825,11 @@
               </div>
             </div>
           </div>
-          <div *ngIf="this.strojenie.get('MIMO.plik')?.value">
+          <div *ngIf="this.file!=null">
             <h5 class="mt-5" [ngClass]="{'text-muted': !czyInnyObiekt}">Wprowadź plik przedstawiający obiekt symulacji:</h5>
             <span class="p-3"  [ngClass]="{'text-muted': !czyInnyObiekt}">
               {{ strojenie.get('MIMO.plikWizualizacji')?.value?.name ? 'Wybrany plik to: ' +fileWizualizacji!.name : 'Wybierz plik lub go tu przyciągnij i upuść ' }}</span>
-            <input class="file-input" type="file" #fileInput [disabled]="!czyInnyObiekt" (change)="onFileChange($event)">
+            <input class="file-input" type="file" #fileInput [disabled]="!czyInnyObiekt" (change)="onFileWizualizacjiChange($event)">
           </div>
         
       </div>
