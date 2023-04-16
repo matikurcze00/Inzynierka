@@ -254,8 +254,9 @@ export class AppComponent {
     console.log(this.strojenie.get('wizualizacjaZaklocen.'+fieldName)!.value)
   }
   infoZaklocenie() : void{
-    this.infoService.infoMIMOInOut(this.strojenie.get('MIMO.plik')).subscribe({next: response =>{
+    this.infoService.infoMIMOInOut(this.strojenie.get('MIMO.plikZaklocen')).subscribe({next: response =>{
     this.liczbaZaklocen = [];
+    console.log(response)
     for (let i = 0; i < response.wejscia; i++) {
       this.liczbaZaklocen.push(i);
     }
