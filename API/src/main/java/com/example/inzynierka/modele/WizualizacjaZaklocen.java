@@ -4,15 +4,15 @@ import lombok.Data;
 
 @Data
 public class WizualizacjaZaklocen {
-    public WizualizacjaZaklocen(double[] uSkok, int[] skokZaklocenia, int[] skokPowrotnyZaklocenia, double[] deltaU) {
+    public WizualizacjaZaklocen(Double[] uSkok, Integer[] skokZaklocenia, Integer[] skokPowrotnyZaklocenia, Double[] deltaU) {
         this.uSkok = uSkok;
         this.skokZaklocenia = skokZaklocenia;
         this.skokPowrotnyZaklocenia = skokPowrotnyZaklocenia;
         this.deltaU = deltaU;
     }
 
-    private double[] uSkok;
-    private int[] skokZaklocenia;
-    private int[] skokPowrotnyZaklocenia;
-    private double[] deltaU;
+    private Double[] uSkok = null;
+    private Integer[] skokZaklocenia = null;
+    private Integer[] skokPowrotnyZaklocenia = null;
+    private Double[] deltaU = null;
 }

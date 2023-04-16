@@ -43,20 +43,22 @@ public class Controller {
     @RequestMapping(value = "/info/MIMO", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<OdpowiedzInfoMIMO> strojenieMIMO(@RequestPart("file") MultipartFile file) {
-        System.out.println("infoMIMO::start ");
+        System.out.println("infoMIMO:: start ");
         OdpowiedzInfoMIMO odpowiedz = infoService.InfoWejsciaWyjscia(file);
+        System.out.println("infoMIMO:: koniec");
         if(odpowiedz == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } else {
             return ResponseEntity.ok(odpowiedz);
         }
+
     }
 
     @RequestMapping(value = "/strojenie/MIMO", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<OdpowiedzStrojenieMIMO> strojenieMIMO(@RequestPart("file") MultipartFile[] file, @ModelAttribute ParRegulator parRegulator, @ModelAttribute ParWizualizacja parWizualizacja, @ModelAttribute WizualizacjaZaklocen wizualizacjaZaklocen) {
         System.out.println("strojenieMIMO::start ");
-        OdpowiedzStrojenieMIMO odpowiedz = strojenieService.MIMOStrojenie(file, parRegulator, parWizualizacja);
+        OdpowiedzStrojenieMIMO odpowiedz = strojenieService.MIMOStrojenie(file, parRegulator, parWizualizacja, wizualizacjaZaklocen);
         if (odpowiedz == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } else {

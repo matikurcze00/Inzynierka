@@ -97,7 +97,7 @@ public class DMCAnalityczny extends Regulator {
         Arrays.fill(yTemp, aktualna);
         Matrix y = new Matrix(yTemp, 1);
         Matrix Utemp = K.times(yZad.transpose().minus(y.transpose()).minus(Mp.times(dU.transpose()))
-            .minus(Mpz.plus(Mz).times(dUz.transpose())));
+            .minus((Mpz.plus(Mz)).times(dUz.transpose())));
         poprawaUTemp(Utemp, 0);
         dodajdU(Utemp.get(0, 0));
         return Utemp.get(0, 0);
@@ -142,7 +142,27 @@ public class DMCAnalityczny extends Regulator {
         return tempdU;
     }
     public double[] policzOutput(double[] aktualna, double[] sterowanieZaklocenia) {
-        return new double[]{0.0};
+        int OUT = cel.length;
+        dodajdUz(sterowanieZaklocenia);
+        double[] celTemp = new double[N * OUT];
+        for (int i = 0; i < N * OUT; i++) {
+            celTemp[i] = cel[i % OUT];
+        }
+        Matrix yZad = new Matrix(celTemp, 1);
+        double[] yTemp = new double[N * OUT];
+        for (int i = 0; i < N * OUT; i++) {
+            yTemp[i] = aktualna[i % OUT];
+        }
+        Matrix y = new Matrix(yTemp, 1);
+        Matrix Utemp = K.times(yZad.transpose().minus(y.transpose()).minus(Mp.times(dU.transpose()))
+            .minus(Mpz.plus(Mz).times(dUz.transpose())));
+        double[] tempdU = new double[getLambda().size()];
+        for (int i = 0; i < getLambda().size(); i++) {
+            poprawaUTemp(Utemp, i);
+            tempdU[i] = Utemp.get(i, 0);
+        }
+        dodajdU(tempdU);
+        return tempdU;
     }
 
     protected void policzWartosci(SISO siso) {
@@ -151,11 +171,11 @@ public class DMCAnalityczny extends Regulator {
         policzMp();
         policzM();
         policzK();
-        if(siso.getZaklocenia()!=null && !siso.getZaklocenia().isEmpty()) {
-            resetujZaklocenia(siso.getZaklocenia().size());
+        if(siso.getZakloceniaMierzalne()!=null && !siso.getZakloceniaMierzalne().isEmpty()) {
+            resetujZaklocenia(siso.getZakloceniaMierzalne().size());
             policzSz(siso);
-            policzMz(siso.getZaklocenia().size(), 1);
-            policzMpz(siso.getZaklocenia().size(), 1);
+            policzMz(siso.getZakloceniaMierzalne().size(), 1);
+            policzMpz(siso.getZakloceniaMierzalne().size(), 1);
         }
         resetujRegulator(1);
         siso.resetObiektu();
@@ -167,6 +187,12 @@ public class DMCAnalityczny extends Regulator {
         policzMp(mimo.getLiczbaIN(), mimo.getLiczbaOUT());
         policzM(mimo.getLiczbaIN(), mimo.getLiczbaOUT());
         policzK(mimo.getLiczbaIN());
+        if(mimo.getZakloceniaMierzalne()!=null ) {
+            resetujZaklocenia(mimo.getZakloceniaMierzalne().getLiczbaIN());
+            policzSz(mimo);
+            policzMz(mimo.getZakloceniaMierzalne().getLiczbaIN(), mimo.getZakloceniaMierzalne().getLiczbaOUT());
+            policzMpz(mimo.getZakloceniaMierzalne().getLiczbaIN(), mimo.getZakloceniaMierzalne().getLiczbaOUT());
+        }
         resetujRegulator(mimo.getLiczbaIN());
         mimo.resetObiektu();
     }
@@ -229,7 +255,7 @@ public class DMCAnalityczny extends Regulator {
 
     protected void policzSz(SISO obiekt) {
         this.Sz = new ArrayList<>();
-        for(int i = 0; i < obiekt.getZaklocenia().size(); i++) {
+        for(int i = 0; i < obiekt.getZakloceniaMierzalne().size(); i++) {
             List<Double> Stemp = new ArrayList<Double>();
             double Utemp = 0;
             obiekt.resetObiektu();
@@ -239,13 +265,28 @@ public class DMCAnalityczny extends Regulator {
             }
             this.Sz.add(Stemp);
         }
-
+    }
+    protected void policzSz(MIMO obiekt) {
+        this.Sz = new ArrayList<>();
+        for (int i = 0; i < obiekt.getZakloceniaMierzalne().getLiczbaOUT(); i++) {
+            for (int j = 0; j < obiekt.getZakloceniaMierzalne().getLiczbaIN(); j++) {
+                obiekt.resetObiektu();
+                double U = 1;
+                double Utemp = 0;
+                List<Double> Stemp = new ArrayList();
+                Stemp.add(obiekt.obliczKrokZaklocenia(U, j, i) / U);
+                for (int k = 1; k < D + 1; k++) {
+                    Stemp.add(obiekt.obliczKrokZaklocenia(Utemp,j, i) / U);
+                }
+                this.Sz.add(Stemp);
+            }
+        }
     }
     protected void policzS(MIMO obiekt) {
         for (int i = 0; i < obiekt.getLiczbaOUT(); i++) {
             for (int j = 0; j < obiekt.getLiczbaIN(); j++) {
                 obiekt.resetObiektu();
-                double U = obiekt.getUMax(j) / 2;
+                double U = 1;
                 double Utemp = 0;
                 int k = 2;
                 List<Double> Stemp = new ArrayList();
@@ -266,7 +307,7 @@ public class DMCAnalityczny extends Regulator {
         }
         for (int i = 0; i < S.size(); i++) {
             while (D != S.get(i).size()) {
-                S.get(i).add(S.get(i).get(S.size()));
+                S.get(i).add(S.get(i).get(S.get(i).size()-1));
             }
         }
         this.N = D;
@@ -312,8 +353,8 @@ public class DMCAnalityczny extends Regulator {
 
     protected void policzMp(int IN, int OUT) {
         Mp = new Matrix(N * OUT, (D - 1) * IN);
-        for (int i = 0; i < D - 1; i++) {
-            for (int j = 0; j < N; j++) {
+        for (int i = 0; i < D - 1; i++) { //bok ,wszerz
+            for (int j = 0; j < N; j++) { //dół
                 for (int k = 0; k < OUT; k++) {
                     for (int m = 0; m < IN; m++) {
                         if ((j + i + 1) < D) {
@@ -333,12 +374,12 @@ public class DMCAnalityczny extends Regulator {
                     for (int k = 0; k < OUT; k++)
                         for (int m = 0; m < IN; m++)
                             if(j - Nu +1 >= D) {
-                                Mz.set((j+1) * OUT + k, i * IN + m, Sz.get(k * IN + m).get(D) * 0.6);
+                                Mz.set((j+1) * OUT + k, i * IN + m, Sz.get(k * IN + m).get(D) * 1);
                             } else {
                                 if(j<Nu) {
                                     Mz.set((j+1) * OUT + k, i * IN + m, 0.0);
                                 } else {
-                                    Mz.set((j+1) * OUT + k, i * IN + m, Sz.get(k * IN + m).get(j - Nu +1) * 0.6);
+                                    Mz.set((j+1) * OUT + k, i * IN + m,  Mz.get((j+1) * OUT + k, (i - 1) * IN + m) * 0.7 );
                                 }
                             }
                 } else if (j >= i)
@@ -347,9 +388,8 @@ public class DMCAnalityczny extends Regulator {
                             if(j - i +1 >= D) {
                                 Mz.set((j+1) * OUT + k, i * IN + m, Sz.get(k * IN + m).get(D));
                             } else {
-                                Mz.set((j+1) * OUT + k, i * IN + m, Sz.get(k * IN + m).get(j - i +1));
+                                Mz.set((j+1) * OUT + k, i * IN + m, Sz.get(k * IN + m).get(j - i ));
                             }
-
             }
         }
         this.Mz = Mz;
@@ -361,9 +401,9 @@ public class DMCAnalityczny extends Regulator {
             for (int k = 0; k < OUT; k++) {
                 for (int m = 0; m < IN; m++) {
                     if (j  <  D+1 ) {
-                        Mpz.set(j * OUT + k, m, Sz.get(k * IN + m).get(j ) * 1.5);
+                        Mpz.set(j * OUT + k, m, Sz.get(k * IN + m).get(j ) );
                     } else
-                        Mpz.set(j * OUT + k,  m, Sz.get(k * IN + m).get(D) * 1.5);
+                        Mpz.set(j * OUT + k,  m, Sz.get(k * IN + m).get(D) );
                 }
             }
         }
@@ -372,8 +412,8 @@ public class DMCAnalityczny extends Regulator {
             for (int j = 0; j < N; j++) {
                 for (int k = 0; k < OUT; k++) {
                     for (int m = 0; m < IN; m++) {
-                        if ((j + i + 2) < D+1) {
-                            Mpz.set(j * OUT + k, (i + 1) * IN + m, (Sz.get(k * IN + m).get(j + i + 2) - Sz.get(k * IN + m).get(i)));
+                        if ((j + i + 1) < D+1) {
+                            Mpz.set(j * OUT + k, (i + 1) * IN + m, (Sz.get(k * IN + m).get(j + i + 1) - Sz.get(k * IN + m).get(i)));
                         } else
                             Mpz.set(j * OUT + k, (i + 1) * IN + m, (Sz.get(k * IN + m).get(D) - Sz.get(k * IN + m).get(i)));
                     }
@@ -420,13 +460,14 @@ public class DMCAnalityczny extends Regulator {
 
     protected void dodajdUz(double[] sterowanieZaklocenia) {
         if(sterowanieZaklocenia.length>1) {
-            for (int i = D; i > 1; i--) {
+            for (int i = D - 1; i > 1; i--) {
                 for (int j = sterowanieZaklocenia.length - 1; j >= 0; j--)
-                    dUz.set(0, sterowanieZaklocenia.length * i - 1 - j, dUz.get(0, sterowanieZaklocenia.length * i - sterowanieZaklocenia.length - j));
+                    dUz.set(0, sterowanieZaklocenia.length * i - 1 - j, dUz.get(0, sterowanieZaklocenia.length * i - sterowanieZaklocenia.length - j - 1));
             }
 
             for (int j = sterowanieZaklocenia.length - 1; j >= 0; j--)
-                dUz.set(0, j, sterowanieZaklocenia[j]-dUz.get(0,j+sterowanieZaklocenia.length));
+                dUz.set(0, j, sterowanieZaklocenia[sterowanieZaklocenia.length-j-1]);
+
         } else {
             for (int i = D; i > 1; i--) {
                 dUz.set(0, i - 1, dUz.get(0, i - 2));
@@ -439,10 +480,10 @@ public class DMCAnalityczny extends Regulator {
 
         for (int i = D - 1; i > 1; i--) {
             for (int j = dUAktualne.length - 1; j >= 0; j--)
-                dU.set(0, dUAktualne.length * i - 1 - j, dU.get(0, dUAktualne.length * i - dUAktualne.length - j));
+                dU.set(0, dUAktualne.length * i  - j - 1, dU.get(0, dUAktualne.length * i - dUAktualne.length - j - 1));
         }
 
-        for (int j = dUAktualne.length - 1; j >= 0; j--)
+        for (int j = 0; j < dUAktualne.length ; j++)
             dU.set(0, j, dUAktualne[j]);
 
     }
