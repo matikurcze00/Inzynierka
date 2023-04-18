@@ -1,6 +1,6 @@
 package com.example.inzynierka.regulatory;
 
-import com.example.inzynierka.obiekty.MIMO;
+import com.example.inzynierka.obiekty.MIMOTransmitancjaCiagla;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ public class ZbiorPID extends Regulator {
     private Double[] strojenieZadane;
     private int liczbaStrojeniaZadanego;
 
-    public ZbiorPID(MIMO obiekt, Integer[] PV, double duMax, Double[] strojenieZadane) {
+    public ZbiorPID(MIMOTransmitancjaCiagla obiekt, Integer[] PV, double duMax, Double[] strojenieZadane) {
         PIDy = new ArrayList<>(PV.length);
         uMax = obiekt.getUMax();
         for (int i = 0; i < PV.length; i++) {

@@ -8,7 +8,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-public class MIMOTest {
+public class MIMOTransmitancjaCiaglaTest {
 
     @Test
     public void test1() throws IOException
@@ -16,7 +16,7 @@ public class MIMOTest {
         ObjectMapper objectMapper = new ObjectMapper();
         Integer[] PV = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("PV"), Integer[].class);
         ParObiektMIMO[] Obiekty = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("ParObiektMIMO"), ParObiektMIMO[].class);
-        MIMO obiekt  = new MIMO(Obiekty, "srednio");
+        MIMOTransmitancjaCiagla obiekt  = new MIMOTransmitancjaCiagla(Obiekty, "srednio");
         double[] expectedUMax = {100.0, 100.0};
         assertArrayEquals(obiekt.getUMax(),expectedUMax, 0.001);
         double[] expectedUMin = {0.0,0.0};
@@ -38,7 +38,7 @@ public class MIMOTest {
         ObjectMapper objectMapper = new ObjectMapper();
         Integer[] PV = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("PV"), Integer[].class);
         ParObiektMIMO[] Obiekty = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("ParObiektMIMO"), ParObiektMIMO[].class);
-        MIMO obiekt  = new MIMO(Obiekty, "srednio");
+        MIMOTransmitancjaCiagla obiekt  = new MIMOTransmitancjaCiagla(Obiekty, "srednio");
         obiekt.obliczKrok(1.0, 1, 0);
         assert(obiekt.getU().get(0).get(0)==0.0);
         assert(obiekt.getU().get(1).get(0)==1.0);

@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Data
-public class MIMO {
+public class MIMOTransmitancjaCiagla {
 
     private List<List<TransmitancjaCiagla>> transmitancja; //LIST<LIST-IN<OUT>>
     private List<List<Double>> U;
@@ -22,12 +22,12 @@ public class MIMO {
     private int liczbaIN;
     private int delayMax = 0;
     private int dlugosc;
-    private MIMO zakloceniaMierzalne;
+    private MIMOTransmitancjaCiagla zakloceniaMierzalne;
 
-    public MIMO() {
+    public MIMOTransmitancjaCiagla() {
     }
 
-    public MIMO(ParObiektMIMO[] parObiektMIMOS)
+    public MIMOTransmitancjaCiagla(ParObiektMIMO[] parObiektMIMOS)
     {
         stworzTransmitancje(parObiektMIMOS);
         liczbaOUT = transmitancja.get(0).size();
@@ -47,7 +47,7 @@ public class MIMO {
         obliczYMax();
     }
 
-    public MIMO(ParObiektMIMO[] parObiektMIMOS, String blad) {
+    public MIMOTransmitancjaCiagla(ParObiektMIMO[] parObiektMIMOS, String blad) {
         stworzTransmitancje(parObiektMIMOS);
         liczbaOUT = transmitancja.get(0).size();
         liczbaIN = transmitancja.size();
@@ -391,7 +391,7 @@ public class MIMO {
             this.dlugosc = 40;
     }
 
-    public void setZakloceniaMierzalne(MIMO zaklocenieMierzalne) {
+    public void setZakloceniaMierzalne(MIMOTransmitancjaCiagla zaklocenieMierzalne) {
         this.zakloceniaMierzalne = zaklocenieMierzalne;
         zaklocenieMierzalne.resetObiektu();
     }

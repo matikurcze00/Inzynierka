@@ -1,8 +1,8 @@
 package com.example.inzynierka.regulatory;
 
 import Jama.Matrix;
-import com.example.inzynierka.obiekty.MIMO;
-import com.example.inzynierka.obiekty.SISO;
+import com.example.inzynierka.obiekty.MIMOTransmitancjaCiagla;
+import com.example.inzynierka.obiekty.SISOTransmitancjaCiagle;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -34,27 +34,27 @@ public class DMCAnalityczny extends Regulator {
     public DMCAnalityczny() {
     }
 
-    public DMCAnalityczny(int Nu, double lambda, SISO SISO, double cel, double duMax, int N, Double[] strojenieZadane) {
-        this(Nu, lambda, SISO, cel, duMax, N);
+    public DMCAnalityczny(int Nu, double lambda, SISOTransmitancjaCiagle SISOTransmitancjaCiagle, double cel, double duMax, int N, Double[] strojenieZadane) {
+        this(Nu, lambda, SISOTransmitancjaCiagle, cel, duMax, N);
         if (strojenieZadane[0] != null) {
             liczbaStrojeniaZadanego = 1;
             this.strojenieZadane = strojenieZadane;
             this.getLambda().set(0, strojenieZadane[0]);
-            this.policzWartosci(SISO);
+            this.policzWartosci(SISOTransmitancjaCiagle);
         }
     }
 
-    public DMCAnalityczny(int Nu, double lambda, SISO siso, double cel, double duMax, int N) {
+    public DMCAnalityczny(int Nu, double lambda, SISOTransmitancjaCiagle sisoTransmitancjaCiagle, double cel, double duMax, int N) {
         this.Lambda = Arrays.asList(lambda);
         this.Nu = Nu;
         this.N = N;
         this.cel = new double[]{cel};
         this.duMax = duMax;
-        policzWartosci(siso);
+        policzWartosci(sisoTransmitancjaCiagle);
 
     }
 
-    public DMCAnalityczny(int Nu, double[] lambda, MIMO obiekt, double[] cel, double duMax, int N, Double[] strojenieZadane) {
+    public DMCAnalityczny(int Nu, double[] lambda, MIMOTransmitancjaCiagla obiekt, double[] cel, double duMax, int N, Double[] strojenieZadane) {
         this(Nu, lambda, obiekt, cel, duMax, N);
         this.liczbaStrojeniaZadanego = 0;
         this.strojenieZadane = strojenieZadane;
@@ -67,7 +67,7 @@ public class DMCAnalityczny extends Regulator {
         this.policzWartosci(obiekt);
     }
 
-    public DMCAnalityczny(int Nu, double[] lambda, MIMO obiekt, double[] cel, double duMax, int N) {
+    public DMCAnalityczny(int Nu, double[] lambda, MIMOTransmitancjaCiagla obiekt, double[] cel, double duMax, int N) {
         List<Double> tempLambda = new ArrayList();
         for (double wartosc : lambda) {
             tempLambda.add(wartosc);
@@ -165,36 +165,36 @@ public class DMCAnalityczny extends Regulator {
         return tempdU;
     }
 
-    protected void policzWartosci(SISO siso) {
+    protected void policzWartosci(SISOTransmitancjaCiagle sisoTransmitancjaCiagle) {
         this.S = new ArrayList();
-        policzS(siso);
+        policzS(sisoTransmitancjaCiagle);
         policzMp();
         policzM();
         policzK();
-        if(siso.getZakloceniaMierzalne()!=null && !siso.getZakloceniaMierzalne().isEmpty()) {
-            resetujZaklocenia(siso.getZakloceniaMierzalne().size());
-            policzSz(siso);
-            policzMz(siso.getZakloceniaMierzalne().size(), 1);
-            policzMpz(siso.getZakloceniaMierzalne().size(), 1);
+        if(sisoTransmitancjaCiagle.getZakloceniaMierzalne()!=null && !sisoTransmitancjaCiagle.getZakloceniaMierzalne().isEmpty()) {
+            resetujZaklocenia(sisoTransmitancjaCiagle.getZakloceniaMierzalne().size());
+            policzSz(sisoTransmitancjaCiagle);
+            policzMz(sisoTransmitancjaCiagle.getZakloceniaMierzalne().size(), 1);
+            policzMpz(sisoTransmitancjaCiagle.getZakloceniaMierzalne().size(), 1);
         }
         resetujRegulator(1);
-        siso.resetObiektu();
+        sisoTransmitancjaCiagle.resetObiektu();
     }
 
-    protected void policzWartosci(MIMO mimo) {
+    protected void policzWartosci(MIMOTransmitancjaCiagla mimoTransmitancjaCiagla) {
         this.S = new ArrayList();
-        policzS(mimo);
-        policzMp(mimo.getLiczbaIN(), mimo.getLiczbaOUT());
-        policzM(mimo.getLiczbaIN(), mimo.getLiczbaOUT());
-        policzK(mimo.getLiczbaIN());
-        if(mimo.getZakloceniaMierzalne()!=null ) {
-            resetujZaklocenia(mimo.getZakloceniaMierzalne().getLiczbaIN());
-            policzSz(mimo);
-            policzMz(mimo.getZakloceniaMierzalne().getLiczbaIN(), mimo.getZakloceniaMierzalne().getLiczbaOUT());
-            policzMpz(mimo.getZakloceniaMierzalne().getLiczbaIN(), mimo.getZakloceniaMierzalne().getLiczbaOUT());
+        policzS(mimoTransmitancjaCiagla);
+        policzMp(mimoTransmitancjaCiagla.getLiczbaIN(), mimoTransmitancjaCiagla.getLiczbaOUT());
+        policzM(mimoTransmitancjaCiagla.getLiczbaIN(), mimoTransmitancjaCiagla.getLiczbaOUT());
+        policzK(mimoTransmitancjaCiagla.getLiczbaIN());
+        if(mimoTransmitancjaCiagla.getZakloceniaMierzalne()!=null ) {
+            resetujZaklocenia(mimoTransmitancjaCiagla.getZakloceniaMierzalne().getLiczbaIN());
+            policzSz(mimoTransmitancjaCiagla);
+            policzMz(mimoTransmitancjaCiagla.getZakloceniaMierzalne().getLiczbaIN(), mimoTransmitancjaCiagla.getZakloceniaMierzalne().getLiczbaOUT());
+            policzMpz(mimoTransmitancjaCiagla.getZakloceniaMierzalne().getLiczbaIN(), mimoTransmitancjaCiagla.getZakloceniaMierzalne().getLiczbaOUT());
         }
-        resetujRegulator(mimo.getLiczbaIN());
-        mimo.resetObiektu();
+        resetujRegulator(mimoTransmitancjaCiagla.getLiczbaIN());
+        mimoTransmitancjaCiagla.resetObiektu();
     }
 
     public void zmienWartosci(double[] wartosci) {
@@ -236,16 +236,16 @@ public class DMCAnalityczny extends Regulator {
     public void resetujZaklocenia(int IN) {
         dUz = new Matrix(1, (D) * IN, 0.0);
     }
-    protected void policzS(SISO SISO) {
-        double U = SISO.getUMax() / 2;
+    protected void policzS(SISOTransmitancjaCiagle SISOTransmitancjaCiagle) {
+        double U = SISOTransmitancjaCiagle.getUMax() / 2;
         int i = 2;
         List<Double> Stemp = new ArrayList<Double>();
         double Utemp = 0;
-        SISO.resetObiektu();
-        Stemp.add((SISO.obliczKrok(U) - SISO.getYpp()) / U);
-        Stemp.add((SISO.obliczKrok(Utemp) - SISO.getYpp()) / U);
+        SISOTransmitancjaCiagle.resetObiektu();
+        Stemp.add((SISOTransmitancjaCiagle.obliczKrok(U) - SISOTransmitancjaCiagle.getYpp()) / U);
+        Stemp.add((SISOTransmitancjaCiagle.obliczKrok(Utemp) - SISOTransmitancjaCiagle.getYpp()) / U);
         while (!(Math.abs(Stemp.get(i - 1) - Stemp.get(i - 2)) < 0.005) || Stemp.get(i - 2) == 0.0) {
-            Stemp.add((SISO.obliczKrok(Utemp) - SISO.getYpp()) / U);
+            Stemp.add((SISOTransmitancjaCiagle.obliczKrok(Utemp) - SISOTransmitancjaCiagle.getYpp()) / U);
             i++;
         }
         this.S.add(Stemp);
@@ -253,7 +253,7 @@ public class DMCAnalityczny extends Regulator {
         this.N = D;
     }
 
-    protected void policzSz(SISO obiekt) {
+    protected void policzSz(SISOTransmitancjaCiagle obiekt) {
         this.Sz = new ArrayList<>();
         for(int i = 0; i < obiekt.getZakloceniaMierzalne().size(); i++) {
             List<Double> Stemp = new ArrayList<Double>();
@@ -266,7 +266,7 @@ public class DMCAnalityczny extends Regulator {
             this.Sz.add(Stemp);
         }
     }
-    protected void policzSz(MIMO obiekt) {
+    protected void policzSz(MIMOTransmitancjaCiagla obiekt) {
         this.Sz = new ArrayList<>();
         for (int i = 0; i < obiekt.getZakloceniaMierzalne().getLiczbaOUT(); i++) {
             for (int j = 0; j < obiekt.getZakloceniaMierzalne().getLiczbaIN(); j++) {
@@ -282,7 +282,7 @@ public class DMCAnalityczny extends Regulator {
             }
         }
     }
-    protected void policzS(MIMO obiekt) {
+    protected void policzS(MIMOTransmitancjaCiagla obiekt) {
         for (int i = 0; i < obiekt.getLiczbaOUT(); i++) {
             for (int j = 0; j < obiekt.getLiczbaIN(); j++) {
                 obiekt.resetObiektu();

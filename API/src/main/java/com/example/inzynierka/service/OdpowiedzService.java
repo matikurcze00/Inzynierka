@@ -1,8 +1,8 @@
 package com.example.inzynierka.service;
 
 import com.example.inzynierka.modele.*;
-import com.example.inzynierka.obiekty.MIMO;
-import com.example.inzynierka.obiekty.SISO;
+import com.example.inzynierka.obiekty.MIMOTransmitancjaCiagla;
+import com.example.inzynierka.obiekty.SISOTransmitancjaCiagle;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
@@ -15,9 +15,9 @@ public class OdpowiedzService {
         ParObiekt parObiekt = parStrojenie.getParObiekt();
         ParRegulator parRegulator = parStrojenie.getParRegulator();
         ParWizualizacja parWizualizacja = parStrojenie.getParWizualizacja();
-        SISO obiekt;
+        SISOTransmitancjaCiagle obiekt;
         try {
-            obiekt = new SISO(parObiekt, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
+            obiekt = new SISOTransmitancjaCiagle(parObiekt, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
         } catch (Exception ex) {
             ex.printStackTrace();
             return null;
@@ -28,7 +28,7 @@ public class OdpowiedzService {
         return new OdpowiedzSkokowa(odpSkokowa);
     }
 
-    private void symulacjaOdpowiedziSISO(ParWizualizacja parWizualizacja, SISO obiekt, double U, double[][] odpSkokowa) {
+    private void symulacjaOdpowiedziSISO(ParWizualizacja parWizualizacja, SISOTransmitancjaCiagle obiekt, double U, double[][] odpSkokowa) {
         double Utemp = 0;
         odpSkokowa[0][0] = obiekt.obliczKrok(Utemp);
         odpSkokowa[0][1] = obiekt.obliczKrok(U);
@@ -40,11 +40,11 @@ public class OdpowiedzService {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode root;
         ParObiektMIMO[] obiekty;
-        MIMO obiekt;
+        MIMOTransmitancjaCiagla obiekt;
         try {
             root = objectMapper.readTree(file.getInputStream());
             obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektMIMO[].class);
-            obiekt = new MIMO(obiekty, parWizualizacja.getBlad());
+            obiekt = new MIMOTransmitancjaCiagla(obiekty, parWizualizacja.getBlad());
         } catch (Exception ex) {
             ex.printStackTrace();
             return null;
@@ -57,7 +57,7 @@ public class OdpowiedzService {
         return new OdpowiedzSkokowa(odpSkokowa);
     }
 
-    private void symulacjaOdpowiedziMIMO(ParWizualizacja parWizualizacja, MIMO obiekt, double U, double Utemp, double[][] odpSkokowa) {
+    private void symulacjaOdpowiedziMIMO(ParWizualizacja parWizualizacja, MIMOTransmitancjaCiagla obiekt, double U, double Utemp, double[][] odpSkokowa) {
         for (int k = 0; k < obiekt.getLiczbaIN(); k++) {
             for (int j = 0; j < obiekt.getLiczbaOUT(); j++) {
                 obiekt.resetObiektu();

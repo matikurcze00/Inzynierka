@@ -2,8 +2,8 @@ package com.example.inzynierka.service;
 
 import com.example.inzynierka.EA.AlgorytmEwolucyjny;
 import com.example.inzynierka.modele.*;
-import com.example.inzynierka.obiekty.MIMO;
-import com.example.inzynierka.obiekty.SISO;
+import com.example.inzynierka.obiekty.MIMOTransmitancjaCiagla;
+import com.example.inzynierka.obiekty.SISOTransmitancjaCiagle;
 import com.example.inzynierka.regulatory.DMCAnalityczny;
 import com.example.inzynierka.regulatory.PID;
 import com.example.inzynierka.regulatory.Regulator;
@@ -29,7 +29,7 @@ public class StrojenieService {
         Integer[] PIE = new Integer[3];
         OdpowiedzStrojenie odpowiedzStrojenie = new OdpowiedzStrojenie();
 
-        SISO obiekt = dobierzObiektSISO(parObiekt, parRegulator, parWizualizacja, zaklocenie);
+        SISOTransmitancjaCiagle obiekt = dobierzObiektSISO(parObiekt, parRegulator, parWizualizacja, zaklocenie);
         if (obiekt == null) return null;
         Regulator regulator;
         regulator = dobierzRegulatorSISO(parObiekt, parRegulator, parWizualizacja, obiekt, PIE);
@@ -38,9 +38,9 @@ public class StrojenieService {
         dobierzStrojenieSISO(parWizualizacja, obiekt, regulator, GA, odpowiedzStrojenie);
         if(parStrojenie.getParObiektSymulacji()!=null) {
             if(zaklocenie!=null) {
-                obiekt = new SISO (parStrojenie.getParObiektSymulacji(), parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad(), zaklocenie);
+                obiekt = new SISOTransmitancjaCiagle(parStrojenie.getParObiektSymulacji(), parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad(), zaklocenie);
             } else {
-                obiekt = new SISO (parStrojenie.getParObiektSymulacji(), parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
+                obiekt = new SISOTransmitancjaCiagle(parStrojenie.getParObiektSymulacji(), parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
             }
         }
         double[] Y = symulacjaRegulacjiSISO(parWizualizacja, obiekt, regulator, odpowiedzStrojenie, parStrojenie.getWizualizacjaZaklocen());
@@ -60,7 +60,7 @@ public class StrojenieService {
         System.out.println("BLAD:" + blad);
     }
 
-    private double[] symulacjaRegulacjiSISO(ParWizualizacja parWizualizacja, SISO obiekt, Regulator regulator, OdpowiedzStrojenie odpowiedzStrojenie, WizualizacjaZaklocen wizualizacjaZaklocen) {
+    private double[] symulacjaRegulacjiSISO(ParWizualizacja parWizualizacja, SISOTransmitancjaCiagle obiekt, Regulator regulator, OdpowiedzStrojenie odpowiedzStrojenie, WizualizacjaZaklocen wizualizacjaZaklocen) {
         ustawCelSISO(parWizualizacja, regulator, odpowiedzStrojenie);
         if(wizualizacjaZaklocen.getUSkok()!=null && wizualizacjaZaklocen.getUSkok().length!=0) {
             return dodajWartosciWykresowSISO(parWizualizacja, obiekt, regulator, odpowiedzStrojenie,
@@ -131,20 +131,20 @@ public class StrojenieService {
         return dUZTemp;
     }
 
-    private void dobierzStrojenieSISO(ParWizualizacja parWizualizacja, SISO obiekt, Regulator regulator, AlgorytmEwolucyjny GA, OdpowiedzStrojenie odpowiedzStrojenie) {
+    private void dobierzStrojenieSISO(ParWizualizacja parWizualizacja, SISOTransmitancjaCiagle obiekt, Regulator regulator, AlgorytmEwolucyjny GA, OdpowiedzStrojenie odpowiedzStrojenie) {
         double[] tempWartosciGA = GA.dobierzWartosci(regulator.liczbaZmiennych(), regulator, obiekt);
         double[] tempStrojenie = dodajStrojenie(parWizualizacja, tempWartosciGA);
         odpowiedzStrojenie.setWspolczynniki(tempStrojenie);
         regulator.zmienWartosci(tempStrojenie);
     }
 
-    private SISO dobierzObiektSISO(ParObiekt parObiekt, ParRegulator parRegulator, ParWizualizacja parWizualizacja, Zaklocenia zaklocenie) {
-        SISO obiekt;
+    private SISOTransmitancjaCiagle dobierzObiektSISO(ParObiekt parObiekt, ParRegulator parRegulator, ParWizualizacja parWizualizacja, Zaklocenia zaklocenie) {
+        SISOTransmitancjaCiagle obiekt;
         try{
             if(zaklocenie!=null) {
-                return new SISO(parObiekt, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad(), zaklocenie);
+                return new SISOTransmitancjaCiagle(parObiekt, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad(), zaklocenie);
             } else {
-                return new SISO(parObiekt, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
+                return new SISOTransmitancjaCiagle(parObiekt, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -152,7 +152,7 @@ public class StrojenieService {
         }
     }
 
-    private Regulator dobierzRegulatorSISO(ParObiekt parObiekt, ParRegulator parRegulator, ParWizualizacja parWizualizacja, SISO obiekt, Integer[] PIE) {
+    private Regulator dobierzRegulatorSISO(ParObiekt parObiekt, ParRegulator parRegulator, ParWizualizacja parWizualizacja, SISOTransmitancjaCiagle obiekt, Integer[] PIE) {
         Regulator regulator;
         if (parRegulator.getTyp().equals("pid")) {
             regulator = new PID(0.0, 0.0, 0.0, parObiekt.getTp(), new double[]{obiekt.getYMax()}, parRegulator.getDuMax(), parRegulator.getUMax(), parWizualizacja.getStrojenie());
@@ -171,7 +171,7 @@ public class StrojenieService {
         return regulator;
     }
 
-    private double[] dodajWartosciWykresowSISO(ParWizualizacja parWizualizacja, SISO obiekt, Regulator regulator, OdpowiedzStrojenie odpowiedzStrojenie) {
+    private double[] dodajWartosciWykresowSISO(ParWizualizacja parWizualizacja, SISOTransmitancjaCiagle obiekt, Regulator regulator, OdpowiedzStrojenie odpowiedzStrojenie) {
         double[] Y = new double[parWizualizacja.getDlugosc()];
         double[] U = new double[parWizualizacja.getDlugosc()];
         obiekt.resetObiektu();
@@ -193,8 +193,8 @@ public class StrojenieService {
         return Y;
     }
 
-    private double[] dodajWartosciWykresowSISO(ParWizualizacja parWizualizacja, SISO obiekt, Regulator regulator,
-                   OdpowiedzStrojenie odpowiedzStrojenie, double[][] dUZ) {
+    private double[] dodajWartosciWykresowSISO(ParWizualizacja parWizualizacja, SISOTransmitancjaCiagle obiekt, Regulator regulator,
+                                               OdpowiedzStrojenie odpowiedzStrojenie, double[][] dUZ) {
         double[] Y = new double[parWizualizacja.getDlugosc()];
         double[] U = new double[parWizualizacja.getDlugosc()];
         obiekt.resetObiektu();
@@ -235,18 +235,18 @@ public class StrojenieService {
     public OdpowiedzStrojenieMIMO MIMOStrojenie(MultipartFile[] file, ParRegulator parRegulator, ParWizualizacja parWizualizacja, WizualizacjaZaklocen wizualizacjaZaklocen) {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode root;
-        MIMO obiekt;
+        MIMOTransmitancjaCiagla obiekt;
         ParObiektMIMO[] obiekty;
         Integer[] PIE = new Integer[3];
         OdpowiedzStrojenieMIMO odpowiedz = new OdpowiedzStrojenieMIMO();
         try {
             root = objectMapper.readTree(file[0].getInputStream());
             obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektMIMO[].class);
-            obiekt = new MIMO(obiekty, parWizualizacja.getBlad());
+            obiekt = new MIMOTransmitancjaCiagla(obiekty, parWizualizacja.getBlad());
             if(file.length==3) {
                 root = objectMapper.readTree(file[2].getInputStream());
                 obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektMIMO[].class);
-                MIMO blad = new MIMO(obiekty, parWizualizacja.getBlad());
+                MIMOTransmitancjaCiagla blad = new MIMOTransmitancjaCiagla(obiekty, parWizualizacja.getBlad());
                 obiekt.setZakloceniaMierzalne(blad);
             }
             root = objectMapper.readTree(file[0].getInputStream());
@@ -263,11 +263,11 @@ public class StrojenieService {
             try {
                 root = objectMapper.readTree(file[1].getInputStream());
                 obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektMIMO[].class);
-                obiekt = new MIMO(obiekty, parWizualizacja.getBlad());
+                obiekt = new MIMOTransmitancjaCiagla(obiekty, parWizualizacja.getBlad());
                 if(file.length==3) {
                     root = objectMapper.readTree(file[2].getInputStream());
                     obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektMIMO[].class);
-                    MIMO blad = new MIMO(obiekty, parWizualizacja.getBlad());
+                    MIMOTransmitancjaCiagla blad = new MIMOTransmitancjaCiagla(obiekty, parWizualizacja.getBlad());
                     obiekt.setZakloceniaMierzalne(blad);
                 }
                 root = objectMapper.readTree(file[1].getInputStream());
@@ -281,7 +281,7 @@ public class StrojenieService {
         return odpowiedz;
     }
 
-    private double[][] symulacjaRegulacjiMIMO(ParWizualizacja parWizualizacja, MIMO obiekt,
+    private double[][] symulacjaRegulacjiMIMO(ParWizualizacja parWizualizacja, MIMOTransmitancjaCiagla obiekt,
               Regulator regulator, OdpowiedzStrojenieMIMO odpowiedz, WizualizacjaZaklocen wizualizacjaZaklocen) {
         double[][] celTemp = ustawCelMIMO(parWizualizacja, obiekt, parWizualizacja.getDlugosc());
         odpowiedz.setCel(celTemp);
@@ -292,7 +292,7 @@ public class StrojenieService {
         }
     }
 
-    private void dobierzStrojenieMIMO(ParWizualizacja parWizualizacja, MIMO obiekt, Regulator regulator, AlgorytmEwolucyjny GA, OdpowiedzStrojenieMIMO odpowiedz) {
+    private void dobierzStrojenieMIMO(ParWizualizacja parWizualizacja, MIMOTransmitancjaCiagla obiekt, Regulator regulator, AlgorytmEwolucyjny GA, OdpowiedzStrojenieMIMO odpowiedz) {
         double[] tempWartosciGA = GA.dobierzWartosci(regulator.liczbaZmiennych(), regulator, obiekt);
         regulator.zmienWartosci(tempWartosciGA);
         double[] tempStrojenie = dodajStrojenie(parWizualizacja, tempWartosciGA);
@@ -308,7 +308,7 @@ public class StrojenieService {
         System.out.println(blad);
     }
 
-    private Regulator dobierzRegulatorMIMO(ParRegulator parRegulator, ParWizualizacja parWizualizacja, ObjectMapper objectMapper, MIMO obiekt, JsonNode root, Integer[] PIE) {
+    private Regulator dobierzRegulatorMIMO(ParRegulator parRegulator, ParWizualizacja parWizualizacja, ObjectMapper objectMapper, MIMOTransmitancjaCiagla obiekt, JsonNode root, Integer[] PIE) {
         Regulator regulator;
         if (parRegulator.getTyp().equals("pid")) {
             Integer[] PV;
@@ -337,7 +337,7 @@ public class StrojenieService {
         return regulator;
     }
 
-    private double[][] dodajWartosciWykresowMIMO(MIMO obiekt, Regulator regulator, OdpowiedzStrojenieMIMO odpowiedz, int dlugoscSymulacji, double[][] celTemp) {
+    private double[][] dodajWartosciWykresowMIMO(MIMOTransmitancjaCiagla obiekt, Regulator regulator, OdpowiedzStrojenieMIMO odpowiedz, int dlugoscSymulacji, double[][] celTemp) {
         obiekt.resetObiektu();
         regulator.resetujRegulator();
         double[][] Y = new double[obiekt.getLiczbaOUT()][dlugoscSymulacji];
@@ -361,9 +361,9 @@ public class StrojenieService {
         return Y;
     }
 
-    private double[][] dodajWartosciWykresowMIMO(MIMO obiekt, Regulator regulator,
-             OdpowiedzStrojenieMIMO odpowiedz, int dlugoscSymulacji,
-                     double[][] celTemp, double[][] dUZ) {
+    private double[][] dodajWartosciWykresowMIMO(MIMOTransmitancjaCiagla obiekt, Regulator regulator,
+                                                 OdpowiedzStrojenieMIMO odpowiedz, int dlugoscSymulacji,
+                                                 double[][] celTemp, double[][] dUZ) {
         obiekt.resetObiektu();
         regulator.resetujRegulator();
         double[][] Y = new double[obiekt.getLiczbaOUT()][dlugoscSymulacji];
@@ -386,7 +386,7 @@ public class StrojenieService {
         odpowiedz.setWykres(Y);
         return Y;
     }
-    private double[][] ustawCelMIMO(ParWizualizacja parWizualizacja, MIMO obiekt, int dlugoscSymulacji) {
+    private double[][] ustawCelMIMO(ParWizualizacja parWizualizacja, MIMOTransmitancjaCiagla obiekt, int dlugoscSymulacji) {
         double[][] celTemp = new double[obiekt.getLiczbaOUT()][dlugoscSymulacji];
         for (int i = 0; i < obiekt.getLiczbaOUT(); i++) {
             for (int j = 0; j < dlugoscSymulacji; j++) {

@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Data
-public class SISO {
+public class SISOTransmitancjaCiagle {
 
     private TransmitancjaCiagla transmitancja;
     private List<Double> U;
@@ -24,10 +24,10 @@ public class SISO {
 
     private List<TransmitancjaCiagla> zakloceniaMierzalne;
 
-    public SISO() {
+    public SISOTransmitancjaCiagle() {
     }
 
-    public SISO(ParObiekt parObiekt, double uMax, double uMin, String blad, Zaklocenia zakloceniaMierzalne) {
+    public SISOTransmitancjaCiagle(ParObiekt parObiekt, double uMax, double uMin, String blad, Zaklocenia zakloceniaMierzalne) {
         this(parObiekt.getGain(), parObiekt.getR1(), parObiekt.getQ1(), parObiekt.getR2(),
             parObiekt.getQ2(), parObiekt.getT1(), parObiekt.getT2(), parObiekt.getT3()
             , parObiekt.getDelay(), parObiekt.getTp(), uMax, uMin, blad);
@@ -40,14 +40,14 @@ public class SISO {
         }}
         resetObiektu();
     }
-    public SISO(ParObiekt parObiekt, double uMax, double uMin, String blad) {
+    public SISOTransmitancjaCiagle(ParObiekt parObiekt, double uMax, double uMin, String blad) {
         this(parObiekt.getGain(), parObiekt.getR1(), parObiekt.getQ1(), parObiekt.getR2(),
                 parObiekt.getQ2(), parObiekt.getT1(), parObiekt.getT2(), parObiekt.getT3()
                 , parObiekt.getDelay(), parObiekt.getTp(), uMax, uMin, blad);
     }
 
-    public SISO(double gain, double R1, int Q1, double R2, int Q2, double T1,
-                double T2, double T3, int delay, double Tp, double uMax, double uMin, String blad) {
+    public SISOTransmitancjaCiagle(double gain, double R1, int Q1, double R2, int Q2, double T1,
+                                   double T2, double T3, int delay, double Tp, double uMax, double uMin, String blad) {
         this.transmitancja = new TransmitancjaCiagla(gain, R1, Q1, R2, Q2, T1, T2, T3, delay, Tp);
         U = new ArrayList(Collections.nCopies(3 + delay, transmitancja.getUpp()));
         Y = new ArrayList(Collections.nCopies(3, transmitancja.getYpp()));

@@ -1,7 +1,7 @@
 package com.example.inzynierka.EA;
 
-import com.example.inzynierka.obiekty.MIMO;
-import com.example.inzynierka.obiekty.SISO;
+import com.example.inzynierka.obiekty.MIMOTransmitancjaCiagla;
+import com.example.inzynierka.obiekty.SISOTransmitancjaCiagle;
 import com.example.inzynierka.regulatory.Regulator;
 import lombok.Data;
 
@@ -29,10 +29,10 @@ public class AlgorytmEwolucyjny {
     public AlgorytmEwolucyjny() {
     }
 
-    public double[] dobierzWartosci(int liczbaArgumentow, Regulator regulator, SISO SISO) {
+    public double[] dobierzWartosci(int liczbaArgumentow, Regulator regulator, SISOTransmitancjaCiagle SISOTransmitancjaCiagle) {
         populacja = new ArrayList<Osobnik>();
         Random r = new Random();
-        double[] cel = new double[]{SISO.getYMax() / 2};
+        double[] cel = new double[]{SISOTransmitancjaCiagle.getYMax() / 2};
         regulator.setCel(cel);
         for (int i = 0; i < rozmiarPopulacji; i++) {
             Osobnik osobnikTemp = new Osobnik(liczbaArgumentow);
@@ -40,32 +40,32 @@ public class AlgorytmEwolucyjny {
                 osobnikTemp.setParametryIndex(j, r.nextDouble(5.0));
             }
             regulator.zmienWartosci(osobnikTemp.getParametry());
-            SISO.resetObiektu();
+            SISOTransmitancjaCiagle.resetObiektu();
             regulator.resetujRegulator();
-            osobnikTemp.setWartosc(SISO.obliczPraceObiektu(regulator, cel));
+            osobnikTemp.setWartosc(SISOTransmitancjaCiagle.obliczPraceObiektu(regulator, cel));
             populacja.add(osobnikTemp);
         }
         Collections.sort(populacja);
         for (int k = 0; k < liczbaIteracji; k++) {
-            ewolucje(liczbaArgumentow, regulator, SISO, cel);
+            ewolucje(liczbaArgumentow, regulator, SISOTransmitancjaCiagle, cel);
         }
         Collections.sort(populacja);
         return populacja.get(0).getParametry();
     }
 
-    private void ewolucje(int liczbaArgumentow, Regulator regulator, SISO SISO, double[] cel) {
+    private void ewolucje(int liczbaArgumentow, Regulator regulator, SISOTransmitancjaCiagle SISOTransmitancjaCiagle, double[] cel) {
         Random r = new Random();
         List<Osobnik> reprodukcja = new ArrayList<Osobnik>();
         Collections.sort(populacja);
         for (int i = 0; i < rozmiarElity; i++) {
             reprodukcja.add(populacja.get(i));
         }
-        krzyzowania(liczbaArgumentow, regulator, SISO, cel, r, reprodukcja);
-        mutacje(liczbaArgumentow, regulator, SISO, cel, r, reprodukcja);
+        krzyzowania(liczbaArgumentow, regulator, SISOTransmitancjaCiagle, cel, r, reprodukcja);
+        mutacje(liczbaArgumentow, regulator, SISOTransmitancjaCiagle, cel, r, reprodukcja);
         populacja = reprodukcja;
     }
 
-    private void mutacje(int liczbaArgumentow, Regulator regulator, SISO SISO, double[] cel, Random r, List<Osobnik> reprodukcja) {
+    private void mutacje(int liczbaArgumentow, Regulator regulator, SISOTransmitancjaCiagle SISOTransmitancjaCiagle, double[] cel, Random r, List<Osobnik> reprodukcja) {
         for (int i = 0; i < iloscMutacji; i++) {
             int rodzic = r.nextInt(rozmiarElity);
             Osobnik osobnikTemp = new Osobnik(liczbaArgumentow);
@@ -73,14 +73,14 @@ public class AlgorytmEwolucyjny {
                 osobnikTemp.getParametry()[j] = (r.nextDouble() < getPrawdopodobienstwoMutacji()) ? Math.abs(r.nextGaussian(populacja.get(rodzic).getParametry()[j], 0.4)) : populacja.get(rodzic).getParametry()[j];
             }
             regulator.zmienWartosci(osobnikTemp.getParametry());
-            SISO.resetObiektu();
+            SISOTransmitancjaCiagle.resetObiektu();
             regulator.resetujRegulator();
-            osobnikTemp.setWartosc(SISO.obliczPraceObiektu(regulator, cel));
+            osobnikTemp.setWartosc(SISOTransmitancjaCiagle.obliczPraceObiektu(regulator, cel));
             reprodukcja.add(osobnikTemp);
         }
     }
 
-    private void krzyzowania(int liczbaArgumentow, Regulator regulator, SISO SISO, double[] cel, Random r, List<Osobnik> reprodukcja) {
+    private void krzyzowania(int liczbaArgumentow, Regulator regulator, SISOTransmitancjaCiagle SISOTransmitancjaCiagle, double[] cel, Random r, List<Osobnik> reprodukcja) {
         for (int i = 0; i < iloscKrzyzowania; i++) {
             int osobnik1 = r.nextInt(rozmiarPopulacji);
             int osobnik2 = r.nextInt(rozmiarPopulacji);
@@ -89,14 +89,14 @@ public class AlgorytmEwolucyjny {
                 osobnikTemp.getParametry()[j] = (r.nextBoolean()) ? populacja.get(osobnik1).getParametry()[j] : populacja.get(osobnik2).getParametry()[j];
             }
             regulator.zmienWartosci(osobnikTemp.getParametry());
-            SISO.resetObiektu();
+            SISOTransmitancjaCiagle.resetObiektu();
             regulator.resetujRegulator();
-            osobnikTemp.setWartosc(SISO.obliczPraceObiektu(regulator, cel));
+            osobnikTemp.setWartosc(SISOTransmitancjaCiagle.obliczPraceObiektu(regulator, cel));
             reprodukcja.add(osobnikTemp);
         }
     }
 
-    public double[] dobierzWartosci(int liczbaArgumentow, Regulator regulator, MIMO obiekt) {
+    public double[] dobierzWartosci(int liczbaArgumentow, Regulator regulator, MIMOTransmitancjaCiagla obiekt) {
         populacja = new ArrayList<Osobnik>();
         Random r = new Random();
         double[] cel = Arrays.copyOf(obiekt.getYMax(), obiekt.getYMax().length);
@@ -122,7 +122,7 @@ public class AlgorytmEwolucyjny {
         return populacja.get(0).getParametry();
     }
 
-    private void ewolucje(int liczbaArgumentow, Regulator regulator, MIMO obiekt, double[] cel) {
+    private void ewolucje(int liczbaArgumentow, Regulator regulator, MIMOTransmitancjaCiagla obiekt, double[] cel) {
         Random r = new Random();
         List<Osobnik> reprodukcja = new ArrayList<Osobnik>();
         Collections.sort(populacja);
@@ -134,7 +134,7 @@ public class AlgorytmEwolucyjny {
         populacja = reprodukcja;
     }
 
-    private void mutacje(int liczbaArgumentow, Regulator regulator, MIMO obiekt, double[] cel, Random r, List<Osobnik> reprodukcja) {
+    private void mutacje(int liczbaArgumentow, Regulator regulator, MIMOTransmitancjaCiagla obiekt, double[] cel, Random r, List<Osobnik> reprodukcja) {
         for (int i = 0; i < iloscMutacji; i++) {
             int rodzic = r.nextInt(rozmiarPopulacji);
             Osobnik osobnikTemp = new Osobnik(liczbaArgumentow);
@@ -148,7 +148,7 @@ public class AlgorytmEwolucyjny {
         }
     }
 
-    private void krzyzowania(int liczbaArgumentow, Regulator regulator, MIMO obiekt, double[] cel, Random r, List<Osobnik> reprodukcja) {
+    private void krzyzowania(int liczbaArgumentow, Regulator regulator, MIMOTransmitancjaCiagla obiekt, double[] cel, Random r, List<Osobnik> reprodukcja) {
         for (int i = 0; i < iloscKrzyzowania; i++) {
             int osobnik1 = r.nextInt(rozmiarPopulacji);
             int osobnik2 = r.nextInt(rozmiarPopulacji);

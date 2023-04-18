@@ -1,8 +1,8 @@
 package com.example.inzynierka.regulatory;
 
 import com.example.inzynierka.modele.ParObiektMIMO;
-import com.example.inzynierka.obiekty.MIMO;
-import com.example.inzynierka.obiekty.SISO;
+import com.example.inzynierka.obiekty.MIMOTransmitancjaCiagla;
+import com.example.inzynierka.obiekty.SISOTransmitancjaCiagle;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
@@ -15,16 +15,16 @@ public class PIDTest {
 
     @Test
     public void SISOTest() {
-        SISO siso = new SISO(10.0, 1.0, 1, 1.0, 0, 1.0, 1.0, 0.0, 0, 1, 100.0, -100.0, "srednio");
+        SISOTransmitancjaCiagle sisoTransmitancjaCiagle = new SISOTransmitancjaCiagle(10.0, 1.0, 1, 1.0, 0, 1.0, 1.0, 0.0, 0, 1, 100.0, -100.0, "srednio");
         Regulator regulator = new PID(1.0, 1.0, 1.0, 1.0, new double[]{100.0} , 3.0, 100.0, new Double[]{null, null, null});
         regulator.setCel(new double[]{30.0});
         assert(regulator.getCel()[0]==30.0);
-        double tempY = siso.obliczKrok(regulator.policzOutput(siso.getAktualna()));
+        double tempY = sisoTransmitancjaCiagle.obliczKrok(regulator.policzOutput(sisoTransmitancjaCiagle.getAktualna()));
         double expectedY = 20.0;
         assert(tempY==expectedY);
-        siso.resetObiektu();
+        sisoTransmitancjaCiagle.resetObiektu();
         regulator.resetujRegulator();
-        tempY = siso.obliczKrok(regulator.policzOutput(siso.getAktualna()));
+        tempY = sisoTransmitancjaCiagle.obliczKrok(regulator.policzOutput(sisoTransmitancjaCiagle.getAktualna()));
         assert(tempY==expectedY);
     }
 
@@ -33,7 +33,7 @@ public class PIDTest {
         ObjectMapper objectMapper = new ObjectMapper();
         Integer[] PV = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("PV"), Integer[].class);
         ParObiektMIMO[] Obiekty = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("ParObiektMIMO"), ParObiektMIMO[].class);
-        MIMO obiekt  = new MIMO(Obiekty, "srednio");
+        MIMOTransmitancjaCiagla obiekt  = new MIMOTransmitancjaCiagla(Obiekty, "srednio");
         Double[] tempStrojenie = new Double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
         Regulator regulator = new ZbiorPID(obiekt,PV, 3.0, tempStrojenie);
         double[] tempCel = {30.0, 30.0};

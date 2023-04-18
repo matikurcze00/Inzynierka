@@ -2,7 +2,7 @@ package com.example.inzynierka.service;
 
 import com.example.inzynierka.modele.OdpowiedzInfoMIMO;
 import com.example.inzynierka.modele.ParObiektMIMO;
-import com.example.inzynierka.obiekty.MIMO;
+import com.example.inzynierka.obiekty.MIMOTransmitancjaCiagla;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
@@ -15,11 +15,11 @@ public class InfoService {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode root;
         ParObiektMIMO[] obiekty;
-        MIMO obiekt;
+        MIMOTransmitancjaCiagla obiekt;
         try {
             root = objectMapper.readTree(file.getInputStream());
             obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektMIMO[].class);
-            obiekt = new MIMO(obiekty);
+            obiekt = new MIMOTransmitancjaCiagla(obiekty);
         } catch (Exception ex) {
             ex.printStackTrace();
             return null;
