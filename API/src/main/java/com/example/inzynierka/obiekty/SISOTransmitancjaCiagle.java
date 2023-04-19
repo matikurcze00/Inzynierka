@@ -122,11 +122,16 @@ public class SISOTransmitancjaCiagle {
         double Yakt;
         Yakt = transmitancja.obliczKrok(U);
 
+        dodajY(Yakt);
+        return Yakt;
+    }
+
+    private void dodajY(double Yakt) {
         for (int i = Y.size() - 1; i > 0; i--)
             Y.set(i, Y.get(i - 1));
         Y.set(0, Yakt);
-        return Yakt;
     }
+
     public double obliczKrok(double du, double[] duZ) {
         obliczU(du);
         double Yakt;
@@ -134,9 +139,7 @@ public class SISOTransmitancjaCiagle {
         for(int i = 0; i < duZ.length; i++) {
             Yakt+=obliczKrokZaklocenia(duZ[i], i);
         }
-        for (int i = Y.size() - 1; i > 0; i--)
-            Y.set(i, Y.get(i - 1));
-        Y.set(0, Yakt);
+        dodajY(Yakt);
         return Yakt;
     }
     public double obliczKrokZaklocenia(double du, int zaklocenie) {
@@ -144,9 +147,7 @@ public class SISOTransmitancjaCiagle {
         obliczUZ(du,zaklocenie);
         Yakt = this.zakloceniaMierzalne.get(zaklocenie).obliczKrok(Uz.get(zaklocenie));
 
-        for (int i = Y.size() - 1; i > 0; i--)
-            Y.set(i, Y.get(i - 1));
-        Y.set(0, Yakt);
+        dodajY(Yakt);
         return Yakt;
     }
     public void obliczUZ(double du, int zaklocenie) {

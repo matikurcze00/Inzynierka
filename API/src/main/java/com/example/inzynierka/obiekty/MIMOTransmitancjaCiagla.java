@@ -77,15 +77,16 @@ public class MIMOTransmitancjaCiagla {
             }
             Yakt[i] = YaktIN;
         }
-        for (int i = 0; i < liczbaOUT; i++) {
-            List<Double> Ytemp = Y.get(i);
-            for (int j = Y.get(i).size() - 1; j > 0; j--)
-                Ytemp.set(j, Ytemp.get(j - 1));
-            Ytemp.set(0, Yakt[i]);
-            Y.set(i, Ytemp);
-        }
+        dodajY(Yakt);
         return Yakt;
     }
+
+    private void dodajY(double[] Yakt) {
+        for (int i = 0; i < liczbaOUT; i++) {
+            dodajY(i, Yakt[i]);
+        }
+    }
+
     public double[] obliczKrok(double[] du, double[] dUz) {
         obliczU(du);
         double[] Yakt = zakloceniaMierzalne.obliczKrok(dUz);
@@ -96,25 +97,23 @@ public class MIMOTransmitancjaCiagla {
             }
             Yakt[i] += YaktIN;
         }
-        for (int i = 0; i < liczbaOUT; i++) {
-            List<Double> Ytemp = Y.get(i);
-            for (int j = Y.get(i).size() - 1; j > 0; j--)
-                Ytemp.set(j, Ytemp.get(j - 1));
-            Ytemp.set(0, Yakt[i]);
-            Y.set(i, Ytemp);
-        }
+        dodajY(Yakt);
         return Yakt;
     }
     public double obliczKrok(double du, int IN, int OUT) {
         obliczU(du, IN);
         double YaktIN = transmitancja.get(IN).get(OUT).obliczKrok(U.get(IN));
+        dodajY(OUT, YaktIN);
+
+        return YaktIN;
+    }
+
+    private void dodajY(int OUT, double YaktIN) {
         List<Double> Ytemp = Y.get(OUT);
         for (int j = Y.get(OUT).size() - 1; j > 0; j--)
             Ytemp.set(j, Ytemp.get(j - 1));
         Ytemp.set(0, YaktIN);
         Y.set(OUT, Ytemp);
-
-        return YaktIN;
     }
 
     public double obliczKrokZaklocenia(double du, int IN, int OUT) {
