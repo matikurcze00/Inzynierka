@@ -36,6 +36,7 @@
     </div>
     <div class="dane">
       <app-obiekt-widok
+      [typRegulatora]="this.typRegulatora"
         (updateEvent)="updateObiekt($event)"
         [hidden]="zakladka !== 'model'"
       ></app-obiekt-widok>
@@ -45,7 +46,7 @@
       ></app-regulator-widok>
     </div>
 
-    <div *ngIf="zakladka == 'wizualizacja'">
+    <div [hidden]="zakladka != 'wizualizacja'">
       <div class="mt-5">
         <div class="btn-group">
           <input
