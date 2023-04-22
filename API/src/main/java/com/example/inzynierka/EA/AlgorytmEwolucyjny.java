@@ -101,13 +101,13 @@ public class AlgorytmEwolucyjny {
         Random r = new Random();
         double[] cel = Arrays.copyOf(obiekt.getYMax(), obiekt.getYMax().length);
         for (int i = 0; i < cel.length; i++)
-            cel[i] = cel[i] / 2;
+            cel[i] = cel[i] / 5;
 
         regulator.setCel(cel);
         for (int i = 0; i < rozmiarPopulacji; i++) {
             Osobnik osobnikTemp = new Osobnik(liczbaArgumentow);
             for (int j = 0; j < liczbaArgumentow; j++) {
-                osobnikTemp.setParametryIndex(j, r.nextDouble(5.0));
+                osobnikTemp.setParametryIndex(j, r.nextDouble(3.0));
             }
             regulator.zmienWartosci(osobnikTemp.getParametry());
             obiekt.resetObiektu();
@@ -139,7 +139,7 @@ public class AlgorytmEwolucyjny {
             int rodzic = r.nextInt(rozmiarPopulacji);
             Osobnik osobnikTemp = new Osobnik(liczbaArgumentow);
             for (int j = 0; j < liczbaArgumentow; j++) {
-                osobnikTemp.getParametry()[j] = (r.nextDouble() < getPrawdopodobienstwoMutacji()) ? Math.abs(r.nextGaussian(populacja.get(rodzic).getParametry()[j], 0.4)) : populacja.get(rodzic).getParametry()[j];
+                osobnikTemp.getParametry()[j] = (r.nextDouble() < getPrawdopodobienstwoMutacji()) ? Math.abs(r.nextGaussian(populacja.get(rodzic).getParametry()[j], 0.6)) : populacja.get(rodzic).getParametry()[j];
             }
             regulator.zmienWartosci(osobnikTemp.getParametry());
             obiekt.resetObiektu();

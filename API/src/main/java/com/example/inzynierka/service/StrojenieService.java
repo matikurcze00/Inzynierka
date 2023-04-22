@@ -246,8 +246,8 @@ public class StrojenieService {
             if(file.length==3) {
                 root = objectMapper.readTree(file[2].getInputStream());
                 obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektMIMO[].class);
-                MIMOTransmitancjaCiagla blad = new MIMOTransmitancjaCiagla(obiekty, parWizualizacja.getBlad());
-                obiekt.setZakloceniaMierzalne(blad);
+                MIMOTransmitancjaCiagla zaklocenie = new MIMOTransmitancjaCiagla(obiekty, parWizualizacja.getBlad());
+                obiekt.setZakloceniaMierzalne(zaklocenie);
             }
             root = objectMapper.readTree(file[0].getInputStream());
         } catch (Exception ex) {
@@ -256,7 +256,7 @@ public class StrojenieService {
         }
         Regulator regulator = dobierzRegulatorMIMO(parRegulator, parWizualizacja, objectMapper, obiekt, root, PIE);
         if (regulator == null) return null;
-        AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(PIE[0], PIE[1], PIE[2], 0.3, 0.4);
+        AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(PIE[0], PIE[1], PIE[2], 0.5, 0.5);
         dobierzStrojenieMIMO(parWizualizacja, obiekt, regulator, GA, odpowiedz);
         if(file.length>1)
         {
@@ -267,8 +267,8 @@ public class StrojenieService {
                 if(file.length==3) {
                     root = objectMapper.readTree(file[2].getInputStream());
                     obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektMIMO[].class);
-                    MIMOTransmitancjaCiagla blad = new MIMOTransmitancjaCiagla(obiekty, parWizualizacja.getBlad());
-                    obiekt.setZakloceniaMierzalne(blad);
+                    MIMOTransmitancjaCiagla zaklocenie = new MIMOTransmitancjaCiagla(obiekty, parWizualizacja.getBlad());
+                    obiekt.setZakloceniaMierzalne(zaklocenie);
                 }
                 root = objectMapper.readTree(file[1].getInputStream());
             } catch (Exception ex) {
@@ -286,7 +286,8 @@ public class StrojenieService {
         double[][] celTemp = ustawCelMIMO(parWizualizacja, obiekt, parWizualizacja.getDlugosc());
         odpowiedz.setCel(celTemp);
         if(wizualizacjaZaklocen.getUSkok()!= null && wizualizacjaZaklocen.getUSkok().length!=0) {
-            return dodajWartosciWykresowMIMO(obiekt, regulator, odpowiedz, parWizualizacja.getDlugosc(), celTemp, ustawSterowanieZaklocen(parWizualizacja, wizualizacjaZaklocen));
+            return dodajWartosciWykresowMIMO(obiekt, regulator, odpowiedz, parWizualizacja.getDlugosc(), celTemp,
+                ustawSterowanieZaklocen(parWizualizacja, wizualizacjaZaklocen));
         } else {
             return  dodajWartosciWykresowMIMO(obiekt, regulator, odpowiedz, parWizualizacja.getDlugosc(), celTemp);
         }
@@ -320,8 +321,8 @@ public class StrojenieService {
                 return null;
             }
             regulator = new ZbiorPID(obiekt, PV, parRegulator.getDuMax(), parWizualizacja.getStrojenie());
-            PIE[0] = 400;
-            PIE[1] = 200;
+            PIE[0] = 600;
+            PIE[1] = 300;
             PIE[2] = 10;
         } else if (parRegulator.getTyp().equals("dmc")) {
             double[] tempLambda = new double[obiekt.getLiczbaIN()];

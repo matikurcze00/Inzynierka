@@ -5,8 +5,6 @@ import lombok.Data;
 @Data
 abstract public class Regulator {
     double[] cel;
-    double duMax;
-    double uMax;
 
     abstract public double policzOutput(double aktualna);
     abstract public double policzOutput(double aktualna, double[] sterowanieZaklocenia);

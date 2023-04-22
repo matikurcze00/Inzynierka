@@ -117,6 +117,7 @@ public class MIMOTransmitancjaCiagla {
     }
 
     public double obliczKrokZaklocenia(double du, int IN, int OUT) {
+
         return zakloceniaMierzalne.obliczKrok(du, IN, OUT);
     }
 
@@ -208,12 +209,12 @@ public class MIMOTransmitancjaCiagla {
             for (int i = 0; i < liczbaOUT; i++)
                 tempCel[i] = 0;
             tempCel[k] = cel[k];
-            regulator.setCel(tempCel);
             resetObiektu();
             regulator.resetujRegulator();
+            regulator.setCel(tempCel);
             for (int i = 0; i < this.dlugosc; i++) {
                 double[] Ytepm = obliczKrok(regulator.policzOutput(getAktualne()));
-                for (int j = 0; j < Ytepm.length; j++) {
+                for (int j = 0; j < liczbaOUT; j++) {
                     if (this.blad.equals("srednio"))
                         blad += Math.pow(Ytepm[j] - tempCel[j], 2);
                     else if (this.blad.equals("absolutny"))
@@ -244,9 +245,9 @@ public class MIMOTransmitancjaCiagla {
             }
             double[] zakloceniaU = new double[zakloceniaMierzalne.getTransmitancja().size()];
             for(int i = 0; i < zakloceniaMierzalne.getTransmitancja().size(); i++)
-                zakloceniaU[i] = zakloceniaMierzalne.getUMax(i)/Math.floorDiv(this.dlugosc,400);
+                zakloceniaU[i] = zakloceniaMierzalne.getUMax(i)/this.dlugosc;
 
-            for (int i = 0; i < Math.floorDiv(this.dlugosc,4); i++) {
+            for (int i = 0; i < Math.floorDiv(this.dlugosc,8); i++) {
                 double[] Ytepm = obliczKrok(regulator.policzOutput(getAktualne(), zakloceniaU),zakloceniaU);
                 for (int j = 0; j < Ytepm.length; j++) {
                     if (this.blad.equals("srednio"))
@@ -258,7 +259,7 @@ public class MIMOTransmitancjaCiagla {
             for(int i = 0; i < zakloceniaMierzalne.getTransmitancja().size(); i++)
                 zakloceniaU[i] = 0.0;
 
-            for (int i = 0; i < Math.floorDiv(this.dlugosc,4); i++) {
+            for (int i = 0; i < Math.floorDiv(this.dlugosc*3,8); i++) {
                 double[] Ytepm = obliczKrok(regulator.policzOutput(getAktualne(), zakloceniaU),zakloceniaU);
                 for (int j = 0; j < Ytepm.length; j++) {
                     if (this.blad.equals("srednio"))
