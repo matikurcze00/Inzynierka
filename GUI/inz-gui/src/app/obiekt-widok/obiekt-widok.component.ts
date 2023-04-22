@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, EventEmitter, HostListener, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, OnInit, Output, SimpleChanges } from '@angular/core';
 import { ControlContainer, FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { InfoService } from '../service/info.service';
 
@@ -13,6 +13,7 @@ export class ObiektWidokComponent implements OnInit {
   typ='SISO'
   optionsQ = [-1, 0 ,1]
   czyError = false;
+  @Input() typRegulatora: any;
   @Output() updateEvent = new EventEmitter<FormArray>()
   obiektForm = new FormGroup({
     obiekt: new FormArray([
@@ -27,6 +28,18 @@ export class ObiektWidokComponent implements OnInit {
         t3: new FormControl(1.0),
         tp: new FormControl(1.0),
         delay: new FormControl(0),
+      }),
+      new FormGroup({
+        A1: new FormControl(1.0),
+        A2: new FormControl(1.0),
+        A3: new FormControl(1.0),
+        A4: new FormControl(1.0),
+        A5: new FormControl(1.0),
+        B1: new FormControl(1.0),
+        B2: new FormControl(1.0),
+        B3: new FormControl(1.0),
+        B4: new FormControl(1.0),
+        B5: new FormControl(1.0),
       }),
       new FormGroup({
         plik: new FormControl(this.file),
@@ -45,7 +58,16 @@ export class ObiektWidokComponent implements OnInit {
       console.log(this.obiektForm.controls.obiekt.controls[1])
     }
   }
-
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['typRegulatora']) {
+      if(this.typRegulatora=='gpc') {
+        console.log("GPC")
+        this.obiektForm.
+      } else {
+        console.log('cos innego')
+      }
+    }
+  }
   pierwszeRownanie = " $ \\large G(s) = Gain * \\frac{(R1*s + Q1)(R2*s + Q2)}{(T1*s+1)(T2*s+1)(T3+3)}*e^{Delay}$  ";
   drugieRownanie =  " $ \\large G(s) = K * \\frac{(s-z1)}{(s-b1)(s-b2)(s-b3)}$";
   zmienne = [{id: 1, nazwa: "Gain"},
