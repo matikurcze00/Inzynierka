@@ -62,7 +62,6 @@ export class ObiektWidokComponent implements OnInit {
     if (changes['typRegulatora']) {
       if(this.typRegulatora=='gpc') {
         console.log("GPC")
-        this.obiektForm.
       } else {
         console.log('cos innego')
       }
