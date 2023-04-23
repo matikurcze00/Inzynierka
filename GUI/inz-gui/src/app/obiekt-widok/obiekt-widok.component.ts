@@ -29,22 +29,23 @@ export class ObiektWidokComponent implements OnInit {
         tp: new FormControl(1.0),
         delay: new FormControl(0),
       }),
-      new FormGroup({
-        A1: new FormControl(1.0),
-        A2: new FormControl(1.0),
-        A3: new FormControl(1.0),
-        A4: new FormControl(1.0),
-        A5: new FormControl(1.0),
-        B1: new FormControl(1.0),
-        B2: new FormControl(1.0),
-        B3: new FormControl(1.0),
-        B4: new FormControl(1.0),
-        B5: new FormControl(1.0),
-      }),
+
       new FormGroup({
         plik: new FormControl(this.file),
         liczbaWejsc: new FormControl(1),
         liczbaWyjsc: new FormControl(1)
+        }), 
+      new FormGroup({
+          A1: new FormControl(1.0),
+          A2: new FormControl(1.0),
+          A3: new FormControl(1.0),
+          A4: new FormControl(1.0),
+          A5: new FormControl(1.0),
+          B1: new FormControl(1.0),
+          B2: new FormControl(1.0),
+          B3: new FormControl(1.0),
+          B4: new FormControl(1.0),
+          B5: new FormControl(1.0),
         }),
     ])
   })
