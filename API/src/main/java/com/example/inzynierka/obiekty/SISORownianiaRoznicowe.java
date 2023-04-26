@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Data
-public class SISORownianiaRoznicowe {
+public class SISORownianiaRoznicowe extends SISO{
     List<Double> A;
     List<Double> B;
     List<Double> Y;
@@ -46,7 +46,7 @@ public class SISORownianiaRoznicowe {
     private double[] obliczPraceBezZaklocen(Regulator regulator) {
         double[] Y = new double[dlugosc];
         for (int i = 0; i < this.dlugosc; i++) {
-            Y[i] = obliczKrok(regulator.policzOutput(getAktualna()));
+            Y[i] = obliczKrok(regulator.policzSterowanie(getAktualna()));
         }
         return Y;
     }
@@ -57,6 +57,13 @@ public class SISORownianiaRoznicowe {
 
         dodajY(Yakt);
         return Yakt;
+    }
+    public double obliczKrok(double du, double[] duZ) {
+        return obliczKrok(du);
+    }
+
+    public double obliczKrokZaklocenia(double du, int zaklocenie) {
+        return 0.0;
     }
 
     private double obliczWyjscie() {

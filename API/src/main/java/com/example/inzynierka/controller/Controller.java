@@ -1,9 +1,9 @@
 package com.example.inzynierka.controller;
 
 import com.example.inzynierka.modele.*;
-import com.example.inzynierka.service.InfoService;
-import com.example.inzynierka.service.OdpowiedzService;
-import com.example.inzynierka.service.StrojenieService;
+import com.example.inzynierka.serwisy.InfoService;
+import com.example.inzynierka.serwisy.OdpowiedzService;
+import com.example.inzynierka.serwisy.StrojenieService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
+import { WizualizacjaComponent } from './wizualizacja';
 import { RegulatorWidokComponent } from './regulator-widok/regulator-widok.component';
 import { ObiektWidokComponent } from './obiekt-widok/obiekt-widok.component';
 import { NaglowekComponent } from './naglowek/naglowek.component';
@@ -13,7 +13,7 @@ import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
-    AppComponent,
+    WizualizacjaComponent,
     RegulatorWidokComponent,
     ObiektWidokComponent,
     NaglowekComponent
@@ -28,6 +28,6 @@ import { HttpClientModule } from '@angular/common/http';
     HttpClientModule
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [WizualizacjaComponent]
 })
 export class AppModule { }

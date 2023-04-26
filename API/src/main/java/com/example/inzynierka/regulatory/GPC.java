@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class GPC extends Regulator{
+public class GPC extends RegulatorMPC {
     private Matrix K;
     protected Matrix M;
     protected List<List<Double>> S;
@@ -30,7 +30,7 @@ public class GPC extends Regulator{
 
     }
     @Override
-    public double policzOutput(double aktualna){
+    public double policzSterowanie(double aktualna){
         obliczU(aktualna);
         Matrix yZad = ustawMatrixYZad();
         Matrix yAktualne = ustawMatrixY(aktualna);
@@ -41,12 +41,12 @@ public class GPC extends Regulator{
     }
 
     @Override
-    public double policzOutput(double aktualna, double[] sterowanieZaklocenia){
-        return policzOutput(aktualna);
+    public double policzSterowanie(double aktualna, double[] sterowanieZaklocenia){
+        return policzSterowanie(aktualna);
     }
 
     @Override
-    public double[] policzOutput(double[] aktualna)
+    public double[] policzSterowanie(double[] aktualna)
     {
         obliczU(aktualna);
         Matrix yZad = ustawMatrixYZad();
@@ -60,12 +60,12 @@ public class GPC extends Regulator{
     }
 
     @Override
-    public double[] policzOutput(double[] aktualna, double[] sterowanieZaklocenia) {
-        return policzOutput(aktualna);
+    public double[] policzSterowanie(double[] aktualna, double[] sterowanieZaklocenia) {
+        return policzSterowanie(aktualna);
     }
 
     @Override
-    public void zmienWartosci(double[] wartosci) {
+    public void zmienNastawy(double[] wartosci) {
 
     }
 

@@ -22,7 +22,7 @@ public class PID extends Regulator {
     private int liczbaStrojeniaZadanego;
 
     @Override
-    public double policzOutput(double aktualna) {
+    public double policzSterowanie(double aktualna) {
         //Wyliczanie błędu
         E.set(2, E.get(1));
         E.set(1, E.get(0));
@@ -38,22 +38,23 @@ public class PID extends Regulator {
     }
 
     @Override
-    public double policzOutput(double aktualna, double[] UZ) {
-        return policzOutput(aktualna);
+    public double policzSterowanie(double aktualna, double[] UZ) {
+        return policzSterowanie(aktualna);
     }
 
         @Override
-    public double[] policzOutput(double[] aktualna) {
+    public double[] policzSterowanie(double[] aktualna) {
         return new double[0];
     }
 
     @Override
-    public double[] policzOutput(double[] aktualna, double[] UZ) {
+    public double[] policzSterowanie(double[] aktualna, double[] UZ) {
         return new double[0];
     }
 
 
-    public PID(double P, double I, double D, double Ts, double[] cel, double duMax, double uMax, Double[] strojenieZadane) {
+    public PID(double P, double I, double D, double Ts, double[] cel, double duMax,
+               double uMax, Double[] strojenieZadane) {
 
         this(P, I, D, Ts, cel, duMax, uMax);
         if (strojenieZadane[0] != null)
@@ -87,7 +88,7 @@ public class PID extends Regulator {
     }
 
     @Override
-    public void zmienWartosci(double[] wartosci) {
+    public void zmienNastawy(double[] wartosci) {
         if (this.liczbaStrojeniaZadanego == 0) {
             this.K = wartosci[0];
             this.Ti = wartosci[1];

@@ -9,9 +9,9 @@ import java.util.Collections;
 import java.util.List;
 
 @Data
-public class MIMOTransmitancjaCiagla {
+public class MIMODPA extends MIMO{
 
-    private List<List<TransmitancjaCiagla>> transmitancja; //LIST<LIST-IN<OUT>>
+    private List<List<DPA>> transmitancja; //LIST<LIST-IN<OUT>>
     private List<List<Double>> U;
     private List<List<Double>> Y;
     private double[] YMax;
@@ -22,12 +22,12 @@ public class MIMOTransmitancjaCiagla {
     private int liczbaIN;
     private int delayMax = 0;
     private int dlugosc;
-    private MIMOTransmitancjaCiagla zakloceniaMierzalne;
+    private MIMODPA zakloceniaMierzalne;
 
-    public MIMOTransmitancjaCiagla() {
+    public MIMODPA() {
     }
 
-    public MIMOTransmitancjaCiagla(ParObiektMIMO[] parObiektMIMOS)
+    public MIMODPA(ParObiektMIMO[] parObiektMIMOS)
     {
         stworzTransmitancje(parObiektMIMOS);
         liczbaOUT = transmitancja.get(0).size();
@@ -47,7 +47,7 @@ public class MIMOTransmitancjaCiagla {
         obliczYMax();
     }
 
-    public MIMOTransmitancjaCiagla(ParObiektMIMO[] parObiektMIMOS, String blad) {
+    public MIMODPA(ParObiektMIMO[] parObiektMIMOS, String blad) {
         stworzTransmitancje(parObiektMIMOS);
         liczbaOUT = transmitancja.get(0).size();
         liczbaIN = transmitancja.size();
@@ -124,10 +124,10 @@ public class MIMOTransmitancjaCiagla {
     public void stworzTransmitancje(ParObiektMIMO[] parObiektMIMOS) {
         this.transmitancja = new ArrayList();
         for (ParObiektMIMO parObiekt : parObiektMIMOS) {
-            List<TransmitancjaCiagla> transmitancjaTemp = new ArrayList();
+            List<DPA> transmitancjaTemp = new ArrayList();
             for (int i = 0; i < parObiekt.getGain().length; i++) {
 
-                transmitancjaTemp.add(new TransmitancjaCiagla(
+                transmitancjaTemp.add(new DPA(
                         parObiekt.getGain()[i],
                         parObiekt.getR1()[i],
                         parObiekt.getQ1()[i],
@@ -152,7 +152,7 @@ public class MIMOTransmitancjaCiagla {
         }
     }
 
-    public void obliczU(double[] du) {
+    private void obliczU(double[] du) {
         for (int j = 0; j < du.length; j++) {
             double Uakt = U.get(j).get(0) + du[j];
             if (Uakt > uMax[j])
@@ -166,7 +166,7 @@ public class MIMOTransmitancjaCiagla {
         }
     }
 
-    public void obliczU(double du, int IN) {
+    private void obliczU(double du, int IN) {
         double Uakt = U.get(IN).get(0) + du;
         if (Uakt > uMax[IN]) {
             Uakt = uMax[IN];
@@ -213,7 +213,7 @@ public class MIMOTransmitancjaCiagla {
             regulator.resetujRegulator();
             regulator.setCel(tempCel);
             for (int i = 0; i < this.dlugosc; i++) {
-                double[] Ytepm = obliczKrok(regulator.policzOutput(getAktualne()));
+                double[] Ytepm = obliczKrok(regulator.policzSterowanie(getAktualne()));
                 for (int j = 0; j < liczbaOUT; j++) {
                     if (this.blad.equals("srednio"))
                         blad += Math.pow(Ytepm[j] - tempCel[j], 2);
@@ -235,7 +235,7 @@ public class MIMOTransmitancjaCiagla {
             resetObiektu();
             regulator.resetujRegulator();
             for (int i = 0; i < Math.floorDiv(this.dlugosc,2); i++) {
-                double[] Ytepm = obliczKrok(regulator.policzOutput(getAktualne()));
+                double[] Ytepm = obliczKrok(regulator.policzSterowanie(getAktualne()));
                 for (int j = 0; j < Ytepm.length; j++) {
                     if (this.blad.equals("srednio"))
                         blad += Math.pow(Ytepm[j] - tempCel[j], 2);
@@ -248,7 +248,7 @@ public class MIMOTransmitancjaCiagla {
                 zakloceniaU[i] = zakloceniaMierzalne.getUMax(i)/this.dlugosc;
 
             for (int i = 0; i < Math.floorDiv(this.dlugosc,8); i++) {
-                double[] Ytepm = obliczKrok(regulator.policzOutput(getAktualne(), zakloceniaU),zakloceniaU);
+                double[] Ytepm = obliczKrok(regulator.policzSterowanie(getAktualne(), zakloceniaU),zakloceniaU);
                 for (int j = 0; j < Ytepm.length; j++) {
                     if (this.blad.equals("srednio"))
                         blad += Math.pow(Ytepm[j] - tempCel[j], 2);
@@ -260,7 +260,7 @@ public class MIMOTransmitancjaCiagla {
                 zakloceniaU[i] = 0.0;
 
             for (int i = 0; i < Math.floorDiv(this.dlugosc*3,8); i++) {
-                double[] Ytepm = obliczKrok(regulator.policzOutput(getAktualne(), zakloceniaU),zakloceniaU);
+                double[] Ytepm = obliczKrok(regulator.policzSterowanie(getAktualne(), zakloceniaU),zakloceniaU);
                 for (int j = 0; j < Ytepm.length; j++) {
                     if (this.blad.equals("srednio"))
                         blad += Math.pow(Ytepm[j] - tempCel[j], 2);
@@ -342,8 +342,8 @@ public class MIMOTransmitancjaCiagla {
         for (int i = 0; i < this.liczbaIN; i++) {
             U.set(i, new ArrayList(Collections.nCopies(3 + delayMax, transmitancja.get(i).get(0).getUpp())));
         }
-        for (List<TransmitancjaCiagla> ListaTransmitancji : transmitancja)
-            for (TransmitancjaCiagla tran : ListaTransmitancji)
+        for (List<DPA> ListaTransmitancji : transmitancja)
+            for (DPA tran : ListaTransmitancji)
                 tran.reset();
         if(zakloceniaMierzalne !=null) {
             zakloceniaMierzalne.resetObiektu();
@@ -351,8 +351,8 @@ public class MIMOTransmitancjaCiagla {
     }
 
     public void obliczDelayMax() {
-        for (List<TransmitancjaCiagla> listaTransmitancji : transmitancja) {
-            for (TransmitancjaCiagla tran : listaTransmitancji) {
+        for (List<DPA> listaTransmitancji : transmitancja) {
+            for (DPA tran : listaTransmitancji) {
                 if (tran.getDelay() > this.delayMax) {
                     this.delayMax = tran.getDelay();
                 }
@@ -391,7 +391,7 @@ public class MIMOTransmitancjaCiagla {
             this.dlugosc = 40;
     }
 
-    public void setZakloceniaMierzalne(MIMOTransmitancjaCiagla zaklocenieMierzalne) {
+    public void setZakloceniaMierzalne(MIMODPA zaklocenieMierzalne) {
         this.zakloceniaMierzalne = zaklocenieMierzalne;
         zaklocenieMierzalne.resetObiektu();
     }

@@ -6,7 +6,7 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class TransmitancjaCiagla {
+public class DPA {
     private double gain;
     private double R1;
     private double R2;
@@ -25,9 +25,9 @@ public class TransmitancjaCiagla {
     private Lag lag2;
     private Lag lag3;
 
-    public TransmitancjaCiagla(double gain, double R1, int Q1, double R2,
-                               int Q2, double T1,
-                               double T2, double T3, int delay, double Tp) {
+    public DPA(double gain, double R1, int Q1, double R2,
+               int Q2, double T1,
+               double T2, double T3, int delay, double Tp) {
         this.gain = gain;
         this.R1 = R1;
         this.R2 = R2;

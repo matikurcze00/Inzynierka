@@ -1,8 +1,8 @@
 package com.example.inzynierka.EA;
 
 import com.example.inzynierka.modele.ParObiektMIMO;
-import com.example.inzynierka.obiekty.MIMOTransmitancjaCiagla;
-import com.example.inzynierka.obiekty.SISOTransmitancjaCiagle;
+import com.example.inzynierka.obiekty.MIMODPA;
+import com.example.inzynierka.obiekty.SISODPA;
 import com.example.inzynierka.regulatory.DMCAnalityczny;
 import com.example.inzynierka.regulatory.PID;
 import com.example.inzynierka.regulatory.Regulator;
@@ -18,7 +18,7 @@ public class EATest {
     @Test
     public void PIDSisoTest()
     {
-        SISOTransmitancjaCiagle sisoTransmitancjaCiagle = new SISOTransmitancjaCiagle(10.0, 1.0, 1, 1.0, 0, 1.0, 1.0, 0.0, 0, 1, 100.0, -100.0, "srednio");
+        SISODPA SISODPA = new SISODPA(10.0, 1.0, 1, 1.0, 0, 1.0, 1.0, 0.0, 0, 1, 100.0, -100.0, "srednio");
         Regulator regulator = new PID(1.0, 1.0, 1.0, 1.0, new double[]{100.0} , 3.0, 100.0, new Double[]{null, null, null});
         int populacja = 100;
         int iteracja = 20;
@@ -30,7 +30,7 @@ public class EATest {
         assert(GA.getIloscKrzyzowania()==(populacja-elita)*0.8);
         assert(GA.getIloscMutacji()==GA.getRozmiarPopulacji()-GA.getIloscKrzyzowania()-GA.getRozmiarElity());
         assert(GA.getPrawdopodobienstwoMutacji()==0.3);
-        double[] tempWartosciGA = GA.dobierzWartosci(regulator.liczbaZmiennych(), regulator, sisoTransmitancjaCiagle);
+        double[] tempWartosciGA = GA.dobierzWartosci(regulator.liczbaZmiennych(), regulator, SISODPA);
         assert(tempWartosciGA[0]!=0.0);
 
     }
@@ -38,8 +38,8 @@ public class EATest {
     @Test
     public void DMCSisoTest()
     {
-        SISOTransmitancjaCiagle sisoTransmitancjaCiagle = new SISOTransmitancjaCiagle(10.0, 1.0, 1, 1.0, 0, 1.0, 1.0, 0.0, 0, 1, 100.0, -100.0, "srednio");
-        Regulator regulator = new DMCAnalityczny(4, 0.1, sisoTransmitancjaCiagle, sisoTransmitancjaCiagle.getYMax() / 2, 3.0, 11);;
+        SISODPA SISODPA = new SISODPA(10.0, 1.0, 1, 1.0, 0, 1.0, 1.0, 0.0, 0, 1, 100.0, -100.0, "srednio");
+        Regulator regulator = new DMCAnalityczny(4, 0.1, SISODPA, SISODPA.getYMax() / 2, 3.0, 11);;
         int populacja = 100;
         int iteracja = 20;
         int elita = 3;
@@ -50,7 +50,7 @@ public class EATest {
         assert(GA.getIloscKrzyzowania()==(populacja-elita)*0.8);
         assert(GA.getIloscMutacji()==GA.getRozmiarPopulacji()-GA.getIloscKrzyzowania()-GA.getRozmiarElity());
         assert(GA.getPrawdopodobienstwoMutacji()==0.3);
-        double[] tempWartosciGA = GA.dobierzWartosci(regulator.liczbaZmiennych(), regulator, sisoTransmitancjaCiagle);
+        double[] tempWartosciGA = GA.dobierzWartosci(regulator.liczbaZmiennych(), regulator, SISODPA);
         assert(tempWartosciGA[0]!=0.0);
     }
 
@@ -60,7 +60,7 @@ public class EATest {
         ObjectMapper objectMapper = new ObjectMapper();
         Integer[] PV = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("PV"), Integer[].class);
         ParObiektMIMO[] Obiekty = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("ParObiektMIMO"), ParObiektMIMO[].class);
-        MIMOTransmitancjaCiagla obiekt  = new MIMOTransmitancjaCiagla(Obiekty, "srednio");
+        MIMODPA obiekt  = new MIMODPA(Obiekty, "srednio");
         Double[] tempStrojenie = new Double[]{1.0, 1.0, 1.0, null, null, null};
         Regulator regulator = new ZbiorPID(obiekt,PV, 3.0, tempStrojenie);
         int populacja = 100;
@@ -84,7 +84,7 @@ public class EATest {
         ObjectMapper objectMapper = new ObjectMapper();
         Integer[] PV = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("PV"), Integer[].class);
         ParObiektMIMO[] Obiekty = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("ParObiektMIMO"), ParObiektMIMO[].class);
-        MIMOTransmitancjaCiagla obiekt  = new MIMOTransmitancjaCiagla(Obiekty, "srednio");
+        MIMODPA obiekt  = new MIMODPA(Obiekty, "srednio");
         double[] tempLambda = {0.5,0.5};
         Double[] tempStrojenie = new Double[]{1.0, null};
         Regulator regulator = new DMCAnalityczny(5, tempLambda, obiekt, obiekt.getYMax(), 3.0, 11, tempStrojenie);

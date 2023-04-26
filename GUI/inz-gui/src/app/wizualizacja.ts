@@ -13,11 +13,11 @@ import { InfoService } from './service/info.service';
  
 @Component({
   selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  templateUrl: './wizualizacja.html',
+  styleUrls: ['./wizualizacja.css']
 })
 
-export class AppComponent {
+export class WizualizacjaComponent {
   zakladka = "model"
   @ViewChild('fileInput') fileInput: ElementRef<HTMLInputElement>;
   

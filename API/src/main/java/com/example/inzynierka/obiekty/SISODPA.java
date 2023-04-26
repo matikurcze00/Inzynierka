@@ -10,9 +10,9 @@ import java.util.Collections;
 import java.util.List;
 
 @Data
-public class SISOTransmitancjaCiagle {
+public class SISODPA extends SISO{
 
-    private TransmitancjaCiagla transmitancja;
+    private DPA transmitancja;
     private List<Double> U;
     private List<List<Double>> Uz;
     private List<Double> Y;
@@ -22,33 +22,33 @@ public class SISOTransmitancjaCiagle {
     private int dlugosc;
     private String blad;
 
-    private List<TransmitancjaCiagla> zakloceniaMierzalne;
+    private List<DPA> zakloceniaMierzalne;
 
-    public SISOTransmitancjaCiagle() {
+    public SISODPA() {
     }
 
-    public SISOTransmitancjaCiagle(ParObiekt parObiekt, double uMax, double uMin, String blad, Zaklocenia zakloceniaMierzalne) {
+    public SISODPA(ParObiekt parObiekt, double uMax, double uMin, String blad, Zaklocenia zakloceniaMierzalne) {
         this(parObiekt.getGain(), parObiekt.getR1(), parObiekt.getQ1(), parObiekt.getR2(),
             parObiekt.getQ2(), parObiekt.getT1(), parObiekt.getT2(), parObiekt.getT3()
             , parObiekt.getDelay(), parObiekt.getTp(), uMax, uMin, blad);
         this.zakloceniaMierzalne = new ArrayList<>();
         if(zakloceniaMierzalne.getGain()!=null){
             for(int i = 0; i < zakloceniaMierzalne.getGain().length; i++) {
-                this.zakloceniaMierzalne.add(new TransmitancjaCiagla(zakloceniaMierzalne.getGain()[i], zakloceniaMierzalne.getR1()[i], zakloceniaMierzalne.getQ1()[i],
+                this.zakloceniaMierzalne.add(new DPA(zakloceniaMierzalne.getGain()[i], zakloceniaMierzalne.getR1()[i], zakloceniaMierzalne.getQ1()[i],
                     zakloceniaMierzalne.getR2()[i], zakloceniaMierzalne.getQ2()[i], zakloceniaMierzalne.getT1()[i], zakloceniaMierzalne.getT2()[i],
                     zakloceniaMierzalne.getT3()[i], zakloceniaMierzalne.getDelay()[i], zakloceniaMierzalne.getTp()[i]));
         }}
         resetObiektu();
     }
-    public SISOTransmitancjaCiagle(ParObiekt parObiekt, double uMax, double uMin, String blad) {
+    public SISODPA(ParObiekt parObiekt, double uMax, double uMin, String blad) {
         this(parObiekt.getGain(), parObiekt.getR1(), parObiekt.getQ1(), parObiekt.getR2(),
                 parObiekt.getQ2(), parObiekt.getT1(), parObiekt.getT2(), parObiekt.getT3()
                 , parObiekt.getDelay(), parObiekt.getTp(), uMax, uMin, blad);
     }
 
-    public SISOTransmitancjaCiagle(double gain, double R1, int Q1, double R2, int Q2, double T1,
-                                   double T2, double T3, int delay, double Tp, double uMax, double uMin, String blad) {
-        this.transmitancja = new TransmitancjaCiagla(gain, R1, Q1, R2, Q2, T1, T2, T3, delay, Tp);
+    public SISODPA(double gain, double R1, int Q1, double R2, int Q2, double T1,
+                   double T2, double T3, int delay, double Tp, double uMax, double uMin, String blad) {
+        this.transmitancja = new DPA(gain, R1, Q1, R2, Q2, T1, T2, T3, delay, Tp);
         U = new ArrayList(Collections.nCopies(3 + delay, transmitancja.getUpp()));
         Y = new ArrayList(Collections.nCopies(3, transmitancja.getYpp()));
         this.uMax = uMax;
@@ -72,7 +72,7 @@ public class SISOTransmitancjaCiagle {
         transmitancja.reset();
         if(zakloceniaMierzalne !=null && !zakloceniaMierzalne.isEmpty()) {
             this.Uz = new ArrayList();
-            for(TransmitancjaCiagla zaklocenie: zakloceniaMierzalne) {
+            for(DPA zaklocenie: zakloceniaMierzalne) {
                 Uz.add(new ArrayList<>(Collections.nCopies(3 + zaklocenie.getDelay(), 0.0)));
                 zaklocenie.reset();
             }
@@ -95,7 +95,7 @@ public class SISOTransmitancjaCiagle {
     private double[] obliczPraceBezZaklocen(Regulator regulator) {
         double[] Y = new double[dlugosc];
         for (int i = 0; i < this.dlugosc; i++) {
-            Y[i] = obliczKrok(regulator.policzOutput(getAktualna()));
+            Y[i] = obliczKrok(regulator.policzSterowanie(getAktualna()));
         }
         return Y;
     }
@@ -103,16 +103,16 @@ public class SISOTransmitancjaCiagle {
     public double[] obliczPraceZZakloceniem(Regulator regulator) {
         double[] Y = new double[dlugosc];
         for (int i = 0; i < Math.floorDiv(this.dlugosc,2); i++)
-            Y[i] = obliczKrok(regulator.policzOutput(getAktualna()));
+            Y[i] = obliczKrok(regulator.policzSterowanie(getAktualna()));
         double[] zakloceniaU = new double[zakloceniaMierzalne.size()];
         for(int i = 0; i< zakloceniaU.length; i++)
             zakloceniaU[i] = 3 * transmitancja.getGain() / zakloceniaMierzalne.get(i).getGain();
         for (int i = Math.floorDiv(this.dlugosc,2); i < Math.floorDiv(this.dlugosc*3,4); i++)
-            Y[i] = obliczKrok(regulator.policzOutput(getAktualna(), zakloceniaU), zakloceniaU);
+            Y[i] = obliczKrok(regulator.policzSterowanie(getAktualna(), zakloceniaU), zakloceniaU);
         for(int i = 0; i< zakloceniaU.length; i++)
             zakloceniaU[i] = 0.0;
         for (int i = Math.floorDiv(this.dlugosc*3,4); i < dlugosc; i++)
-            Y[i] = obliczKrok(regulator.policzOutput(getAktualna(),zakloceniaU),zakloceniaU);
+            Y[i] = obliczKrok(regulator.policzSterowanie(getAktualna(),zakloceniaU),zakloceniaU);
 
         return Y;
     }
@@ -150,7 +150,7 @@ public class SISOTransmitancjaCiagle {
         dodajY(Yakt);
         return Yakt;
     }
-    public void obliczUZ(double du, int zaklocenie) {
+    private void obliczUZ(double du, int zaklocenie) {
         double Uakt = Uz.get(zaklocenie).get(0) + du;
         if (Uakt > uMax)
             Uakt = uMax;
@@ -160,7 +160,7 @@ public class SISOTransmitancjaCiagle {
             Uz.get(zaklocenie).set(i, Uz.get(zaklocenie).get(i - 1));
         Uz.get(zaklocenie).set(0, Uakt);
     }
-    public void obliczU(double du) {
+    private void obliczU(double du) {
         double Uakt = U.get(0) + du;
         if (Uakt > uMax)
             Uakt = uMax;
@@ -186,7 +186,7 @@ public class SISOTransmitancjaCiagle {
         this.YMax = Ytemp;
     }
 
-    public void obliczDlugosc() {
+    private void obliczDlugosc() {
         resetObiektu();
         double U = getUMax() / 2;
         int i = 2;
@@ -203,7 +203,7 @@ public class SISOTransmitancjaCiagle {
             this.dlugosc = 40;
     }
 
-    public double obliczBlad(double[] Y, double yZad) {
+    private double obliczBlad(double[] Y, double yZad) {
         double bladTemp = 0.0;
         if (this.blad.equals("srednio"))
             for (int i = 0; i < this.dlugosc; i++)

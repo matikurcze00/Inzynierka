@@ -1,12 +1,14 @@
 package com.example.inzynierka.obiekty;
 
 import com.example.inzynierka.regulatory.Regulator;
+import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class MIMORownianiaRoznicowe {
+@Data
+public class MIMORownianiaRoznicowe extends MIMO{
     List<List<Double>> A;
     List<List<Double>> B;
     List<List<Double>> Y;
@@ -45,7 +47,7 @@ public class MIMORownianiaRoznicowe {
             resetObiektu();
             regulator.resetujRegulator();
             for (int i = 0; i < this.dlugosc; i++) {
-                double[] Ytepm = obliczKrok(regulator.policzOutput(getAktualne()));
+                double[] Ytepm = obliczKrok(regulator.policzSterowanie(getAktualne()));
                 for (int j = 0; j < Ytepm.length; j++) {
                     if (this.blad.equals("srednio"))
                         blad += Math.pow(Ytepm[j] - tempCel[j], 2);
@@ -66,6 +68,12 @@ public class MIMORownianiaRoznicowe {
         }
         dodajY(Yakt);
         return Yakt;
+    }
+    public double[] obliczKrok(double[] du, double[]dz) {
+        return obliczKrok(du);
+    }
+    public double obliczKrokZaklocenia(double du, int IN, int OUT) {
+        return 0.0;
     }
 
     public double obliczKrok(double du, int IN, int OUT) {
