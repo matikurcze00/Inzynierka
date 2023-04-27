@@ -48,43 +48,79 @@
     </div>
   </div>
   <div class="mt-5" *ngIf="typ=='SISO'">
-    {{pierwszeRownanie}}
-    <h5 class="mt-5">Wprowadź wartości transmitancji:</h5>
-    <form [formGroup]="obiektForm" >
-      <div class="container ml-0 mr-0 mx-auto">
-        <div class="form-group mb-3" formArrayName="obiekt">
-          <div class="form-row align-items-center" [formGroupName]="0">
-            <div class="input-group col">
-              <label class="input-group-text"> {{zmienne[0].nazwa}} &nbsp; </label>
-              <input class="form-control" type="number" placeholder="1.0" formControlName="gain"/>
-              <label class="input-group-text">{{zmienne[1].nazwa}}</label>
-              <input class="form-control" type="number" placeholder="1.0" formControlName="r1"/>
-              <label class="input-group-text">{{zmienne[2].nazwa}}</label>
-              <select class="form-control" formControlName="q1">
-                <option *ngFor="let option of optionsQ" [value]="option">{{option}}</option>
-              </select>
-              <label class="input-group-text">{{zmienne[3].nazwa}}</label>
-              <input class="form-control" type="number" placeholder="1.0" formControlName="r2"/>
-              <label class="input-group-text">{{zmienne[4].nazwa}}</label>
-              <select class="form-control" formControlName="q2">
-                <option *ngFor="let option of optionsQ" [value]="option">{{option}}</option>
-              </select>
-            </div>
-            <div class="input-group col-3">
-              <label class="input-group-text">{{zmienne[5].nazwa}}</label>
-              <input class="form-control" type="number" placeholder="1.0" formControlName="t1"/>
-              <label class="input-group-text">{{zmienne[6].nazwa}}</label>
-              <input class="form-control" type="number" placeholder="1.0" formControlName="t2"/>
-              <label class="input-group-text">{{zmienne[7].nazwa}}</label>
-              <input class="form-control" type="number" placeholder="1.0" formControlName="t3"/>
-              <label class="input-group-text">{{zmienne[8].nazwa}}</label>
-              <input class="form-control" type="number" placeholder="1.0" formControlName="delay"/>
-              <label class="input-group-text">{{zmienne[9].nazwa}}</label>
-              <input class="form-control" type="number" placeholder="1.0" formControlName="tp"/>
-            </div>
-          </div>      
+    <div [hidden]="this.typRegulatora=='gpc'">
+      {{pierwszeRownanie}}
+      <h5 class="mt-5">Wprowadź wartości transmitancji:</h5>
+      <form [formGroup]="obiektForm" >
+        <div class="container ml-0 mr-0 mx-auto">
+          <div class="form-group mb-3" formArrayName="obiekt">
+            <div class="form-row align-items-center" [formGroupName]="0">
+              <div class="input-group col">
+                <label class="input-group-text"> {{zmienne[0].nazwa}} &nbsp; </label>
+                <input class="form-control" type="number" placeholder="1.0" formControlName="gain"/>
+                <label class="input-group-text">{{zmienne[1].nazwa}}</label>
+                <input class="form-control" type="number" placeholder="1.0" formControlName="r1"/>
+                <label class="input-group-text">{{zmienne[2].nazwa}}</label>
+                <select class="form-control" formControlName="q1">
+                  <option *ngFor="let option of optionsQ" [value]="option">{{option}}</option>
+                </select>
+                <label class="input-group-text">{{zmienne[3].nazwa}}</label>
+                <input class="form-control" type="number" placeholder="1.0" formControlName="r2"/>
+                <label class="input-group-text">{{zmienne[4].nazwa}}</label>
+                <select class="form-control" formControlName="q2">
+                  <option *ngFor="let option of optionsQ" [value]="option">{{option}}</option>
+                </select>
+              </div>
+              <div class="input-group col-3">
+                <label class="input-group-text">{{zmienne[5].nazwa}}</label>
+                <input class="form-control" type="number" placeholder="1.0" formControlName="t1"/>
+                <label class="input-group-text">{{zmienne[6].nazwa}}</label>
+                <input class="form-control" type="number" placeholder="1.0" formControlName="t2"/>
+                <label class="input-group-text">{{zmienne[7].nazwa}}</label>
+                <input class="form-control" type="number" placeholder="1.0" formControlName="t3"/>
+                <label class="input-group-text">{{zmienne[8].nazwa}}</label>
+                <input class="form-control" type="number" placeholder="1.0" formControlName="delay"/>
+                <label class="input-group-text">{{zmienne[9].nazwa}}</label>
+                <input class="form-control" type="number" placeholder="1.0" formControlName="tp"/>
+              </div>
+            </div>      
+          </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </div>
+    <div [hidden]="this.typRegulatora!='gpc'">
+      <form [formGroup]="obiektForm" >
+        <div class="container ml-0 mr-0 mx-auto">
+          <div class="form-group mb-3" formArrayName="obiekt">
+            <div class="form-row align-items-center" [formGroupName]="2">
+              <div class="input-group col">
+                <label class="input-group-text">A1</label>
+                <input class="form-control" type="number" placeholder="1.0" formControlName="a1"/>
+                <label class="input-group-text">A2</label>
+                <input class="form-control" type="number" placeholder="1.0" formControlName="a2"/>
+                <label class="input-group-text">A3</label>
+                <input class="form-control" type="number" placeholder="1.0" formControlName="a3"/>
+                <label class="input-group-text">A4</label>
+                <input class="form-control" type="number" placeholder="1.0" formControlName="a4"/>
+                <label class="input-group-text">A5</label>
+                <input class="form-control" type="number" placeholder="1.0" formControlName="a5"/>
+              </div>
+              <div class="input-group col">
+                <label class="input-group-text">B1</label>
+                <input class="form-control" type="number" placeholder="1.0" formControlName="b1"/>
+                <label class="input-group-text">B2</label>
+                <input class="form-control" type="number" placeholder="1.0" formControlName="b2"/>
+                <label class="input-group-text">B3</label>
+                <input class="form-control" type="number" placeholder="1.0" formControlName="b3"/>
+                <label class="input-group-text">B5</label>
+                <input class="form-control" type="number" placeholder="1.0" formControlName="b4"/>
+                <label class="input-group-text">B5</label>
+                <input class="form-control" type="number" placeholder="1.0" formControlName="b5"/>
+              </div>
+            </div>      
+          </div>
+        </div>
+      </form>
+    </div>
   </div>
 </div>

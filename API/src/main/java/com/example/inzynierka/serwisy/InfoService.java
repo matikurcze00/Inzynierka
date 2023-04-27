@@ -1,7 +1,7 @@
 package com.example.inzynierka.serwisy;
 
 import com.example.inzynierka.modele.OdpowiedzInfoMIMO;
-import com.example.inzynierka.modele.ParObiektMIMO;
+import com.example.inzynierka.modele.ParObiektDPAMIMO;
 import com.example.inzynierka.obiekty.MIMODPA;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,11 +14,11 @@ public class InfoService {
     {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode root;
-        ParObiektMIMO[] obiekty;
+        ParObiektDPAMIMO[] obiekty;
         MIMODPA obiekt;
         try {
             root = objectMapper.readTree(file.getInputStream());
-            obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektMIMO[].class);
+            obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektDPAMIMO[].class);
             obiekt = new MIMODPA(obiekty);
         } catch (Exception ex) {
             ex.printStackTrace();

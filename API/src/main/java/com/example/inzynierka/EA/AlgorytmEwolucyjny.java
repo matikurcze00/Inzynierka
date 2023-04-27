@@ -1,6 +1,7 @@
 package com.example.inzynierka.EA;
 
 import com.example.inzynierka.obiekty.MIMODPA;
+import com.example.inzynierka.obiekty.SISO;
 import com.example.inzynierka.obiekty.SISODPA;
 import com.example.inzynierka.regulatory.Regulator;
 import lombok.Data;
@@ -29,10 +30,10 @@ public class AlgorytmEwolucyjny {
     public AlgorytmEwolucyjny() {
     }
 
-    public double[] dobierzWartosci(int liczbaArgumentow, Regulator regulator, SISODPA SISODPA) {
+    public double[] dobierzWartosci(int liczbaArgumentow, Regulator regulator, SISO siso) {
         populacja = new ArrayList<Osobnik>();
         Random r = new Random();
-        double[] cel = new double[]{SISODPA.getYMax() / 2};
+        double[] cel = new double[]{siso.getYMax() / 2};
         regulator.setCel(cel);
         for (int i = 0; i < rozmiarPopulacji; i++) {
             Osobnik osobnikTemp = new Osobnik(liczbaArgumentow);
@@ -40,32 +41,32 @@ public class AlgorytmEwolucyjny {
                 osobnikTemp.setParametryIndex(j, r.nextDouble(5.0));
             }
             regulator.zmienNastawy(osobnikTemp.getParametry());
-            SISODPA.resetObiektu();
+            siso.resetObiektu();
             regulator.resetujRegulator();
-            osobnikTemp.setWartosc(SISODPA.obliczPraceObiektu(regulator, cel));
+            osobnikTemp.setWartosc(siso.obliczPraceObiektu(regulator, cel));
             populacja.add(osobnikTemp);
         }
         Collections.sort(populacja);
         for (int k = 0; k < liczbaIteracji; k++) {
-            ewolucje(liczbaArgumentow, regulator, SISODPA, cel);
+            ewolucje(liczbaArgumentow, regulator, siso, cel);
         }
         Collections.sort(populacja);
         return populacja.get(0).getParametry();
     }
 
-    private void ewolucje(int liczbaArgumentow, Regulator regulator, SISODPA SISODPA, double[] cel) {
+    private void ewolucje(int liczbaArgumentow, Regulator regulator, SISO siso, double[] cel) {
         Random r = new Random();
         List<Osobnik> reprodukcja = new ArrayList<Osobnik>();
         Collections.sort(populacja);
         for (int i = 0; i < rozmiarElity; i++) {
             reprodukcja.add(populacja.get(i));
         }
-        krzyzowania(liczbaArgumentow, regulator, SISODPA, cel, r, reprodukcja);
-        mutacje(liczbaArgumentow, regulator, SISODPA, cel, r, reprodukcja);
+        krzyzowania(liczbaArgumentow, regulator, siso, cel, r, reprodukcja);
+        mutacje(liczbaArgumentow, regulator, siso, cel, r, reprodukcja);
         populacja = reprodukcja;
     }
 
-    private void mutacje(int liczbaArgumentow, Regulator regulator, SISODPA SISODPA, double[] cel, Random r, List<Osobnik> reprodukcja) {
+    private void mutacje(int liczbaArgumentow, Regulator regulator, SISO siso, double[] cel, Random r, List<Osobnik> reprodukcja) {
         for (int i = 0; i < iloscMutacji; i++) {
             int rodzic = r.nextInt(rozmiarElity);
             Osobnik osobnikTemp = new Osobnik(liczbaArgumentow);
@@ -73,14 +74,14 @@ public class AlgorytmEwolucyjny {
                 osobnikTemp.getParametry()[j] = (r.nextDouble() < getPrawdopodobienstwoMutacji()) ? Math.abs(r.nextGaussian(populacja.get(rodzic).getParametry()[j], 0.4)) : populacja.get(rodzic).getParametry()[j];
             }
             regulator.zmienNastawy(osobnikTemp.getParametry());
-            SISODPA.resetObiektu();
+            siso.resetObiektu();
             regulator.resetujRegulator();
-            osobnikTemp.setWartosc(SISODPA.obliczPraceObiektu(regulator, cel));
+            osobnikTemp.setWartosc(siso.obliczPraceObiektu(regulator, cel));
             reprodukcja.add(osobnikTemp);
         }
     }
 
-    private void krzyzowania(int liczbaArgumentow, Regulator regulator, SISODPA SISODPA, double[] cel, Random r, List<Osobnik> reprodukcja) {
+    private void krzyzowania(int liczbaArgumentow, Regulator regulator, SISO siso, double[] cel, Random r, List<Osobnik> reprodukcja) {
         for (int i = 0; i < iloscKrzyzowania; i++) {
             int osobnik1 = r.nextInt(rozmiarPopulacji);
             int osobnik2 = r.nextInt(rozmiarPopulacji);
@@ -89,9 +90,9 @@ public class AlgorytmEwolucyjny {
                 osobnikTemp.getParametry()[j] = (r.nextBoolean()) ? populacja.get(osobnik1).getParametry()[j] : populacja.get(osobnik2).getParametry()[j];
             }
             regulator.zmienNastawy(osobnikTemp.getParametry());
-            SISODPA.resetObiektu();
+            siso.resetObiektu();
             regulator.resetujRegulator();
-            osobnikTemp.setWartosc(SISODPA.obliczPraceObiektu(regulator, cel));
+            osobnikTemp.setWartosc(siso.obliczPraceObiektu(regulator, cel));
             reprodukcja.add(osobnikTemp);
         }
     }

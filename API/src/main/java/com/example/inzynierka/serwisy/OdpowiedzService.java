@@ -12,12 +12,12 @@ import org.springframework.web.multipart.MultipartFile;
 public class OdpowiedzService {
 
     public OdpowiedzSkokowa SISOOdpowiedz(ParStrojenie parStrojenie) {
-        ParObiekt parObiekt = parStrojenie.getParObiekt();
+        ParObiektDPA parObiektDPA = parStrojenie.getParObiektDPA();
         ParRegulator parRegulator = parStrojenie.getParRegulator();
         ParWizualizacja parWizualizacja = parStrojenie.getParWizualizacja();
         SISODPA obiekt;
         try {
-            obiekt = new SISODPA(parObiekt, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
+            obiekt = new SISODPA(parObiektDPA, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
         } catch (Exception ex) {
             ex.printStackTrace();
             return null;
@@ -39,11 +39,11 @@ public class OdpowiedzService {
     public OdpowiedzSkokowa MIMOOdpowiedz(MultipartFile file, ParRegulator parRegulator, ParWizualizacja parWizualizacja) {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode root;
-        ParObiektMIMO[] obiekty;
+        ParObiektDPAMIMO[] obiekty;
         MIMODPA obiekt;
         try {
             root = objectMapper.readTree(file.getInputStream());
-            obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektMIMO[].class);
+            obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektDPAMIMO[].class);
             obiekt = new MIMODPA(obiekty, parWizualizacja.getBlad());
         } catch (Exception ex) {
             ex.printStackTrace();

@@ -55,12 +55,23 @@ export class WizualizacjaComponent {
   {id: 8, nazwa: "T3"},
   {id: 9, nazwa: "Delay"},
   {id: 10, nazwa: "Tp"}];
+  zmienneGPC = [{id:1, nazwa: "A1"},
+  {id:2, nazwa: "A2"},
+  {id:3, nazwa: "A3"},
+  {id:4, nazwa: "A4"},
+  {id:5, nazwa: "A5"},
+  {id:6, nazwa: "B1"},
+  {id:7, nazwa: "B2"},
+  {id:8, nazwa: "B3"},
+  {id:9, nazwa: "B4"},
+  {id:10, nazwa: "B5"},
+]
   optionsQ = [-1, 0 ,1]
   optionsZaklocenia: number[] = [];
   liczbaZaklocen: number[] = [];
   chartData?: WykresDane;
   strojenie = new FormGroup({
-    parObiekt: new FormGroup({
+    parObiektDPA: new FormGroup({
       gain: new FormControl(1.0),
       r1: new FormControl(1.0),
       q1: new FormControl(1.0),
@@ -79,6 +90,18 @@ export class WizualizacjaComponent {
           plikWizualizacji: new FormControl(this.fileWizualizacji),
           plikZaklocen: new FormControl(this.fileZaklocen)
         }),
+    parObiektRownania: new FormGroup({
+      a1: new FormControl(),
+      a2: new FormControl(),
+      a3: new FormControl(),
+      a4: new FormControl(),
+      a5: new FormControl(),
+      b1: new FormControl(),
+      b2: new FormControl(),
+      b3: new FormControl(),
+      b4: new FormControl(),
+      b5: new FormControl(),
+    }),
     parRegulator: new FormGroup({
       typ: new FormControl(),
       uMin: new FormControl(),
@@ -94,7 +117,7 @@ export class WizualizacjaComponent {
       strojenie: new FormControl([null,null,null] as (number | null)[]),
       blad: new FormControl('srednio')
     }),
-    parObiektSymulacji : new FormGroup({
+    parObiektSymulacjiDPA : new FormGroup({
       gain: new FormControl(),
       r1: new FormControl(),
       q1: new FormControl(),
@@ -105,6 +128,18 @@ export class WizualizacjaComponent {
       t3: new FormControl(),
       tp: new FormControl(),
       delay: new FormControl(),
+    }),
+    parObiektSymulacjiRownania : new FormGroup({
+      a1: new FormControl(),
+      a2: new FormControl(),
+      a3: new FormControl(),
+      a4: new FormControl(),
+      a5: new FormControl(),
+      b1: new FormControl(),
+      b2: new FormControl(),
+      b3: new FormControl(),
+      b4: new FormControl(),
+      b5: new FormControl(),
     }),
     zaklocenia: new FormGroup({
       gain: new FormControl(),
@@ -145,8 +180,9 @@ export class WizualizacjaComponent {
       console.log("updateObiekt")
       console.log(updatedObiekt)
       if(updatedObiekt.controls['0']!=undefined){
-          this.strojenie.controls.parObiekt.patchValue(updatedObiekt.controls['0'].value)
+          this.strojenie.controls.parObiektDPA.patchValue(updatedObiekt.controls['0'].value)
           this.strojenie.controls.MIMO.patchValue(updatedObiekt.controls['1'].value)
+          this.strojenie.controls.parObiektRownania.patchValue(updatedObiekt.controls['2'].value)
           this.file=updatedObiekt.controls['1'].value.plik;
           if(this.file==null)
           {
@@ -254,7 +290,7 @@ export class WizualizacjaComponent {
     console.log(this.strojenie.get('wizualizacjaZaklocen.'+fieldName)!.value)
   }
   infoZaklocenie() : void{
-    this.infoService.infoMIMOInOut(this.strojenie.get('MIMO.plikZaklocen')).subscribe({next: response =>{
+    this.infoService.infoMIMODPAInOut(this.strojenie.get('MIMO.plikZaklocen')).subscribe({next: response =>{
     this.liczbaZaklocen = [];
     console.log(response)
     for (let i = 0; i < response.wejscia; i++) {
@@ -659,23 +695,32 @@ export class WizualizacjaComponent {
     if(this.czyInnyObiekt)
     {
       console.log("pierwsze")
-      this.strojenie.get('parObiektSymulacji')?.reset();
-      this.strojenie.get('parObiektSymulacji')?.disable();
+      this.strojenie.get('parObiektSymulacjiDPA')?.reset();
+      this.strojenie.get('parObiektSymulacjiDPA')?.disable();
+      this.strojenie.get('parObiektSymulacjiRownania')?.reset();
+      this.strojenie.get('parObiektSymulacjiRownania')?.disable();
+
       this.fileWizualizacji=null;
       this.strojenie.get('MIMO.plikWizualizacji')!.reset();
-      this.fileInput.nativeElement.value = '';
+
+      if (this.fileInput && this.fileInput.nativeElement) {
+        this.fileInput.nativeElement.value = '';
+      }
     }
     else
     {
       console.log("drugie")
-      this.strojenie.get('parObiektSymulacji')?.enable();
-      this.strojenie.get('parObiektSymulacji')?.patchValue(this.strojenie.get('parObiekt')!.value);
+      this.strojenie.get('parObiektSymulacjiDPA')?.enable();
+      this.strojenie.get('parObiektSymulacjiDPA')?.patchValue(this.strojenie.get('parObiektDPA')!.value);
+      this.strojenie.get('parObiektSymulacjiRownania')?.enable();
+      this.strojenie.get('parObiektSymulacjiRownania')?.patchValue(this.strojenie.get('parObiektRownania')!.value);
     }
     this.czyInnyObiekt = !this.czyInnyObiekt
     
   }
   ngOnInit(): void {
-    this.strojenie.get('parObiektSymulacji')?.disable();
+    this.strojenie.get('parObiektSymulacjiDPA')?.disable();
+    this.strojenie.get('parObiektSymulacjiRownania')?.disable();
   }
   ngAfterViewInit() {
     this.cdRef.detectChanges();

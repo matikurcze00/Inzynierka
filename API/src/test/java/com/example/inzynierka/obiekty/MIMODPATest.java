@@ -1,6 +1,6 @@
 package com.example.inzynierka.obiekty;
 
-import com.example.inzynierka.modele.ParObiektMIMO;
+import com.example.inzynierka.modele.ParObiektDPAMIMO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import static org.junit.Assert.assertArrayEquals;
@@ -15,7 +15,7 @@ public class MIMODPATest {
     {
         ObjectMapper objectMapper = new ObjectMapper();
         Integer[] PV = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("PV"), Integer[].class);
-        ParObiektMIMO[] Obiekty = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("ParObiektMIMO"), ParObiektMIMO[].class);
+        ParObiektDPAMIMO[] Obiekty = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("ParObiektMIMO"), ParObiektDPAMIMO[].class);
         MIMODPA obiekt  = new MIMODPA(Obiekty, "srednio");
         double[] expectedUMax = {100.0, 100.0};
         assertArrayEquals(obiekt.getUMax(),expectedUMax, 0.001);
@@ -37,7 +37,7 @@ public class MIMODPATest {
     {
         ObjectMapper objectMapper = new ObjectMapper();
         Integer[] PV = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("PV"), Integer[].class);
-        ParObiektMIMO[] Obiekty = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("ParObiektMIMO"), ParObiektMIMO[].class);
+        ParObiektDPAMIMO[] Obiekty = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("ParObiektMIMO"), ParObiektDPAMIMO[].class);
         MIMODPA obiekt  = new MIMODPA(Obiekty, "srednio");
         obiekt.obliczKrok(1.0, 1, 0);
         assert(obiekt.getU().get(0).get(0)==0.0);

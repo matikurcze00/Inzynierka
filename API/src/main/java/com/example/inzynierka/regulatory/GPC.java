@@ -5,6 +5,7 @@ import com.example.inzynierka.obiekty.SISORownianiaRoznicowe;
 import lombok.Data;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Data
@@ -19,7 +20,7 @@ public class GPC extends RegulatorMPC {
     protected List<Double> Lambda;
     private double[] uMin;
     private double[] uMax;
-    private double[] duMax;
+    private double duMax;
     private Integer N;
     private Integer Nu;
     private Integer IN;
@@ -27,7 +28,10 @@ public class GPC extends RegulatorMPC {
     public GPC() {
     }
     public GPC(SISORownianiaRoznicowe sisoRownianiaRoznicowe, double lambda, double cel, double duMax) {
-
+        this.Lambda = Arrays.asList(lambda);
+        this.cel = new double[]{cel};
+        this.duMax = duMax;
+        policzWartosci(sisoRownianiaRoznicowe);
     }
     @Override
     public double policzSterowanie(double aktualna){
@@ -73,7 +77,22 @@ public class GPC extends RegulatorMPC {
     public void resetujRegulator(){
 
     }
-
+    public void policzWartosci(SISORownianiaRoznicowe sisoRownianiaRoznicowe) {
+        this.S = new ArrayList();
+        List Atemp = new ArrayList();
+        this.A = new ArrayList<>();
+        A.add(sisoRownianiaRoznicowe.getA());
+        this.B = new ArrayList<>();
+        B.add(sisoRownianiaRoznicowe.getB());
+        this.IN = 1;
+        this.OUT = 1;
+        policzS();
+        policzM();
+        policzMp();
+        policzK();
+        resetujRegulator();
+        sisoRownianiaRoznicowe.resetObiektu();
+    }
     @Override
     public int liczbaZmiennych(){
         return 0;
@@ -95,6 +114,17 @@ public class GPC extends RegulatorMPC {
                 S.add(Stemp);
             }
         }
+        this.N = S.get(0).size();
+        for (int i = 0; i < S.size(); i++) {
+            if (N < S.get(i).size()) {
+                N = S.get(i).size();
+            }
+        }
+        for (int i = 0; i < S.size(); i++) {
+            while (N != S.get(i).size()) {
+                S.get(i).add(S.get(i).get(S.get(i).size()-1));
+            }
+        }
     }
 
     private void policzM() {
@@ -105,6 +135,21 @@ public class GPC extends RegulatorMPC {
                     for (int k = 0; k < OUT; k++)
                         for (int m = 0; m < IN; m++)
                             M.set(j * OUT + k, i * IN + m, S.get(k * IN + m).get(j - i));
+            }
+        }
+    }
+    private void policzMp() {
+        Mp = new Matrix(N * OUT, (N - 1) * IN);
+        for (int i = 0; i < D - 1; i++) { //bok ,wszerz
+            for (int j = 0; j < N; j++) { //dół
+                for (int k = 0; k < OUT; k++) {
+                    for (int m = 0; m < IN; m++) {
+                        if ((j + i + 1) < N) {
+                            Mp.set(j * OUT + k, i * IN + m, S.get(k * IN + m).get(j + i + 1) - S.get(k * IN + m).get(i));
+                        } else
+                            Mp.set(j * OUT + k, i * IN + m, S.get(k * IN + m).get(D - 1) - S.get(k * IN + m).get(i));
+                    }
+                }
             }
         }
     }
@@ -181,7 +226,7 @@ public class GPC extends RegulatorMPC {
         for(int i = 0; i < N-1; i ++) {
             double yTemp = 0.0;
             yTemp += ustawBUSISO(i);
-            yTemp += ustawAYSISO(i);
+            yTemp += ustawYSISO(i);
             YMatrix.set(0,i,yTemp);
         }
         return YMatrix;
@@ -191,14 +236,14 @@ public class GPC extends RegulatorMPC {
         Matrix YMatrix = new Matrix(1, N * OUT);
         for(int i = 0; i < N-1; i ++) {
             double[] yTemp = ustawBUMIMO(i);
-            yTemp = ustawAYMIMO(i, yTemp);
+            yTemp = ustawYMIMO(i, yTemp);
             for(int j = 0; j < OUT; j ++)
                 YMatrix.set(1, i * OUT + j, yTemp[j]);
         }
         return YMatrix;
     }
 
-    private double[] ustawAYMIMO(int i, double[] yTemp) {
+    private double[] ustawYMIMO(int i, double[] yTemp) {
         for(int k = 0; k < OUT; k++) {
             for(int l = 0; l < OUT; l++) {
                 if(A.get(l*OUT + k).size() > i) {
@@ -237,7 +282,7 @@ public class GPC extends RegulatorMPC {
         }
         return yTemp;
     }
-    private double ustawAYSISO(int i) {
+    private double ustawYSISO(int i) {
         double yTemp = 0.0;
         if(A.get(0).size() > i) {
             for(int j = 0; j < A.get(0).size() - i; j++) {
@@ -271,10 +316,10 @@ public class GPC extends RegulatorMPC {
     }
 
     protected double poprawaUTemp(double Utemp, int i) {
-        if(Utemp > duMax[i]) {
-            return duMax[i];
-        } else if(Utemp < -duMax[i]) {
-            return -duMax[i];
+        if(Utemp > duMax) {
+            return duMax;
+        } else if(Utemp < -duMax) {
+            return -duMax;
         } else {
             return Utemp;
         }

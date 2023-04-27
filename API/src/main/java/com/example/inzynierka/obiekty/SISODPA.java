@@ -1,6 +1,6 @@
 package com.example.inzynierka.obiekty;
 
-import com.example.inzynierka.modele.ParObiekt;
+import com.example.inzynierka.modele.ParObiektDPA;
 import com.example.inzynierka.modele.Zaklocenia;
 import com.example.inzynierka.regulatory.Regulator;
 import lombok.Data;
@@ -27,10 +27,10 @@ public class SISODPA extends SISO{
     public SISODPA() {
     }
 
-    public SISODPA(ParObiekt parObiekt, double uMax, double uMin, String blad, Zaklocenia zakloceniaMierzalne) {
-        this(parObiekt.getGain(), parObiekt.getR1(), parObiekt.getQ1(), parObiekt.getR2(),
-            parObiekt.getQ2(), parObiekt.getT1(), parObiekt.getT2(), parObiekt.getT3()
-            , parObiekt.getDelay(), parObiekt.getTp(), uMax, uMin, blad);
+    public SISODPA(ParObiektDPA parObiektDPA, double uMax, double uMin, String blad, Zaklocenia zakloceniaMierzalne) {
+        this(parObiektDPA.getGain(), parObiektDPA.getR1(), parObiektDPA.getQ1(), parObiektDPA.getR2(),
+            parObiektDPA.getQ2(), parObiektDPA.getT1(), parObiektDPA.getT2(), parObiektDPA.getT3()
+            , parObiektDPA.getDelay(), parObiektDPA.getTp(), uMax, uMin, blad);
         this.zakloceniaMierzalne = new ArrayList<>();
         if(zakloceniaMierzalne.getGain()!=null){
             for(int i = 0; i < zakloceniaMierzalne.getGain().length; i++) {
@@ -40,10 +40,10 @@ public class SISODPA extends SISO{
         }}
         resetObiektu();
     }
-    public SISODPA(ParObiekt parObiekt, double uMax, double uMin, String blad) {
-        this(parObiekt.getGain(), parObiekt.getR1(), parObiekt.getQ1(), parObiekt.getR2(),
-                parObiekt.getQ2(), parObiekt.getT1(), parObiekt.getT2(), parObiekt.getT3()
-                , parObiekt.getDelay(), parObiekt.getTp(), uMax, uMin, blad);
+    public SISODPA(ParObiektDPA parObiektDPA, double uMax, double uMin, String blad) {
+        this(parObiektDPA.getGain(), parObiektDPA.getR1(), parObiektDPA.getQ1(), parObiektDPA.getR2(),
+                parObiektDPA.getQ2(), parObiektDPA.getT1(), parObiektDPA.getT2(), parObiektDPA.getT3()
+                , parObiektDPA.getDelay(), parObiektDPA.getTp(), uMax, uMin, blad);
     }
 
     public SISODPA(double gain, double R1, int Q1, double R2, int Q2, double T1,

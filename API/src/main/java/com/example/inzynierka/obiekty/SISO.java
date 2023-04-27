@@ -14,6 +14,7 @@ abstract public class SISO {
     private double YMax;
     private int dlugosc;
     private String blad;
+    private double Ypp;
     public abstract Double getAktualna();
     public abstract void resetObiektu();
     public abstract double obliczPraceObiektu(Regulator regulator, double[] cel);

@@ -1,6 +1,6 @@
 package com.example.inzynierka.regulatory;
 
-import com.example.inzynierka.modele.ParObiektMIMO;
+import com.example.inzynierka.modele.ParObiektDPAMIMO;
 import com.example.inzynierka.obiekty.MIMODPA;
 import com.example.inzynierka.obiekty.SISODPA;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,7 +32,7 @@ public class PIDTest {
     public void MIMOTest() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         Integer[] PV = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("PV"), Integer[].class);
-        ParObiektMIMO[] Obiekty = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("ParObiektMIMO"), ParObiektMIMO[].class);
+        ParObiektDPAMIMO[] Obiekty = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("ParObiektMIMO"), ParObiektDPAMIMO[].class);
         MIMODPA obiekt  = new MIMODPA(Obiekty, "srednio");
         Double[] tempStrojenie = new Double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
         Regulator regulator = new ZbiorPID(obiekt,PV, 3.0, tempStrojenie);

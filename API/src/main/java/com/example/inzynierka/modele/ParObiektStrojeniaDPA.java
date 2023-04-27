@@ -3,7 +3,7 @@ package com.example.inzynierka.modele;
 import lombok.Data;
 
 @Data
-public class ParObiektStrojenia {
+public class ParObiektStrojeniaDPA {
     private double gain;
     private double R1;
     private double R2;

@@ -1,6 +1,6 @@
 package com.example.inzynierka.obiekty;
 
-import com.example.inzynierka.modele.ParObiektMIMO;
+import com.example.inzynierka.modele.ParObiektDPAMIMO;
 import com.example.inzynierka.regulatory.Regulator;
 import lombok.Data;
 
@@ -27,14 +27,14 @@ public class MIMODPA extends MIMO{
     public MIMODPA() {
     }
 
-    public MIMODPA(ParObiektMIMO[] parObiektMIMOS)
+    public MIMODPA(ParObiektDPAMIMO[] parObiektDPAMIMOS)
     {
-        stworzTransmitancje(parObiektMIMOS);
+        stworzTransmitancje(parObiektDPAMIMOS);
         liczbaOUT = transmitancja.get(0).size();
         liczbaIN = transmitancja.size();
         obliczDelayMax();
         this.blad = "srednio";
-        obliczUMax(parObiektMIMOS);
+        obliczUMax(parObiektDPAMIMOS);
         this.Y = new ArrayList();
         for (int i = 0; i < this.liczbaOUT; i++) {
             Y.add(new ArrayList(Collections.nCopies(3, transmitancja.get(0).get(i).getYpp())));
@@ -47,13 +47,13 @@ public class MIMODPA extends MIMO{
         obliczYMax();
     }
 
-    public MIMODPA(ParObiektMIMO[] parObiektMIMOS, String blad) {
-        stworzTransmitancje(parObiektMIMOS);
+    public MIMODPA(ParObiektDPAMIMO[] parObiektDPAMIMOS, String blad) {
+        stworzTransmitancje(parObiektDPAMIMOS);
         liczbaOUT = transmitancja.get(0).size();
         liczbaIN = transmitancja.size();
         obliczDelayMax();
         this.blad = blad;
-        obliczUMax(parObiektMIMOS);
+        obliczUMax(parObiektDPAMIMOS);
 
         this.Y = new ArrayList();
         for (int i = 0; i < this.liczbaOUT; i++) {
@@ -121,9 +121,9 @@ public class MIMODPA extends MIMO{
         return zakloceniaMierzalne.obliczKrok(du, IN, OUT);
     }
 
-    public void stworzTransmitancje(ParObiektMIMO[] parObiektMIMOS) {
+    public void stworzTransmitancje(ParObiektDPAMIMO[] parObiektDPAMIMOS) {
         this.transmitancja = new ArrayList();
-        for (ParObiektMIMO parObiekt : parObiektMIMOS) {
+        for (ParObiektDPAMIMO parObiekt : parObiektDPAMIMOS) {
             List<DPA> transmitancjaTemp = new ArrayList();
             for (int i = 0; i < parObiekt.getGain().length; i++) {
 
@@ -143,7 +143,7 @@ public class MIMODPA extends MIMO{
         }
     }
 
-    private void obliczUMax(ParObiektMIMO[] obiektyMIMO) {
+    private void obliczUMax(ParObiektDPAMIMO[] obiektyMIMO) {
         this.uMax = new double[obiektyMIMO.length];
         this.uMin = new double[obiektyMIMO.length];
         for (int i = 0; i < obiektyMIMO.length; i++) {

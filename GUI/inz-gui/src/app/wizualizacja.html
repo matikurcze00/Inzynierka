@@ -724,13 +724,13 @@
           <div *ngIf="
           this.file==null
         ">
-            <!-- {{ rownanie }} -->
+            <div [hidden]="this.typRegulatora=='gpc'">
             <h5 class="mt-5">Wprowadź wartości transmitancji:</h5>
             <div class="container ml-0 mr-0 mx-auto">
               <div class="form-group mb-3" [formGroup]="strojenie">
                 <div
                   class="form-row align-items-center"
-                  formGroupName="parObiektSymulacji"
+                  formGroupName="parObiektSymulacjiDPA"
                 >
                   <div class="input-group col">
                     <label class="input-group-text"> Gain &nbsp; </label>
@@ -821,6 +821,92 @@
                       formControlName="tp"
                       [disabled]="czyInnyObiekt"
                     />
+                  </div>
+                </div>
+              </div>
+            </div>
+            </div>
+            <div [hidden]="this.typRegulatora!='gpc'">
+              <div class="container ml-0 mr-0 mx-auto">
+                <div class="form-group mb-3" [formGroup]="strojenie">
+                  <div
+                    class="form-row align-items-center"
+                    formGroupName="parObiektSymulacjiRownania"
+                  >
+                    <div class="input-group col">
+                      <label class="input-group-text">A1</label>
+                      <input
+                        class="form-control"
+                        type="number"
+                        formControlName="a1"
+                        [disabled]="czyInnyObiekt"
+                      />
+                      <label class="input-group-text">A2</label>
+                      <input
+                        class="form-control"
+                        type="number"
+                        formControlName="a2"
+                        [disabled]="czyInnyObiekt"
+                      />
+                      <label class="input-group-text">A3</label>
+                      <input
+                        class="form-control"
+                        type="number"
+                        formControlName="a3"
+                        [disabled]="czyInnyObiekt"
+                      />
+                      <label class="input-group-text">A4</label>
+                      <input
+                        class="form-control"
+                        type="number"
+                        formControlName="a4"
+                        [disabled]="czyInnyObiekt"
+                      />
+                      <label class="input-group-text">A5</label>
+                      <input
+                        class="form-control"
+                        type="number"
+                        formControlName="a5"
+                        [disabled]="czyInnyObiekt"
+                      />
+                    </div>
+                    <div class="input-group col-3">
+                      <label class="input-group-text">B1</label>
+                      <input
+                        class="form-control"
+                        type="number"
+                        formControlName="b1"
+                        [disabled]="czyInnyObiekt"
+                      />
+                      <label class="input-group-text">B2</label>
+                      <input
+                        class="form-control"
+                        type="number"
+                        formControlName="b2"
+                        [disabled]="czyInnyObiekt"
+                      />
+                      <label class="input-group-text">B3</label>
+                      <input
+                        class="form-control"
+                        type="number"
+                        formControlName="b3"
+                        [disabled]="czyInnyObiekt"
+                      />
+                      <label class="input-group-text">B4</label>
+                      <input
+                        class="form-control"
+                        type="number"
+                        formControlName="b4"
+                        [disabled]="czyInnyObiekt"
+                      />
+                      <label class="input-group-text">B5</label>
+                      <input
+                        class="form-control"
+                        type="number"
+                        formControlName="b5"
+                        [disabled]="czyInnyObiekt"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

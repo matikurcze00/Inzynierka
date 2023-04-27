@@ -18,11 +18,20 @@ export class InfoService {
     return value;
   }
 
-  public infoMIMOInOut(file: any): Observable<OdpowiedzInfoMIMO>{
+  public infoMIMODPAInOut(file: any): Observable<OdpowiedzInfoMIMO>{
     const formData = new FormData();
     formData.append('file', file.value);
     return this.http.post<OdpowiedzInfoMIMO>(
-      this.api+'/MIMO',
+      this.api+'/MIMO/DPA',
+      formData
+    )
+  }
+
+  public infoMIMORownianiaInOut(file: any): Observable<OdpowiedzInfoMIMO>{
+    const formData = new FormData();
+    formData.append('file', file.value);
+    return this.http.post<OdpowiedzInfoMIMO>(
+      this.api+'/MIMO/Rownania',
       formData
     )
   }

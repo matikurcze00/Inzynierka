@@ -36,16 +36,16 @@ export class ObiektWidokComponent implements OnInit {
         liczbaWyjsc: new FormControl(1)
         }), 
       new FormGroup({
-          A1: new FormControl(1.0),
-          A2: new FormControl(1.0),
-          A3: new FormControl(1.0),
-          A4: new FormControl(1.0),
-          A5: new FormControl(1.0),
-          B1: new FormControl(1.0),
-          B2: new FormControl(1.0),
-          B3: new FormControl(1.0),
-          B4: new FormControl(1.0),
-          B5: new FormControl(1.0),
+          a1: new FormControl(1.0),
+          a2: new FormControl(1.0),
+          a3: new FormControl(1.0),
+          a4: new FormControl(1.0),
+          a5: new FormControl(1.0),
+          b1: new FormControl(1.0),
+          b2: new FormControl(1.0),
+          b3: new FormControl(1.0),
+          b4: new FormControl(1.0),
+          b5: new FormControl(1.0),
         }),
     ])
   })
@@ -87,16 +87,29 @@ export class ObiektWidokComponent implements OnInit {
     this.czyError = false;
   }
   infoWejscieWyjscia(): void{
-    this.infoService.infoMIMOInOut(this.obiektForm.get('obiekt.1.plik')).subscribe({next: response =>{
-      this.czyError = false;
-      this.obiektForm.get('obiekt.1.liczbaWejsc')?.setValue(response.wejscia)
-      this.obiektForm.get('obiekt.1.liczbaWyjsc')?.setValue(response.wyjscia)
-    },
-    error: error => {
-      this.czyError = true;
-      this.obiektForm.get('obiekt')?.get([1])?.patchValue({ plik: null, liczbaWejsc: 1, liczbaWyjsc: 1 }); 
-      this.file=null
-    }})
+    if(this.typRegulatora=='gpc') {
+      this.infoService.infoMIMORownianiaInOut(this.obiektForm.get('obiekt.1.plik')).subscribe({next: response =>{
+        this.czyError = false;
+        this.obiektForm.get('obiekt.1.liczbaWejsc')?.setValue(response.wejscia)
+        this.obiektForm.get('obiekt.1.liczbaWyjsc')?.setValue(response.wyjscia)
+      },
+      error: error => {
+        this.czyError = true;
+        this.obiektForm.get('obiekt')?.get([1])?.patchValue({ plik: null, liczbaWejsc: 1, liczbaWyjsc: 1 }); 
+        this.file=null
+      }})
+    } else {
+      this.infoService.infoMIMODPAInOut(this.obiektForm.get('obiekt.1.plik')).subscribe({next: response =>{
+        this.czyError = false;
+        this.obiektForm.get('obiekt.1.liczbaWejsc')?.setValue(response.wejscia)
+        this.obiektForm.get('obiekt.1.liczbaWyjsc')?.setValue(response.wyjscia)
+      },
+      error: error => {
+        this.czyError = true;
+        this.obiektForm.get('obiekt')?.get([1])?.patchValue({ plik: null, liczbaWejsc: 1, liczbaWyjsc: 1 }); 
+        this.file=null
+      }})
+  }
   }
   ngOnInit(): void {
     this.updateEvent.emit(this.obiektForm.controls.obiekt);

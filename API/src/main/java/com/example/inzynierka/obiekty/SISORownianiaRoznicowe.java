@@ -1,6 +1,7 @@
 package com.example.inzynierka.obiekty;
 
 
+import com.example.inzynierka.modele.ParObiektRownania;
 import com.example.inzynierka.regulatory.Regulator;
 import lombok.Data;
 
@@ -22,6 +23,30 @@ public class SISORownianiaRoznicowe extends SISO{
     private int dlugosc;
     private String blad;
 
+    public SISORownianiaRoznicowe(ParObiektRownania parObiektRownania, double uMax, double uMin, String blad) {
+        this(parObiektRownania.getA1(), parObiektRownania.getA2(), parObiektRownania.getA3(), parObiektRownania.getA4(), parObiektRownania.getA5(),
+            parObiektRownania.getB1(), parObiektRownania.getB2(), parObiektRownania.getB3(), parObiektRownania.getB4(), parObiektRownania.getB5(),
+            uMax, uMin, blad);
+    }
+    public SISORownianiaRoznicowe(double A1, double A2, double A3, double A4, double A5,
+                                  double B1, double B2, double B3, double B4, double B5,
+                                  double uMax, double uMin, String blad) {
+        this.A = new ArrayList<>();
+        this.A.add(A1);
+        this.A.add(A2);
+        this.A.add(A3);
+        this.A.add(A4);
+        this.A.add(A5);
+        this.B = new ArrayList<>();
+        this.B.add(B1);
+        this.B.add(B2);
+        this.B.add(B3);
+        this.B.add(B4);
+        this.B.add(B5);
+        this.uMax = uMax;
+        this.uMin = uMin;
+        this.blad = blad;
+    }
     public Double getAktualna() {
         try {
             return Y.get(0);

@@ -3,11 +3,10 @@ package com.example.inzynierka.serwisy;
 import com.example.inzynierka.EA.AlgorytmEwolucyjny;
 import com.example.inzynierka.modele.*;
 import com.example.inzynierka.obiekty.MIMODPA;
+import com.example.inzynierka.obiekty.SISO;
 import com.example.inzynierka.obiekty.SISODPA;
-import com.example.inzynierka.regulatory.DMCAnalityczny;
-import com.example.inzynierka.regulatory.PID;
-import com.example.inzynierka.regulatory.Regulator;
-import com.example.inzynierka.regulatory.ZbiorPID;
+import com.example.inzynierka.obiekty.SISORownianiaRoznicowe;
+import com.example.inzynierka.regulatory.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
@@ -19,7 +18,8 @@ import java.util.Arrays;
 public class StrojenieService {
 
     public OdpowiedzStrojenie SISOStrojenie(ParStrojenie parStrojenie) {
-        ParObiekt parObiekt = parStrojenie.getParObiekt();
+        ParObiektDPA parObiektDPA = parStrojenie.getParObiektDPA();
+        ParObiektRownania parObiektRownania = parStrojenie.getParObiektRownania();
         ParRegulator parRegulator = parStrojenie.getParRegulator();
         ParWizualizacja parWizualizacja = parStrojenie.getParWizualizacja();
         Zaklocenia zaklocenie = new Zaklocenia();
@@ -29,18 +29,18 @@ public class StrojenieService {
         Integer[] PIE = new Integer[3];
         OdpowiedzStrojenie odpowiedzStrojenie = new OdpowiedzStrojenie();
 
-        SISODPA obiekt = dobierzObiektSISO(parObiekt, parRegulator, parWizualizacja, zaklocenie);
+        SISO obiekt = dobierzObiektSISO(parObiektDPA,parObiektRownania, parRegulator, parWizualizacja, zaklocenie);
         if (obiekt == null) return null;
         Regulator regulator;
-        regulator = dobierzRegulatorSISO(parObiekt, parRegulator, parWizualizacja, obiekt, PIE);
+        regulator = dobierzRegulatorSISO(parObiektDPA, parRegulator, parWizualizacja, obiekt, PIE);
         if (regulator == null) return null;
         AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(PIE[0], PIE[1], PIE[2], 0.3, 0.2);
         dobierzStrojenieSISO(parWizualizacja, obiekt, regulator, GA, odpowiedzStrojenie);
-        if(parStrojenie.getParObiektSymulacji()!=null) {
+        if(parStrojenie.getParObiektSymulacjiDPA()!=null) {
             if(zaklocenie!=null) {
-                obiekt = new SISODPA(parStrojenie.getParObiektSymulacji(), parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad(), zaklocenie);
+                obiekt = new SISODPA(parStrojenie.getParObiektSymulacjiDPA(), parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad(), zaklocenie);
             } else {
-                obiekt = new SISODPA(parStrojenie.getParObiektSymulacji(), parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
+                obiekt = new SISODPA(parStrojenie.getParObiektSymulacjiDPA(), parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
             }
         }
         double[] Y = symulacjaRegulacjiSISO(parWizualizacja, obiekt, regulator, odpowiedzStrojenie, parStrojenie.getWizualizacjaZaklocen());
@@ -60,7 +60,8 @@ public class StrojenieService {
         System.out.println("BLAD:" + blad);
     }
 
-    private double[] symulacjaRegulacjiSISO(ParWizualizacja parWizualizacja, SISODPA obiekt, Regulator regulator, OdpowiedzStrojenie odpowiedzStrojenie, WizualizacjaZaklocen wizualizacjaZaklocen) {
+    private double[] symulacjaRegulacjiSISO(ParWizualizacja parWizualizacja, SISO obiekt, Regulator regulator,
+                OdpowiedzStrojenie odpowiedzStrojenie, WizualizacjaZaklocen wizualizacjaZaklocen) {
         ustawCelSISO(parWizualizacja, regulator, odpowiedzStrojenie);
         if(wizualizacjaZaklocen.getUSkok()!=null && wizualizacjaZaklocen.getUSkok().length!=0) {
             return dodajWartosciWykresowSISO(parWizualizacja, obiekt, regulator, odpowiedzStrojenie,
@@ -131,20 +132,25 @@ public class StrojenieService {
         return dUZTemp;
     }
 
-    private void dobierzStrojenieSISO(ParWizualizacja parWizualizacja, SISODPA obiekt, Regulator regulator, AlgorytmEwolucyjny GA, OdpowiedzStrojenie odpowiedzStrojenie) {
+    private void dobierzStrojenieSISO(ParWizualizacja parWizualizacja, SISO obiekt, Regulator regulator, AlgorytmEwolucyjny GA, OdpowiedzStrojenie odpowiedzStrojenie) {
         double[] tempWartosciGA = GA.dobierzWartosci(regulator.liczbaZmiennych(), regulator, obiekt);
         double[] tempStrojenie = dodajStrojenie(parWizualizacja, tempWartosciGA);
         odpowiedzStrojenie.setWspolczynniki(tempStrojenie);
         regulator.zmienNastawy(tempStrojenie);
     }
 
-    private SISODPA dobierzObiektSISO(ParObiekt parObiekt, ParRegulator parRegulator, ParWizualizacja parWizualizacja, Zaklocenia zaklocenie) {
-        SISODPA obiekt;
+    private SISO dobierzObiektSISO(ParObiektDPA parObiektDPA, ParObiektRownania parObiektRownania, ParRegulator parRegulator,
+                                   ParWizualizacja parWizualizacja, Zaklocenia zaklocenie) {
         try{
-            if(zaklocenie!=null) {
-                return new SISODPA(parObiekt, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad(), zaklocenie);
+            if(!parRegulator.getTyp().equals("gpc")) {
+
+                if(zaklocenie!=null) {
+                    return new SISODPA(parObiektDPA, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad(), zaklocenie);
+                } else {
+                    return new SISODPA(parObiektDPA, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
+                }
             } else {
-                return new SISODPA(parObiekt, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
+                return new SISORownianiaRoznicowe(parObiektRownania, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -152,26 +158,29 @@ public class StrojenieService {
         }
     }
 
-    private Regulator dobierzRegulatorSISO(ParObiekt parObiekt, ParRegulator parRegulator, ParWizualizacja parWizualizacja, SISODPA obiekt, Integer[] PIE) {
+    private Regulator dobierzRegulatorSISO(ParObiektDPA parObiektDPA, ParRegulator parRegulator, ParWizualizacja parWizualizacja, SISO obiekt, Integer[] PIE) {
         Regulator regulator;
         if (parRegulator.getTyp().equals("pid")) {
-            regulator = new PID(0.0, 0.0, 0.0, parObiekt.getTp(), new double[]{obiekt.getYMax()}, parRegulator.getDuMax(), parRegulator.getUMax(), parWizualizacja.getStrojenie());
+            regulator = new PID(0.0, 0.0, 0.0, parObiektDPA.getTp(), new double[]{obiekt.getYMax()}, parRegulator.getDuMax(), parRegulator.getUMax(), parWizualizacja.getStrojenie());
             PIE[0] = 300;
             PIE[1] = 40;
             PIE[2] = 10;
         } else if (parRegulator.getTyp().equals("dmc")) {
-            regulator = new DMCAnalityczny(4, 0.1, obiekt, obiekt.getYMax() / 2, parRegulator.getDuMax(), 11, parWizualizacja.getStrojenie());
+            regulator = new DMCAnalityczny(4, 0.1, (SISODPA) obiekt, obiekt.getYMax() / 2, parRegulator.getDuMax(), 11, parWizualizacja.getStrojenie());
             PIE[0] = 100;
             PIE[1] = 20;
             PIE[2] = 3;
-        } else
-        {
-            return null;
+        } else {
+            regulator = new GPC((SISORownianiaRoznicowe) obiekt, 0.1, obiekt.getYMax() / 2, parRegulator.getDuMax());
+            PIE[0] = 100;
+            PIE[1] = 20;
+            PIE[2] = 3;
         }
         return regulator;
     }
 
-    private double[] dodajWartosciWykresowSISO(ParWizualizacja parWizualizacja, SISODPA obiekt, Regulator regulator, OdpowiedzStrojenie odpowiedzStrojenie) {
+    private double[] dodajWartosciWykresowSISO(ParWizualizacja parWizualizacja, SISO obiekt, Regulator regulator,
+                               OdpowiedzStrojenie odpowiedzStrojenie) {
         double[] Y = new double[parWizualizacja.getDlugosc()];
         double[] U = new double[parWizualizacja.getDlugosc()];
         obiekt.resetObiektu();
@@ -193,7 +202,7 @@ public class StrojenieService {
         return Y;
     }
 
-    private double[] dodajWartosciWykresowSISO(ParWizualizacja parWizualizacja, SISODPA obiekt, Regulator regulator,
+    private double[] dodajWartosciWykresowSISO(ParWizualizacja parWizualizacja, SISO obiekt, Regulator regulator,
                                                OdpowiedzStrojenie odpowiedzStrojenie, double[][] dUZ) {
         double[] Y = new double[parWizualizacja.getDlugosc()];
         double[] U = new double[parWizualizacja.getDlugosc()];
@@ -236,16 +245,16 @@ public class StrojenieService {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode root;
         MIMODPA obiekt;
-        ParObiektMIMO[] obiekty;
+        ParObiektDPAMIMO[] obiekty;
         Integer[] PIE = new Integer[3];
         OdpowiedzStrojenieMIMO odpowiedz = new OdpowiedzStrojenieMIMO();
         try {
             root = objectMapper.readTree(file[0].getInputStream());
-            obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektMIMO[].class);
+            obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektDPAMIMO[].class);
             obiekt = new MIMODPA(obiekty, parWizualizacja.getBlad());
             if(file.length==3) {
                 root = objectMapper.readTree(file[2].getInputStream());
-                obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektMIMO[].class);
+                obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektDPAMIMO[].class);
                 MIMODPA zaklocenie = new MIMODPA(obiekty, parWizualizacja.getBlad());
                 obiekt.setZakloceniaMierzalne(zaklocenie);
             }
@@ -262,11 +271,11 @@ public class StrojenieService {
         {
             try {
                 root = objectMapper.readTree(file[1].getInputStream());
-                obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektMIMO[].class);
+                obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektDPAMIMO[].class);
                 obiekt = new MIMODPA(obiekty, parWizualizacja.getBlad());
                 if(file.length==3) {
                     root = objectMapper.readTree(file[2].getInputStream());
-                    obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektMIMO[].class);
+                    obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektDPAMIMO[].class);
                     MIMODPA zaklocenie = new MIMODPA(obiekty, parWizualizacja.getBlad());
                     obiekt.setZakloceniaMierzalne(zaklocenie);
                 }
