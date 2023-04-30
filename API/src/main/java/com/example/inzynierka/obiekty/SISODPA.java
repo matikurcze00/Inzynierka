@@ -1,7 +1,7 @@
 package com.example.inzynierka.obiekty;
 
 import com.example.inzynierka.modele.ParObiektDPA;
-import com.example.inzynierka.modele.Zaklocenia;
+import com.example.inzynierka.modele.ZakloceniaDPA;
 import com.example.inzynierka.regulatory.Regulator;
 import lombok.Data;
 
@@ -27,16 +27,16 @@ public class SISODPA extends SISO{
     public SISODPA() {
     }
 
-    public SISODPA(ParObiektDPA parObiektDPA, double uMax, double uMin, String blad, Zaklocenia zakloceniaMierzalne) {
+    public SISODPA(ParObiektDPA parObiektDPA, double uMax, double uMin, String blad, ZakloceniaDPA zakloceniaDPAMierzalne) {
         this(parObiektDPA.getGain(), parObiektDPA.getR1(), parObiektDPA.getQ1(), parObiektDPA.getR2(),
             parObiektDPA.getQ2(), parObiektDPA.getT1(), parObiektDPA.getT2(), parObiektDPA.getT3()
             , parObiektDPA.getDelay(), parObiektDPA.getTp(), uMax, uMin, blad);
         this.zakloceniaMierzalne = new ArrayList<>();
-        if(zakloceniaMierzalne.getGain()!=null){
-            for(int i = 0; i < zakloceniaMierzalne.getGain().length; i++) {
-                this.zakloceniaMierzalne.add(new DPA(zakloceniaMierzalne.getGain()[i], zakloceniaMierzalne.getR1()[i], zakloceniaMierzalne.getQ1()[i],
-                    zakloceniaMierzalne.getR2()[i], zakloceniaMierzalne.getQ2()[i], zakloceniaMierzalne.getT1()[i], zakloceniaMierzalne.getT2()[i],
-                    zakloceniaMierzalne.getT3()[i], zakloceniaMierzalne.getDelay()[i], zakloceniaMierzalne.getTp()[i]));
+        if(zakloceniaDPAMierzalne.getGain()!=null){
+            for(int i = 0; i < zakloceniaDPAMierzalne.getGain().length; i++) {
+                this.zakloceniaMierzalne.add(new DPA(zakloceniaDPAMierzalne.getGain()[i], zakloceniaDPAMierzalne.getR1()[i], zakloceniaDPAMierzalne.getQ1()[i],
+                    zakloceniaDPAMierzalne.getR2()[i], zakloceniaDPAMierzalne.getQ2()[i], zakloceniaDPAMierzalne.getT1()[i], zakloceniaDPAMierzalne.getT2()[i],
+                    zakloceniaDPAMierzalne.getT3()[i], zakloceniaDPAMierzalne.getDelay()[i], zakloceniaDPAMierzalne.getTp()[i]));
         }}
         resetObiektu();
     }
@@ -67,13 +67,13 @@ public class SISODPA extends SISO{
     }
 
     public void resetObiektu() {
-        setU(new ArrayList<Double>(Collections.nCopies(U.size(), transmitancja.getUpp())));
-        setY(new ArrayList<Double>(Collections.nCopies(Y.size(), transmitancja.getYpp())));
+        setU(new ArrayList(Collections.nCopies(U.size(), transmitancja.getUpp())));
+        setY(new ArrayList(Collections.nCopies(Y.size(), transmitancja.getYpp())));
         transmitancja.reset();
         if(zakloceniaMierzalne !=null && !zakloceniaMierzalne.isEmpty()) {
-            this.Uz = new ArrayList();
+            this.Uz = new ArrayList<>();
             for(DPA zaklocenie: zakloceniaMierzalne) {
-                Uz.add(new ArrayList<>(Collections.nCopies(3 + zaklocenie.getDelay(), 0.0)));
+                Uz.add(new ArrayList(Collections.nCopies(3 + zaklocenie.getDelay(), 0.0)));
                 zaklocenie.reset();
             }
         }
@@ -82,39 +82,39 @@ public class SISODPA extends SISO{
     public double obliczPraceObiektu(Regulator regulator, double[] cel) {
         resetObiektu();
         regulator.setCel(cel);
-        double[] Y ;
+        double[] YSymulacji ;
         if(zakloceniaMierzalne !=null && !zakloceniaMierzalne.isEmpty()) {
-            Y = obliczPraceZZakloceniem(regulator);
+            YSymulacji = obliczPraceZZakloceniem(regulator);
         } else {
-            Y = obliczPraceBezZaklocen(regulator);
+            YSymulacji = obliczPraceBezZaklocen(regulator);
         }
         resetObiektu();
-        return obliczBlad(Y, cel[0]);
+        return obliczBlad(YSymulacji, cel[0]);
     }
 
     private double[] obliczPraceBezZaklocen(Regulator regulator) {
-        double[] Y = new double[dlugosc];
+        double[] YSymulacji = new double[dlugosc];
         for (int i = 0; i < this.dlugosc; i++) {
-            Y[i] = obliczKrok(regulator.policzSterowanie(getAktualna()));
+            YSymulacji[i] = obliczKrok(regulator.policzSterowanie(getAktualna()));
         }
-        return Y;
+        return YSymulacji;
     }
 
     public double[] obliczPraceZZakloceniem(Regulator regulator) {
-        double[] Y = new double[dlugosc];
+        double[] YSymulacji = new double[dlugosc];
         for (int i = 0; i < Math.floorDiv(this.dlugosc,2); i++)
-            Y[i] = obliczKrok(regulator.policzSterowanie(getAktualna()));
+            YSymulacji[i] = obliczKrok(regulator.policzSterowanie(getAktualna()));
         double[] zakloceniaU = new double[zakloceniaMierzalne.size()];
         for(int i = 0; i< zakloceniaU.length; i++)
             zakloceniaU[i] = 3 * transmitancja.getGain() / zakloceniaMierzalne.get(i).getGain();
         for (int i = Math.floorDiv(this.dlugosc,2); i < Math.floorDiv(this.dlugosc*3,4); i++)
-            Y[i] = obliczKrok(regulator.policzSterowanie(getAktualna(), zakloceniaU), zakloceniaU);
+            YSymulacji[i] = obliczKrok(regulator.policzSterowanie(getAktualna(), zakloceniaU), zakloceniaU);
         for(int i = 0; i< zakloceniaU.length; i++)
             zakloceniaU[i] = 0.0;
         for (int i = Math.floorDiv(this.dlugosc*3,4); i < dlugosc; i++)
-            Y[i] = obliczKrok(regulator.policzSterowanie(getAktualna(),zakloceniaU),zakloceniaU);
+            YSymulacji[i] = obliczKrok(regulator.policzSterowanie(getAktualna(),zakloceniaU),zakloceniaU);
 
-        return Y;
+        return YSymulacji;
     }
 
     public double obliczKrok(double du) {
@@ -171,6 +171,7 @@ public class SISODPA extends SISO{
         U.set(0, Uakt);
     }
 
+    @Override
     public double getYpp() {
         return transmitancja.getYpp();
     }
@@ -188,14 +189,14 @@ public class SISODPA extends SISO{
 
     private void obliczDlugosc() {
         resetObiektu();
-        double U = getUMax() / 2;
+        double USkok = getUMax() / 2;
         int i = 2;
         List<Double> Stemp = new ArrayList<Double>();
         double Utemp = 0;
-        Stemp.add((obliczKrok(U) - getYpp()) / U);
-        Stemp.add((obliczKrok(Utemp) - getYpp()) / U);
+        Stemp.add((obliczKrok(USkok) - getYpp()) / USkok);
+        Stemp.add((obliczKrok(Utemp) - getYpp()) / USkok);
         while (!(Math.abs(Stemp.get(i - 1) - Stemp.get(i - 2)) < 0.001) || Stemp.get(i - 2) == 0.0) {
-            Stemp.add((obliczKrok(Utemp) - getYpp()) / U);
+            Stemp.add((obliczKrok(Utemp) - getYpp()) / USkok);
             i++;
         }
         this.dlugosc = Stemp.size();

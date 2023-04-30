@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-abstract public class MIMO {
+public abstract class MIMO {
     private int liczbaOUT;
     private int liczbaIN;
     private int delayMax;
@@ -23,5 +23,6 @@ abstract public class MIMO {
     public abstract double obliczKrokZaklocenia(double du, int IN, int OUT);
     public abstract double[] getAktualne();
     public abstract double obliczPraceObiektu(Regulator regulator, double[] cel);
+    public abstract void resetObiektu();
 
-    }
+}

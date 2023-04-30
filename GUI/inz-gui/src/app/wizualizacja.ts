@@ -141,7 +141,7 @@ export class WizualizacjaComponent {
       b4: new FormControl(),
       b5: new FormControl(),
     }),
-    zaklocenia: new FormGroup({
+    zakloceniaDPA: new FormGroup({
       gain: new FormControl(),
       r1: new FormControl(),
       q1: new FormControl(),
@@ -152,6 +152,14 @@ export class WizualizacjaComponent {
       t3: new FormControl(),
       tp: new FormControl(),
       delay: new FormControl(),
+      liczbaZaklocen: new FormControl(0),
+    }),
+    zakloceniaRownania: new FormGroup({
+      b1: new FormControl(),
+      b2: new FormControl(),
+      b3: new FormControl(),
+      b4: new FormControl(),
+      b5: new FormControl(),
       liczbaZaklocen: new FormControl(0),
     }),
     wizualizacjaZaklocen: new FormGroup({
@@ -221,7 +229,8 @@ export class WizualizacjaComponent {
               this.liczbaWejscArray = Array.from({length:this.strojenie.controls.MIMO.controls.liczbaWejsc.value}, (_,i) => i);
             }
             if(this.file) {
-              this.strojenie.controls.zaklocenia.reset();
+              this.strojenie.controls.zakloceniaDPA.reset();
+              this.strojenie.controls.zakloceniaRownania.reset();
               this.liczbaZaklocen = [];
             }
           }      
@@ -254,33 +263,46 @@ export class WizualizacjaComponent {
   }
   zmienLiczbeZaklocen(event: any) {
     const liczbaZaklocenTemp :number = event.target.value;
-    this.strojenie.get('zaklocenia.liczbaZaklocen')?.setValue(liczbaZaklocenTemp)
+    this.strojenie.get('zakloceniaDPA.liczbaZaklocen')?.setValue(liczbaZaklocenTemp)
+    this.strojenie.get('zakloceniaRownania.liczbaZaklocen')?.setValue(liczbaZaklocenTemp)
     this.liczbaZaklocen = [];
     for (let i = 0; i < liczbaZaklocenTemp; i++) {
       this.liczbaZaklocen.push(i);
     }
     const tablicaZaklocen = Array.from({ length: liczbaZaklocenTemp }, () => 1);
-    this.strojenie.controls.zaklocenia.controls.gain.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1));
-    this.strojenie.get('zaklocenia.r1')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
-    this.strojenie.get('zaklocenia.q1')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => -1))
-    this.strojenie.get('zaklocenia.r2')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
-    this.strojenie.get('zaklocenia.q2')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => -1))
-    this.strojenie.get('zaklocenia.t1')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
-    this.strojenie.get('zaklocenia.t2')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
-    this.strojenie.get('zaklocenia.t3')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
-    this.strojenie.get('zaklocenia.tp')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
-    this.strojenie.get('zaklocenia.delay')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    this.strojenie.controls.zakloceniaDPA.controls.gain.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1));
+    this.strojenie.get('zakloceniaDPA.r1')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    this.strojenie.get('zakloceniaDPA.q1')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => -1))
+    this.strojenie.get('zakloceniaDPA.r2')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    this.strojenie.get('zakloceniaDPA.q2')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => -1))
+    this.strojenie.get('zakloceniaDPA.t1')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    this.strojenie.get('zakloceniaDPA.t2')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    this.strojenie.get('zakloceniaDPA.t3')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    this.strojenie.get('zakloceniaDPA.tp')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    this.strojenie.get('zakloceniaDPA.delay')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    this.strojenie.get('zakloceniaRownania.b1')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    this.strojenie.get('zakloceniaRownania.b2')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    this.strojenie.get('zakloceniaRownania.b3')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    this.strojenie.get('zakloceniaRownania.b4')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    this.strojenie.get('zakloceniaRownania.b5')?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0))
+    
     this.strojenie.get('wizualizacjaZaklocen.uSkok')!.setValue(Array.from({length: liczbaZaklocenTemp}, () => 0.0))
     this.strojenie.get('wizualizacjaZaklocen.skokZaklocenia')!.setValue(Array.from({length: liczbaZaklocenTemp}, () => 0.0))
     this.strojenie.get('wizualizacjaZaklocen.skokPowrotnyZaklocenia')!.setValue(Array.from({length: liczbaZaklocenTemp}, () => 0.0))
     this.strojenie.get('wizualizacjaZaklocen.deltaU')!.setValue(Array.from({length: liczbaZaklocenTemp}, () => 0.0))
     
   }
-  updateZaklocenieValue(zaklocenie: number, fieldName: string, target: any) {
-    const currentValue = this.strojenie.get('zaklocenia.'+fieldName)!.value;
+  updateZaklocenieDPAValue(zaklocenie: number, fieldName: string, target: any) {
+    const currentValue = this.strojenie.get('zakloceniaDPA.'+fieldName)!.value;
     let nowaWartosc : number = target.value;
     currentValue[zaklocenie] = nowaWartosc;
-    this.strojenie.get('zaklocenia.'+fieldName)!.setValue(currentValue);
+    this.strojenie.get('zakloceniaDPA.'+fieldName)!.setValue(currentValue);
+  }
+  updateZaklocenieRownaniaValue(zaklocenie: number, fieldName: string, target: any) {
+    const currentValue = this.strojenie.get('zakloceniaRownania.'+fieldName)!.value;
+    let nowaWartosc : number = target.value;
+    currentValue[zaklocenie] = nowaWartosc;
+    this.strojenie.get('zakloceniaRownania.'+fieldName)!.setValue(currentValue);
   }
   updateWizualizacjiaZaklocenieValue(zaklocenie: number, fieldName: string, target: any) {
     const currentValue = this.strojenie.get('wizualizacjaZaklocen.'+fieldName)!.value;
@@ -290,6 +312,7 @@ export class WizualizacjaComponent {
     console.log(this.strojenie.get('wizualizacjaZaklocen.'+fieldName)!.value)
   }
   infoZaklocenie() : void{
+    if(this.typRegulatora=='pid' || this.typRegulatora=='dmc') {
     this.infoService.infoMIMODPAInOut(this.strojenie.get('MIMO.plikZaklocen')).subscribe({next: response =>{
     this.liczbaZaklocen = [];
     console.log(response)
@@ -305,7 +328,24 @@ export class WizualizacjaComponent {
     error: () => {
       this.fileZaklocen=null;
       this.strojenie.get('MIMO.plikZaklocen')?.setValue(null)
-    }})
+    }}) } else {
+      this.infoService.infoMIMORownianiaZakloceniaInOut(this.strojenie.get('MIMO.plikZaklocen')).subscribe({next: response =>{
+        this.liczbaZaklocen = [];
+        console.log(response)
+        for (let i = 0; i < response.wejscia; i++) {
+          this.liczbaZaklocen.push(i);
+        }
+        this.strojenie.get('wizualizacjaZaklocen.uSkok')!.setValue(Array.from({length: response.wejscia}, () => 0.0))
+        this.strojenie.get('wizualizacjaZaklocen.skokZaklocenia')!.setValue(Array.from({length: response.wejscia}, () => 0.0))
+        this.strojenie.get('wizualizacjaZaklocen.skokPowrotnyZaklocenia')!.setValue(Array.from({length: response.wejscia}, () => 0.0))
+        this.strojenie.get('wizualizacjaZaklocen.deltaU')!.setValue(Array.from({length: response.wejscia}, () => 0.0))
+        
+      },
+        error: () => {
+          this.fileZaklocen=null;
+          this.strojenie.get('MIMO.plikZaklocen')?.setValue(null)
+        }}) 
+    }
   }
   onYZadChange(index: number, value: any) {
     let yZad = this.strojenie.get('parWizualizacja.yZad')?.value;

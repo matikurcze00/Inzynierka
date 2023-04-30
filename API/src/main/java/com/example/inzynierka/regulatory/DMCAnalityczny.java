@@ -11,11 +11,7 @@ import java.util.List;
 
 @Data
 public class DMCAnalityczny extends RegulatorMPC {
-    protected Integer D;
-    protected Integer N;
-    protected Integer Nu;
-    protected List<Double> Lambda;
-    protected Matrix Mp;
+
     protected Matrix Mpz;
     protected Matrix Mz;
     private Matrix K;
@@ -25,9 +21,8 @@ public class DMCAnalityczny extends RegulatorMPC {
 
     protected Matrix dUz;
     protected Matrix M;
-    protected double duMax;
+    protected Matrix Mp;
 
-    protected double[] cel;
     protected Double[] strojenieZadane;
     protected int liczbaStrojeniaZadanego;
 
@@ -68,7 +63,7 @@ public class DMCAnalityczny extends RegulatorMPC {
     }
 
     public DMCAnalityczny(int Nu, double[] lambda, MIMODPA obiekt, double[] cel, double duMax, int N) {
-        List<Double> tempLambda = new ArrayList();
+        List<Double> tempLambda = new ArrayList<>();
         for (double wartosc : lambda) {
             tempLambda.add(wartosc);
         }
@@ -167,7 +162,7 @@ public class DMCAnalityczny extends RegulatorMPC {
 
 
     protected void policzWartosci(SISODPA SISODPA) {
-        this.S = new ArrayList();
+        this.S = new ArrayList<>();
         policzS(SISODPA);
         policzMp();
         policzM();
@@ -183,7 +178,7 @@ public class DMCAnalityczny extends RegulatorMPC {
     }
 
     protected void policzWartosci(MIMODPA MIMODPA) {
-        this.S = new ArrayList();
+        this.S = new ArrayList<>();
         policzS(MIMODPA);
         policzMp(MIMODPA.getLiczbaIN(), MIMODPA.getLiczbaOUT());
         policzM(MIMODPA.getLiczbaIN(), MIMODPA.getLiczbaOUT());
@@ -199,7 +194,7 @@ public class DMCAnalityczny extends RegulatorMPC {
     }
 
     public void zmienNastawy(double[] wartosci) {
-        List<Double> tempLambda = new ArrayList();
+        List<Double> tempLambda = new ArrayList<>();
         if (this.liczbaStrojeniaZadanego == 0) {
             for (double wartosc : wartosci) {
                 tempLambda.add(wartosc);
@@ -274,7 +269,7 @@ public class DMCAnalityczny extends RegulatorMPC {
                 obiekt.resetObiektu();
                 double U = 1;
                 double Utemp = 0;
-                List<Double> Stemp = new ArrayList();
+                List<Double> Stemp = new ArrayList<>();
                 Stemp.add(obiekt.obliczKrokZaklocenia(U, j, i) / U);
                 for (int k = 1; k < D + 1; k++) {
                     Stemp.add(obiekt.obliczKrokZaklocenia(Utemp,j, i) / U);
@@ -290,7 +285,7 @@ public class DMCAnalityczny extends RegulatorMPC {
                 double U = 1;
                 double Utemp = 0;
                 int k = 2;
-                List<Double> Stemp = new ArrayList();
+                List<Double> Stemp = new ArrayList<>();
                 Stemp.add((obiekt.obliczKrok(U, j, i) - obiekt.getYpp(i)) / U);
                 Stemp.add((obiekt.obliczKrok(Utemp, j, i) - obiekt.getYpp(i)) / U);
                 while (!(Math.abs(Stemp.get(k - 1) - Stemp.get(k - 2)) < 0.005) || Stemp.get(k - 2) == 0.0) {
@@ -486,6 +481,7 @@ public class DMCAnalityczny extends RegulatorMPC {
     }
 
     public int liczbaZmiennych() {
+
         return getLambda().size() - liczbaStrojeniaZadanego;
     }
 }

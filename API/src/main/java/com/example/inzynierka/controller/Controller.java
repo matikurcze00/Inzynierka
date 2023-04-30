@@ -40,20 +40,42 @@ public class Controller {
         }
 
     }
-    @RequestMapping(value = "/info/MIMO", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, method = RequestMethod.POST)
+    @RequestMapping(value = "/info/MIMO/DPA", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<OdpowiedzInfoMIMO> strojenieMIMO(@RequestPart("file") MultipartFile file) {
+    public ResponseEntity<OdpowiedzInfoMIMO> infoMIMODPA(@RequestPart("file") MultipartFile file) {
         System.out.println("infoMIMO:: start ");
-        OdpowiedzInfoMIMO odpowiedz = infoService.InfoWejsciaWyjscia(file);
+        OdpowiedzInfoMIMO odpowiedz = infoService.InfoWejsciaWyjsciaDPA(file);
         System.out.println("infoMIMO:: koniec");
         if(odpowiedz == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } else {
             return ResponseEntity.ok(odpowiedz);
         }
-
     }
-
+    @RequestMapping(value = "/info/MIMO/Rownania", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<OdpowiedzInfoMIMO> infoMIMORownania(@RequestPart("file") MultipartFile file) {
+        System.out.println("infoMIMO:: start ");
+        OdpowiedzInfoMIMO odpowiedz = infoService.InfoWejsciaWyjsciaRownania(file);
+        System.out.println("infoMIMO:: koniec");
+        if(odpowiedz == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } else {
+            return ResponseEntity.ok(odpowiedz);
+        }
+    }
+    @RequestMapping(value = "/info/MIMO/Rownania/Zaklocenia", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<OdpowiedzInfoMIMO> infoMIMOZakloceniaRownania(@RequestPart("file") MultipartFile file) {
+        System.out.println("infoMIMO:: start ");
+        OdpowiedzInfoMIMO odpowiedz = infoService.InfoWejsciaWyjsciaZakloceniaRownania(file);
+        System.out.println("infoMIMO:: koniec");
+        if(odpowiedz == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } else {
+            return ResponseEntity.ok(odpowiedz);
+        }
+    }
     @RequestMapping(value = "/strojenie/MIMO", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<OdpowiedzStrojenieMIMO> strojenieMIMO(@RequestPart("file") MultipartFile[] file, @ModelAttribute ParRegulator parRegulator, @ModelAttribute ParWizualizacja parWizualizacja, @ModelAttribute WizualizacjaZaklocen wizualizacjaZaklocen) {

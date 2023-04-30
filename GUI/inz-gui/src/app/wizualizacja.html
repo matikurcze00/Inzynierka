@@ -166,29 +166,72 @@
             <h5 class="mt-5">Wprowadź wartości transmitancji:</h5>
             <div *ngFor="let zaklocenie of this.liczbaZaklocen">
               <b>Zakłócenie nr {{zaklocenie+1}}</b>
-              <div class="container ml-0 mr-0 mx-auto">
+              <div class="container ml-0 mr-0 mx-auto" >
                 <div
                   class="form-row align-items-center"
+                  *ngIf="typRegulatora=='gpc'"
+                >
+                  <div class="input-group col-3">
+                    <label class="input-group-text">B1</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      (input)="updateZaklocenieRownaniaValue(zaklocenie, 'b1', $event.target)"  
+                      placeholder="1.0"
+                      />
+                    <label class="input-group-text">B2</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      (input)="updateZaklocenieRownaniaValue(zaklocenie, 'b2', $event.target)"  
+                      placeholder="1.0"
+                      />
+                    <label class="input-group-text">B3</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      (input)="updateZaklocenieRownaniaValue(zaklocenie, 'b3', $event.target)"  
+                      placeholder="1.0"
+                      />
+                      <label class="input-group-text">B4</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      (input)="updateZaklocenieRownaniaValue(zaklocenie, 'b4', $event.target)"  
+                      placeholder="1.0"
+                      />
+                    <label class="input-group-text">B5</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      (input)="updateZaklocenieRownaniaValue(zaklocenie, 'b5', $event.target)"  
+                      placeholder="1.0"
+                      />
+                  </div>
+                </div>
+                <div
+                  class="form-row align-items-center"
+                  *ngIf="typRegulatora!='gpc'"
                 >
                   <div class="input-group col">
                     <label class="input-group-text"> Gain &nbsp; </label>
                     <input
                       class="form-control"
                       type="number"
-                      (input)="updateZaklocenieValue(zaklocenie, 'gain', $event.target)"                        
+                      (input)="updateZaklocenieDPAValue(zaklocenie, 'gain', $event.target)"                        
                       placeholder="1.0"
                     />
                     <label class="input-group-text">R1</label>
                     <input
                       class="form-control"
                       type="number"
-                      (input)="updateZaklocenieValue(zaklocenie, 'r1', $event.target)"  
+                      (input)="updateZaklocenieDPAValue(zaklocenie, 'r1', $event.target)"  
                       placeholder="1.0"
                     />
                     <label class="input-group-text">Q1</label>
                     <select
                       class="form-control"
-                      (input)="updateZaklocenieValue(zaklocenie, 'q1', $event.target)"  
+                      (input)="updateZaklocenieDPAValue(zaklocenie, 'q1', $event.target)"  
                       placeholder="1"
                     >
                       <option *ngFor="let option of optionsQ" [value]="option">
@@ -199,13 +242,13 @@
                     <input
                       class="form-control"
                       type="number"
-                      (input)="updateZaklocenieValue(zaklocenie, 'r2', $event.target)"  
+                      (input)="updateZaklocenieDPAValue(zaklocenie, 'r2', $event.target)"  
                       placeholder="1.0"
                     />
                     <label class="input-group-text">Q2</label>
                     <select
                       class="form-control"
-                      (input)="updateZaklocenieValue(zaklocenie, 'q2', $event.target)"  
+                      (input)="updateZaklocenieDPAValue(zaklocenie, 'q2', $event.target)"  
                       placeholder="1"
                     >
                       <option *ngFor="let option of optionsQ" [value]="option">
@@ -218,35 +261,35 @@
                     <input
                       class="form-control"
                       type="number"
-                      (input)="updateZaklocenieValue(zaklocenie, 't1', $event.target)"  
+                      (input)="updateZaklocenieDPAValue(zaklocenie, 't1', $event.target)"  
                       placeholder="1.0"
                       />
                     <label class="input-group-text">T2</label>
                     <input
                       class="form-control"
                       type="number"
-                      (input)="updateZaklocenieValue(zaklocenie, 't2', $event.target)"  
+                      (input)="updateZaklocenieDPAValue(zaklocenie, 't2', $event.target)"  
                       placeholder="1.0"
                       />
                     <label class="input-group-text">T3</label>
                     <input
                       class="form-control"
                       type="number"
-                      (input)="updateZaklocenieValue(zaklocenie, 't3', $event.target)"  
+                      (input)="updateZaklocenieDPAValue(zaklocenie, 't3', $event.target)"  
                       placeholder="1.0"
                       />
                       <label class="input-group-text">Tp</label>
                     <input
                       class="form-control"
                       type="number"
-                      (input)="updateZaklocenieValue(zaklocenie, 'tp', $event.target)"  
+                      (input)="updateZaklocenieDPAValue(zaklocenie, 'tp', $event.target)"  
                       placeholder="1.0"
                       />
                     <label class="input-group-text">Delay</label>
                     <input
                       class="form-control"
                       type="number"
-                      (input)="updateZaklocenieValue(zaklocenie, 'delay', $event.target)"  
+                      (input)="updateZaklocenieDPAValue(zaklocenie, 'delay', $event.target)"  
                       placeholder="1.0"
                       />
                   </div>
@@ -478,7 +521,7 @@
         <b
           *ngIf="
             !this.strojenie.get('MIMO.plik')?.value ||
-            this.strojenie.get('parRegulator.typ')?.value == 'dmc'
+            typRegulatora == 'dmc' || typRegulatora 
           "
           >Ustaw proszę wybrane wartości strojenia regulatora:</b
         >
@@ -496,7 +539,7 @@
               this.strojenie.get('MIMO.liczbaWejsc')?.value == 1
             "
           >
-            <div *ngIf="this.strojenie.get('parRegulator.typ')?.value == 'dmc'">
+            <div *ngIf="typRegulatora == 'dmc' || typRegulatora == 'gpc'">
               <div
                 *ngFor="let y of liczbaWejscArray; let i = index"
                 class="mx-auto"
@@ -603,7 +646,7 @@
               this.strojenie.get('MIMO.liczbaWejsc')?.value != 1
             "
           >
-            <div *ngIf="this.strojenie.get('parRegulator.typ')?.value == 'dmc'">
+            <div *ngIf="typRegulatora == 'dmc' || typRegulatora== 'gpc'">
               <div
                 *ngFor="let y of liczbaWejscArray; let i = index"
                 class="mx-auto"
@@ -995,7 +1038,7 @@
           <p><b>D</b> = {{ odpowiedz.wspolczynniki[regulator * 3 + 2] }}</p>
         </div>
       </div>
-      <div *ngIf="odpowiedz.typRegulatora == 'dmc'">
+      <div *ngIf="odpowiedz.typRegulatora == 'dmc' || odpowiedz.typRegulatora == 'gpc'">
         <b>Wartość Lambda:</b>
         <div *ngFor="let regulator of liczbaRegulatorow">
           <p><b>Lambda</b>= {{ odpowiedz.wspolczynniki[regulator] }}</p>
@@ -1017,7 +1060,7 @@
           <p><b>D</b> = {{ odpowiedzMIMO.wspolczynniki[regulator * 3 + 2] }}</p>
         </div>
       </div>
-      <div *ngIf="odpowiedzMIMO.typRegulatora == 'dmc'">
+      <div *ngIf="odpowiedzMIMO.typRegulatora == 'dmc' || odpowiedzMIMO.typRegulatora == 'gpc'">
         <b>Wartości Lambda:</b>
         <div *ngFor="let regulator of this.liczbaRegulatorow">
           <p>

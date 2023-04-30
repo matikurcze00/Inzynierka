@@ -1,5 +1,6 @@
 package com.example.inzynierka.EA;
 
+import com.example.inzynierka.obiekty.MIMO;
 import com.example.inzynierka.obiekty.MIMODPA;
 import com.example.inzynierka.obiekty.SISO;
 import com.example.inzynierka.obiekty.SISODPA;
@@ -97,7 +98,7 @@ public class AlgorytmEwolucyjny {
         }
     }
 
-    public double[] dobierzWartosci(int liczbaArgumentow, Regulator regulator, MIMODPA obiekt) {
+    public double[] dobierzWartosci(int liczbaArgumentow, Regulator regulator, MIMO obiekt) {
         populacja = new ArrayList<Osobnik>();
         Random r = new Random();
         double[] cel = Arrays.copyOf(obiekt.getYMax(), obiekt.getYMax().length);
@@ -123,7 +124,7 @@ public class AlgorytmEwolucyjny {
         return populacja.get(0).getParametry();
     }
 
-    private void ewolucje(int liczbaArgumentow, Regulator regulator, MIMODPA obiekt, double[] cel) {
+    private void ewolucje(int liczbaArgumentow, Regulator regulator, MIMO obiekt, double[] cel) {
         Random r = new Random();
         List<Osobnik> reprodukcja = new ArrayList<Osobnik>();
         Collections.sort(populacja);
@@ -135,7 +136,7 @@ public class AlgorytmEwolucyjny {
         populacja = reprodukcja;
     }
 
-    private void mutacje(int liczbaArgumentow, Regulator regulator, MIMODPA obiekt, double[] cel, Random r, List<Osobnik> reprodukcja) {
+    private void mutacje(int liczbaArgumentow, Regulator regulator, MIMO obiekt, double[] cel, Random r, List<Osobnik> reprodukcja) {
         for (int i = 0; i < iloscMutacji; i++) {
             int rodzic = r.nextInt(rozmiarPopulacji);
             Osobnik osobnikTemp = new Osobnik(liczbaArgumentow);
@@ -149,7 +150,7 @@ public class AlgorytmEwolucyjny {
         }
     }
 
-    private void krzyzowania(int liczbaArgumentow, Regulator regulator, MIMODPA obiekt, double[] cel, Random r, List<Osobnik> reprodukcja) {
+    private void krzyzowania(int liczbaArgumentow, Regulator regulator, MIMO obiekt, double[] cel, Random r, List<Osobnik> reprodukcja) {
         for (int i = 0; i < iloscKrzyzowania; i++) {
             int osobnik1 = r.nextInt(rozmiarPopulacji);
             int osobnik2 = r.nextInt(rozmiarPopulacji);

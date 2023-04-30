@@ -26,7 +26,15 @@ export class InfoService {
       formData
     )
   }
-
+  
+  public infoMIMORownianiaZakloceniaInOut(file: any): Observable<OdpowiedzInfoMIMO>{
+    const formData = new FormData();
+    formData.append('file', file.value);
+    return this.http.post<OdpowiedzInfoMIMO>(
+      this.api+'/MIMO/Rownania/Zaklocenia',
+      formData
+    )
+  }
   public infoMIMORownianiaInOut(file: any): Observable<OdpowiedzInfoMIMO>{
     const formData = new FormData();
     formData.append('file', file.value);

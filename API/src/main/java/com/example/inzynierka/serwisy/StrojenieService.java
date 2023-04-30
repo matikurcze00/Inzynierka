@@ -2,10 +2,7 @@ package com.example.inzynierka.serwisy;
 
 import com.example.inzynierka.EA.AlgorytmEwolucyjny;
 import com.example.inzynierka.modele.*;
-import com.example.inzynierka.obiekty.MIMODPA;
-import com.example.inzynierka.obiekty.SISO;
-import com.example.inzynierka.obiekty.SISODPA;
-import com.example.inzynierka.obiekty.SISORownianiaRoznicowe;
+import com.example.inzynierka.obiekty.*;
 import com.example.inzynierka.regulatory.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,14 +19,18 @@ public class StrojenieService {
         ParObiektRownania parObiektRownania = parStrojenie.getParObiektRownania();
         ParRegulator parRegulator = parStrojenie.getParRegulator();
         ParWizualizacja parWizualizacja = parStrojenie.getParWizualizacja();
-        Zaklocenia zaklocenie = new Zaklocenia();
-        if(parStrojenie.getZaklocenia().getGain() != null && parStrojenie.getZaklocenia().getGain().length!=0) {
-            zaklocenie = parStrojenie.getZaklocenia();
+        ZakloceniaDPA zakloceniaDPA = new ZakloceniaDPA();
+        ZakloceniaRownania zakloceniaRownania = new ZakloceniaRownania();
+        if(parStrojenie.getZakloceniaDPA().getGain() != null && parStrojenie.getZakloceniaDPA().getGain().length!=0) {
+            zakloceniaDPA = parStrojenie.getZakloceniaDPA();
+        }
+        if(parStrojenie.getZakloceniaRownania().getB1() != null && parStrojenie.getZakloceniaRownania().getB1().length!= 0) {
+            zakloceniaRownania = parStrojenie.getZakloceniaRownania();
         }
         Integer[] PIE = new Integer[3];
         OdpowiedzStrojenie odpowiedzStrojenie = new OdpowiedzStrojenie();
 
-        SISO obiekt = dobierzObiektSISO(parObiektDPA,parObiektRownania, parRegulator, parWizualizacja, zaklocenie);
+        SISO obiekt = dobierzObiektSISO(parObiektDPA,parObiektRownania, parRegulator, parWizualizacja, zakloceniaDPA, zakloceniaRownania);
         if (obiekt == null) return null;
         Regulator regulator;
         regulator = dobierzRegulatorSISO(parObiektDPA, parRegulator, parWizualizacja, obiekt, PIE);
@@ -37,8 +38,8 @@ public class StrojenieService {
         AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(PIE[0], PIE[1], PIE[2], 0.3, 0.2);
         dobierzStrojenieSISO(parWizualizacja, obiekt, regulator, GA, odpowiedzStrojenie);
         if(parStrojenie.getParObiektSymulacjiDPA()!=null) {
-            if(zaklocenie!=null) {
-                obiekt = new SISODPA(parStrojenie.getParObiektSymulacjiDPA(), parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad(), zaklocenie);
+            if(zakloceniaDPA!=null) {
+                obiekt = new SISODPA(parStrojenie.getParObiektSymulacjiDPA(), parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad(), zakloceniaDPA);
             } else {
                 obiekt = new SISODPA(parStrojenie.getParObiektSymulacjiDPA(), parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
             }
@@ -94,42 +95,50 @@ public class StrojenieService {
                     dUZTemp[j][i] = 0.0;
                 else {
                     if(j < wizualizacjaZaklocen.getSkokPowrotnyZaklocenia()[i]) {
-                        if(j>0) {
-                            if(uSkok[i] != 0.0) {
-                                if(uSkok[i] - wizualizacjaZaklocen.getDeltaU()[i] <0) {
-                                    dUZTemp[j][i] = uSkok[i];
-                                    uSkok[i] = 0.0;
-                                } else {
-                                    dUZTemp[j][i] = wizualizacjaZaklocen.getDeltaU()[i];
-                                    uSkok[i] -= wizualizacjaZaklocen.getDeltaU()[i];
-                                }
-                            } else {
-                                dUZTemp[j][i] = 0.0;
-                            }
-                        }  else {
-                            dUZTemp[j][i] = wizualizacjaZaklocen.getDeltaU()[i];
-                        }
+                        ustawSkokZaklocenia(wizualizacjaZaklocen, dUZTemp, uSkok, i, j);
                     } else {
-                        if (j > 0) {
-                            if (uPowrot[i] != 0.0) {
-                                if (uPowrot[i] - wizualizacjaZaklocen.getDeltaU()[i] < 0) {
-                                    dUZTemp[j][i] = -uPowrot[i];
-                                    uPowrot[i] = 0.0;
-                                } else {
-                                    dUZTemp[j][i] = -wizualizacjaZaklocen.getDeltaU()[i];
-                                    uPowrot[i] -= wizualizacjaZaklocen.getDeltaU()[i];
-                                }
-                            } else {
-                                dUZTemp[j][i] = 0.0;
-                            }
-                        } else {
-                            dUZTemp[j][i] = wizualizacjaZaklocen.getDeltaU()[i];
-                        }
+                        ustawSkokPowrotnyZaklocenia(wizualizacjaZaklocen, dUZTemp, uPowrot, i, j);
                     }
                 }
             }
         }
         return dUZTemp;
+    }
+
+    private static void ustawSkokZaklocenia(WizualizacjaZaklocen wizualizacjaZaklocen, double[][] dUZTemp, double[] uSkok, int i, int j) {
+        if(j >0) {
+            if(uSkok[i] != 0.0) {
+                if(uSkok[i] - wizualizacjaZaklocen.getDeltaU()[i] <0) {
+                    dUZTemp[j][i] = uSkok[i];
+                    uSkok[i] = 0.0;
+                } else {
+                    dUZTemp[j][i] = wizualizacjaZaklocen.getDeltaU()[i];
+                    uSkok[i] -= wizualizacjaZaklocen.getDeltaU()[i];
+                }
+            } else {
+                dUZTemp[j][i] = 0.0;
+            }
+        }  else {
+            dUZTemp[j][i] = wizualizacjaZaklocen.getDeltaU()[i];
+        }
+    }
+
+    private static void ustawSkokPowrotnyZaklocenia(WizualizacjaZaklocen wizualizacjaZaklocen, double[][] dUZTemp, double[] uPowrot, int i, int j) {
+        if (j > 0) {
+            if (uPowrot[i] != 0.0) {
+                if (uPowrot[i] - wizualizacjaZaklocen.getDeltaU()[i] < 0) {
+                    dUZTemp[j][i] = -uPowrot[i];
+                    uPowrot[i] = 0.0;
+                } else {
+                    dUZTemp[j][i] = -wizualizacjaZaklocen.getDeltaU()[i];
+                    uPowrot[i] -= wizualizacjaZaklocen.getDeltaU()[i];
+                }
+            } else {
+                dUZTemp[j][i] = 0.0;
+            }
+        } else {
+            dUZTemp[j][i] = wizualizacjaZaklocen.getDeltaU()[i];
+        }
     }
 
     private void dobierzStrojenieSISO(ParWizualizacja parWizualizacja, SISO obiekt, Regulator regulator, AlgorytmEwolucyjny GA, OdpowiedzStrojenie odpowiedzStrojenie) {
@@ -140,17 +149,21 @@ public class StrojenieService {
     }
 
     private SISO dobierzObiektSISO(ParObiektDPA parObiektDPA, ParObiektRownania parObiektRownania, ParRegulator parRegulator,
-                                   ParWizualizacja parWizualizacja, Zaklocenia zaklocenie) {
+                                   ParWizualizacja parWizualizacja, ZakloceniaDPA zakloceniaDPA, ZakloceniaRownania zakloceniaRownania) {
         try{
             if(!parRegulator.getTyp().equals("gpc")) {
 
-                if(zaklocenie!=null) {
-                    return new SISODPA(parObiektDPA, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad(), zaklocenie);
+                if(zakloceniaDPA!=null) {
+                    return new SISODPA(parObiektDPA, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad(), zakloceniaDPA);
                 } else {
                     return new SISODPA(parObiektDPA, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
                 }
             } else {
-                return new SISORownianiaRoznicowe(parObiektRownania, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
+                if(zakloceniaRownania!=null) {
+                    return new SISORownianiaRoznicowe(parObiektRownania, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad(), zakloceniaRownania);
+                } else {
+                    return new SISORownianiaRoznicowe(parObiektRownania, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
+                }
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -171,7 +184,7 @@ public class StrojenieService {
             PIE[1] = 20;
             PIE[2] = 3;
         } else {
-            regulator = new GPC((SISORownianiaRoznicowe) obiekt, 0.1, obiekt.getYMax() / 2, parRegulator.getDuMax());
+            regulator = new GPC((SISORownianiaRoznicowe) obiekt, 0.1, obiekt.getYMax() / 2, parRegulator.getDuMax(), parWizualizacja.getStrojenie());
             PIE[0] = 100;
             PIE[1] = 20;
             PIE[2] = 3;
@@ -243,46 +256,21 @@ public class StrojenieService {
 
     public OdpowiedzStrojenieMIMO MIMOStrojenie(MultipartFile[] file, ParRegulator parRegulator, ParWizualizacja parWizualizacja, WizualizacjaZaklocen wizualizacjaZaklocen) {
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode root;
-        MIMODPA obiekt;
-        ParObiektDPAMIMO[] obiekty;
+        MIMO obiekt;
+
         Integer[] PIE = new Integer[3];
         OdpowiedzStrojenieMIMO odpowiedz = new OdpowiedzStrojenieMIMO();
-        try {
-            root = objectMapper.readTree(file[0].getInputStream());
-            obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektDPAMIMO[].class);
-            obiekt = new MIMODPA(obiekty, parWizualizacja.getBlad());
-            if(file.length==3) {
-                root = objectMapper.readTree(file[2].getInputStream());
-                obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektDPAMIMO[].class);
-                MIMODPA zaklocenie = new MIMODPA(obiekty, parWizualizacja.getBlad());
-                obiekt.setZakloceniaMierzalne(zaklocenie);
-            }
-            root = objectMapper.readTree(file[0].getInputStream());
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        obiekt = ustawObiekt(file, parRegulator, parWizualizacja, objectMapper);
+        if(obiekt == null)
             return null;
-        }
-        Regulator regulator = dobierzRegulatorMIMO(parRegulator, parWizualizacja, objectMapper, obiekt, root, PIE);
-        if (regulator == null) return null;
+        Regulator regulator = dobierzRegulatorMIMO(parRegulator, parWizualizacja, objectMapper, obiekt, PIE, file);
+        if (regulator == null)
+            return null;
         AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(PIE[0], PIE[1], PIE[2], 0.5, 0.5);
         dobierzStrojenieMIMO(parWizualizacja, obiekt, regulator, GA, odpowiedz);
-        if(file.length>1)
-        {
-            try {
-                root = objectMapper.readTree(file[1].getInputStream());
-                obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektDPAMIMO[].class);
-                obiekt = new MIMODPA(obiekty, parWizualizacja.getBlad());
-                if(file.length==3) {
-                    root = objectMapper.readTree(file[2].getInputStream());
-                    obiekty = objectMapper.treeToValue(root.path("ParObiektMIMO"), ParObiektDPAMIMO[].class);
-                    MIMODPA zaklocenie = new MIMODPA(obiekty, parWizualizacja.getBlad());
-                    obiekt.setZakloceniaMierzalne(zaklocenie);
-                }
-                root = objectMapper.readTree(file[1].getInputStream());
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+        obiekt = ustawObiektSymulacji(file, parRegulator, parWizualizacja, objectMapper, obiekt);
+        if (obiekt == null) {
+            return null;
         }
         double[][] Y = symulacjaRegulacjiMIMO(parWizualizacja, obiekt, regulator, odpowiedz, wizualizacjaZaklocen);
         System.out.println("strojenie::OK");
@@ -290,7 +278,110 @@ public class StrojenieService {
         return odpowiedz;
     }
 
-    private double[][] symulacjaRegulacjiMIMO(ParWizualizacja parWizualizacja, MIMODPA obiekt,
+    private static MIMO ustawObiekt(MultipartFile[] file, ParRegulator parRegulator, ParWizualizacja parWizualizacja, ObjectMapper objectMapper) {
+        if(parRegulator.getTyp().equals("pid") || parRegulator.getTyp().equals("dmc")) {
+            try {
+                if(file.length==3) {
+                    JsonNode root = objectMapper.readTree(file[2].getInputStream());
+                    ParObiektDPAMIMO[] obiekty = objectMapper.treeToValue(root.path("ParObiektDPAMIMO"), ParObiektDPAMIMO[].class);
+                    MIMODPA zaklocenie = new MIMODPA(obiekty, parWizualizacja.getBlad());
+                    root = objectMapper.readTree(file[0].getInputStream());
+                    obiekty = objectMapper.treeToValue(root.path("ParObiektDPAMIMO"), ParObiektDPAMIMO[].class);
+                     return new MIMODPA(obiekty, parWizualizacja.getBlad(), zaklocenie);
+                } else {
+                    JsonNode root = objectMapper.readTree(file[0].getInputStream());
+                    ParObiektDPAMIMO[] obiekty = objectMapper.treeToValue(root.path("ParObiektDPAMIMO"), ParObiektDPAMIMO[].class);
+                    return new MIMODPA(obiekty, parWizualizacja.getBlad());
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                return null;
+            }
+        } else {
+            try {
+                if(file.length==3) {
+                    JsonNode root = objectMapper.readTree(file[2].getInputStream());
+                    ZakloceniaRownania[] zakloceniaRownania = objectMapper.treeToValue(root.path("ZakloceniaRownania"), ZakloceniaRownania[].class);
+                    root = objectMapper.readTree(file[0].getInputStream());
+                    ParObiektRownaniaMIMO[] obiekty = objectMapper.treeToValue(root.path("ParObiektRownaniaMIMO"), ParObiektRownaniaMIMO[].class);
+                    return new MIMORownianiaRoznicowe(obiekty, parWizualizacja.getBlad(), zakloceniaRownania);
+                } else {
+                    JsonNode root = objectMapper.readTree(file[0].getInputStream());
+                    ParObiektRownaniaMIMO[] obiekty = objectMapper.treeToValue(root.path("ParObiektRownaniaMIMO"), ParObiektRownaniaMIMO[].class);
+                    return new MIMORownianiaRoznicowe(obiekty, parWizualizacja.getBlad());
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                return null;
+            }
+        }
+    }
+    private static MIMO ustawObiektSymulacji(MultipartFile[] file, ParRegulator parRegulator, ParWizualizacja parWizualizacja, ObjectMapper objectMapper, MIMO obiekt) {
+        JsonNode root;
+        if(file.length>1)
+        {
+            if(parRegulator.getTyp().equals("pid") || parRegulator.getTyp().equals("dmc")) {
+                obiekt = ustawObiektSymulacjiDPA(file, parWizualizacja, objectMapper);
+                if (obiekt == null) {
+                    return null;
+                }
+            } else {
+                obiekt = ustawObiektSymulacjiRownania(file, parWizualizacja, objectMapper);
+                if (obiekt == null) {
+                    return null;
+                }
+            }
+        }
+        return obiekt;
+    }
+
+    private static MIMO ustawObiektSymulacjiDPA(MultipartFile[] file, ParWizualizacja parWizualizacja, ObjectMapper objectMapper) {
+        MIMO obiekt;
+        JsonNode root;
+        try {
+
+            if(file.length==3) {
+                root = objectMapper.readTree(file[2].getInputStream());
+                ParObiektDPAMIMO[] obiekty = objectMapper.treeToValue(root.path("ParObiektDPAMIMO"), ParObiektDPAMIMO[].class);
+                MIMODPA zaklocenie = new MIMODPA(obiekty, parWizualizacja.getBlad());
+                root = objectMapper.readTree(file[1].getInputStream());
+                obiekty = objectMapper.treeToValue(root.path("ParObiektDPAMIMO"), ParObiektDPAMIMO[].class);
+                obiekt = new MIMODPA(obiekty, parWizualizacja.getBlad(), zaklocenie);
+            } else {
+                root = objectMapper.readTree(file[1].getInputStream());
+                ParObiektDPAMIMO[] obiekty = objectMapper.treeToValue(root.path("ParObiektDPAMIMO"), ParObiektDPAMIMO[].class);
+                obiekt = new MIMODPA(obiekty, parWizualizacja.getBlad());
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        return obiekt;
+    }
+
+    private static MIMO ustawObiektSymulacjiRownania(MultipartFile[] file, ParWizualizacja parWizualizacja, ObjectMapper objectMapper) {
+        JsonNode root;
+        MIMO obiekt;
+        try {
+            if(file.length==3) {
+            root = objectMapper.readTree(file[2].getInputStream());
+            ZakloceniaRownania[] zakloceniaRownania = objectMapper.treeToValue(root.path("ZakloceniaRownania"), ZakloceniaRownania[].class);
+            root = objectMapper.readTree(file[1].getInputStream());
+            ParObiektRownaniaMIMO[] obiekty = objectMapper.treeToValue(root.path("ParObiektRownaniaMIMO"), ParObiektRownaniaMIMO[].class);
+            obiekt = new MIMORownianiaRoznicowe(obiekty, parWizualizacja.getBlad(), zakloceniaRownania);
+        } else {
+                root = objectMapper.readTree(file[1].getInputStream());
+                ParObiektRownaniaMIMO[] obiekty = objectMapper.treeToValue(root.path("ParObiektRownaniaMIMO"), ParObiektRownaniaMIMO[].class);
+                obiekt = new MIMORownianiaRoznicowe(obiekty, parWizualizacja.getBlad());
+        }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        return obiekt;
+    }
+
+    private double[][] symulacjaRegulacjiMIMO(ParWizualizacja parWizualizacja, MIMO obiekt,
               Regulator regulator, OdpowiedzStrojenieMIMO odpowiedz, WizualizacjaZaklocen wizualizacjaZaklocen) {
         double[][] celTemp = ustawCelMIMO(parWizualizacja, obiekt, parWizualizacja.getDlugosc());
         odpowiedz.setCel(celTemp);
@@ -302,7 +393,7 @@ public class StrojenieService {
         }
     }
 
-    private void dobierzStrojenieMIMO(ParWizualizacja parWizualizacja, MIMODPA obiekt, Regulator regulator, AlgorytmEwolucyjny GA, OdpowiedzStrojenieMIMO odpowiedz) {
+    private void dobierzStrojenieMIMO(ParWizualizacja parWizualizacja, MIMO obiekt, Regulator regulator, AlgorytmEwolucyjny GA, OdpowiedzStrojenieMIMO odpowiedz) {
         double[] tempWartosciGA = GA.dobierzWartosci(regulator.liczbaZmiennych(), regulator, obiekt);
         regulator.zmienNastawy(tempWartosciGA);
         double[] tempStrojenie = dodajStrojenie(parWizualizacja, tempWartosciGA);
@@ -318,18 +409,19 @@ public class StrojenieService {
         System.out.println(blad);
     }
 
-    private Regulator dobierzRegulatorMIMO(ParRegulator parRegulator, ParWizualizacja parWizualizacja, ObjectMapper objectMapper, MIMODPA obiekt, JsonNode root, Integer[] PIE) {
+    private Regulator dobierzRegulatorMIMO(ParRegulator parRegulator, ParWizualizacja parWizualizacja,
+                           ObjectMapper objectMapper, MIMO obiekt,  Integer[] PIE, MultipartFile[] file) {
         Regulator regulator;
         if (parRegulator.getTyp().equals("pid")) {
             Integer[] PV;
             try {
-
+                JsonNode root = objectMapper.readTree(file[0].getInputStream());
                 PV = objectMapper.treeToValue(root.path("PV"), Integer[].class);
             } catch (Exception ex) {
                 ex.printStackTrace();
                 return null;
             }
-            regulator = new ZbiorPID(obiekt, PV, parRegulator.getDuMax(), parWizualizacja.getStrojenie());
+            regulator = new ZbiorPID((MIMODPA) obiekt, PV, parRegulator.getDuMax(), parWizualizacja.getStrojenie());
             PIE[0] = 600;
             PIE[1] = 300;
             PIE[2] = 10;
@@ -337,17 +429,25 @@ public class StrojenieService {
             double[] tempLambda = new double[obiekt.getLiczbaIN()];
             for (int i = 0; i < obiekt.getLiczbaIN(); i++)
                 tempLambda[i] = 0.5;
-            regulator = new DMCAnalityczny(4, tempLambda, obiekt, obiekt.getYMax(), parRegulator.getDuMax(), 11, parWizualizacja.getStrojenie());
+            regulator = new DMCAnalityczny(4, tempLambda, (MIMODPA) obiekt, obiekt.getYMax(), parRegulator.getDuMax(), 11, parWizualizacja.getStrojenie());
+            PIE[0] = 50;
+            PIE[1] = 20;
+            PIE[2] = 1;
+        } else if (parRegulator.getTyp().equals("gpc")) {
+            double[] tempLambda = new double[obiekt.getLiczbaIN()];
+            for (int i = 0; i < obiekt.getLiczbaIN(); i++)
+                tempLambda[i] = 0.5;
+            regulator = new GPC((MIMORownianiaRoznicowe) obiekt,  5, obiekt.getYMax(), parRegulator.getDuMax(), parWizualizacja.getStrojenie(), tempLambda);
             PIE[0] = 50;
             PIE[1] = 20;
             PIE[2] = 1;
         } else {
-            return null;
+            throw new RuntimeException();
         }
         return regulator;
     }
 
-    private double[][] dodajWartosciWykresowMIMO(MIMODPA obiekt, Regulator regulator, OdpowiedzStrojenieMIMO odpowiedz, int dlugoscSymulacji, double[][] celTemp) {
+    private double[][] dodajWartosciWykresowMIMO(MIMO obiekt, Regulator regulator, OdpowiedzStrojenieMIMO odpowiedz, int dlugoscSymulacji, double[][] celTemp) {
         obiekt.resetObiektu();
         regulator.resetujRegulator();
         double[][] Y = new double[obiekt.getLiczbaOUT()][dlugoscSymulacji];
@@ -371,7 +471,7 @@ public class StrojenieService {
         return Y;
     }
 
-    private double[][] dodajWartosciWykresowMIMO(MIMODPA obiekt, Regulator regulator,
+    private double[][] dodajWartosciWykresowMIMO(MIMO obiekt, Regulator regulator,
                                                  OdpowiedzStrojenieMIMO odpowiedz, int dlugoscSymulacji,
                                                  double[][] celTemp, double[][] dUZ) {
         obiekt.resetObiektu();
@@ -396,7 +496,7 @@ public class StrojenieService {
         odpowiedz.setWykres(Y);
         return Y;
     }
-    private double[][] ustawCelMIMO(ParWizualizacja parWizualizacja, MIMODPA obiekt, int dlugoscSymulacji) {
+    private double[][] ustawCelMIMO(ParWizualizacja parWizualizacja, MIMO obiekt, int dlugoscSymulacji) {
         double[][] celTemp = new double[obiekt.getLiczbaOUT()][dlugoscSymulacji];
         for (int i = 0; i < obiekt.getLiczbaOUT(); i++) {
             for (int j = 0; j < dlugoscSymulacji; j++) {

@@ -35,18 +35,21 @@ public class MIMODPA extends MIMO{
         obliczDelayMax();
         this.blad = "srednio";
         obliczUMax(parObiektDPAMIMOS);
-        this.Y = new ArrayList();
+        this.Y = new ArrayList<>();
         for (int i = 0; i < this.liczbaOUT; i++) {
             Y.add(new ArrayList(Collections.nCopies(3, transmitancja.get(0).get(i).getYpp())));
         }
-        this.U = new ArrayList();
+        this.U = new ArrayList<>();
         for (int i = 0; i < this.liczbaIN; i++) {
             U.add(new ArrayList(Collections.nCopies(3 + delayMax, transmitancja.get(i).get(0).getUpp())));
         }
         obliczDlugosc();
         obliczYMax();
     }
-
+    public MIMODPA(ParObiektDPAMIMO[] parObiektDPAMIMOS, String blad, MIMODPA zakloceniaMierzalne) {
+        this(parObiektDPAMIMOS, blad);
+        setZakloceniaMierzalne(zakloceniaMierzalne);
+    }
     public MIMODPA(ParObiektDPAMIMO[] parObiektDPAMIMOS, String blad) {
         stworzTransmitancje(parObiektDPAMIMOS);
         liczbaOUT = transmitancja.get(0).size();
@@ -55,11 +58,11 @@ public class MIMODPA extends MIMO{
         this.blad = blad;
         obliczUMax(parObiektDPAMIMOS);
 
-        this.Y = new ArrayList();
+        this.Y = new ArrayList<>();
         for (int i = 0; i < this.liczbaOUT; i++) {
             Y.add(new ArrayList(Collections.nCopies(3, transmitancja.get(0).get(i).getYpp())));
         }
-        this.U = new ArrayList();
+        this.U = new ArrayList<>();
         for (int i = 0; i < this.liczbaIN; i++) {
             U.add(new ArrayList(Collections.nCopies(3 + delayMax, transmitancja.get(i).get(0).getUpp())));
         }
@@ -122,9 +125,9 @@ public class MIMODPA extends MIMO{
     }
 
     public void stworzTransmitancje(ParObiektDPAMIMO[] parObiektDPAMIMOS) {
-        this.transmitancja = new ArrayList();
+        this.transmitancja = new ArrayList<>();
         for (ParObiektDPAMIMO parObiekt : parObiektDPAMIMOS) {
-            List<DPA> transmitancjaTemp = new ArrayList();
+            List<DPA> transmitancjaTemp = new ArrayList<>();
             for (int i = 0; i < parObiekt.getGain().length; i++) {
 
                 transmitancjaTemp.add(new DPA(
@@ -192,18 +195,18 @@ public class MIMODPA extends MIMO{
     public double obliczPraceObiektu(Regulator regulator, double[] cel) {
 
         resetObiektu();
-        double blad = 0.0;
+        double bladSymulacji = 0.0;
         if(zakloceniaMierzalne !=null) {
-            blad = obliczPraceZZakloceniem(regulator, cel, blad);
+            bladSymulacji = obliczPraceZZakloceniem(regulator, cel, bladSymulacji);
         } else {
-            blad = obliczPraceBezZaklocen(regulator, cel, blad);
+            bladSymulacji = obliczPraceBezZaklocen(regulator, cel, bladSymulacji);
         }
-        blad = blad / this.dlugosc * liczbaOUT * liczbaOUT;
+        bladSymulacji = bladSymulacji / this.dlugosc * liczbaOUT * liczbaOUT;
         resetObiektu();
-        return blad;
+        return bladSymulacji;
     }
 
-    private double obliczPraceBezZaklocen(Regulator regulator, double[] cel, double blad) {
+    private double obliczPraceBezZaklocen(Regulator regulator, double[] cel, double bladSymulacji) {
         double[] tempCel = new double[liczbaOUT];
         for (int k = 0; k < liczbaOUT; k++) {
             for (int i = 0; i < liczbaOUT; i++)
@@ -216,16 +219,16 @@ public class MIMODPA extends MIMO{
                 double[] Ytepm = obliczKrok(regulator.policzSterowanie(getAktualne()));
                 for (int j = 0; j < liczbaOUT; j++) {
                     if (this.blad.equals("srednio"))
-                        blad += Math.pow(Ytepm[j] - tempCel[j], 2);
+                        bladSymulacji += Math.pow(Ytepm[j] - tempCel[j], 2);
                     else if (this.blad.equals("absolutny"))
-                        blad += Math.abs(Ytepm[j] - tempCel[j]);
+                        bladSymulacji += Math.abs(Ytepm[j] - tempCel[j]);
                 }
             }
         }
-        return blad;
+        return bladSymulacji;
     }
 
-    private double obliczPraceZZakloceniem(Regulator regulator, double[] cel, double blad) {
+    private double obliczPraceZZakloceniem(Regulator regulator, double[] cel, double bladSymulacji) {
         double[] tempCel = new double[liczbaOUT];
         for (int k = 0; k < liczbaOUT; k++) {
             for (int i = 0; i < liczbaOUT; i++)
@@ -238,9 +241,9 @@ public class MIMODPA extends MIMO{
                 double[] Ytepm = obliczKrok(regulator.policzSterowanie(getAktualne()));
                 for (int j = 0; j < Ytepm.length; j++) {
                     if (this.blad.equals("srednio"))
-                        blad += Math.pow(Ytepm[j] - tempCel[j], 2);
+                        bladSymulacji += Math.pow(Ytepm[j] - tempCel[j], 2);
                     else if (this.blad.equals("absolutny"))
-                        blad += Math.abs(Ytepm[j] - tempCel[j]);
+                        bladSymulacji += Math.abs(Ytepm[j] - tempCel[j]);
                 }
             }
             double[] zakloceniaU = new double[zakloceniaMierzalne.getTransmitancja().size()];
@@ -251,9 +254,9 @@ public class MIMODPA extends MIMO{
                 double[] Ytepm = obliczKrok(regulator.policzSterowanie(getAktualne(), zakloceniaU),zakloceniaU);
                 for (int j = 0; j < Ytepm.length; j++) {
                     if (this.blad.equals("srednio"))
-                        blad += Math.pow(Ytepm[j] - tempCel[j], 2);
+                        bladSymulacji += Math.pow(Ytepm[j] - tempCel[j], 2);
                     else if (this.blad.equals("absolutny"))
-                        blad += Math.abs(Ytepm[j] - tempCel[j]);
+                        bladSymulacji += Math.abs(Ytepm[j] - tempCel[j]);
                 }
             }
             for(int i = 0; i < zakloceniaMierzalne.getTransmitancja().size(); i++)
@@ -263,26 +266,15 @@ public class MIMODPA extends MIMO{
                 double[] Ytepm = obliczKrok(regulator.policzSterowanie(getAktualne(), zakloceniaU),zakloceniaU);
                 for (int j = 0; j < Ytepm.length; j++) {
                     if (this.blad.equals("srednio"))
-                        blad += Math.pow(Ytepm[j] - tempCel[j], 2);
+                        bladSymulacji += Math.pow(Ytepm[j] - tempCel[j], 2);
                     else if (this.blad.equals("absolutny"))
-                        blad += Math.abs(Ytepm[j] - tempCel[j]);
+                        bladSymulacji += Math.abs(Ytepm[j] - tempCel[j]);
                 }
             }
         }
-        return blad;
+        return bladSymulacji;
     }
 
-    public void SetU(List<List<Double>> noweU) {
-        this.U = noweU;
-    }
-
-    public void SetY(List<List<Double>> noweY) {
-        this.Y = noweY;
-    }
-
-    public double[] getYMax() {
-        return YMax;
-    }
 
     public double getUMax(int IN) {
         return getUMax()[IN];
@@ -321,12 +313,12 @@ public class MIMODPA extends MIMO{
         this.YMax = new double[liczbaOUT];
         for (int i = 0; i < liczbaOUT; i++)
             this.YMax[i] = 0.0;
-        double[] uMax = new double[liczbaIN];
+        double[] uMaxTemp = new double[liczbaIN];
         for (int i = 0; i < liczbaIN; i++) {
-            uMax[i] = this.uMax[i];
+            uMaxTemp[i] = this.uMax[i];
         }
         for (int i = 0; i < dlugosc * 2; i++) {
-            obliczKrok(uMax);
+            obliczKrok(uMaxTemp);
         }
         Ytemp = getAktualne();
         resetObiektu();
@@ -361,34 +353,28 @@ public class MIMODPA extends MIMO{
     }
 
     private void obliczDlugosc() {
-        List<List<Double>> dlugosc = new ArrayList();
+        int dlugoscTemp = 40;
         for (int i = 0; i < this.getLiczbaOUT(); i++) {
             for (int j = 0; j < this.getLiczbaIN(); j++) {
                 this.resetObiektu();
-                double U = this.getUMax(j) / 2;
+                double Uskok = this.getUMax(j) / 2;
                 double Utemp = 0;
 
                 int k = 2;
-                List<Double> dlugoscTemp = new ArrayList<Double>();
-                dlugoscTemp.add((this.obliczKrok(U, j, i) - this.getYpp(i)) / U);
-                dlugoscTemp.add((this.obliczKrok(Utemp, j, i) - this.getYpp(i)) / U);
-                while ((!(Math.abs(dlugoscTemp.get(k - 1) - dlugoscTemp.get(k - 2)) < 0.005) || dlugoscTemp.get(k - 2) == 0.0)
-                    &&((k<=10) || (k>10 && dlugoscTemp.get(k - 2) != 0.0))) {
-                    dlugoscTemp.add((this.obliczKrok(Utemp, j, i) - this.getYpp(i)) / U);
+                List<Double> symulacja = new ArrayList<Double>();
+                symulacja.add((this.obliczKrok(Uskok, j, i) - this.getYpp(i)) / Uskok);
+                symulacja.add((this.obliczKrok(Utemp, j, i) - this.getYpp(i)) / Uskok);
+                while ((!(Math.abs(symulacja.get(k - 1) - symulacja.get(k - 2)) < 0.005) || symulacja.get(k - 2) == 0.0)
+                    &&((k<=10) || (k>10 && symulacja.get(k - 2) != 0.0))) {
+                    symulacja.add((this.obliczKrok(Utemp, j, i) - this.getYpp(i)) / Uskok);
                     k++;
                 }
-                dlugosc.add(dlugoscTemp);
+                if(dlugoscTemp<symulacja.size())
+                    dlugoscTemp = symulacja.size();
             }
         }
-        int dlugoscInt = dlugosc.get(0).size();
-        for (int i = 0; i < dlugosc.size(); i++) {
-            if (dlugoscInt < dlugosc.get(i).size()) {
-                dlugoscInt = dlugosc.get(i).size();
-            }
-        }
-        this.dlugosc = dlugoscInt;
-        if (this.dlugosc < 40)
-            this.dlugosc = 40;
+        this.dlugosc = dlugoscTemp;
+
     }
 
     public void setZakloceniaMierzalne(MIMODPA zaklocenieMierzalne) {

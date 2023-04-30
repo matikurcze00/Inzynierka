@@ -2,6 +2,7 @@ package com.example.inzynierka.obiekty;
 
 
 import com.example.inzynierka.modele.ParObiektRownania;
+import com.example.inzynierka.modele.ZakloceniaRownania;
 import com.example.inzynierka.regulatory.Regulator;
 import lombok.Data;
 
@@ -11,10 +12,13 @@ import java.util.List;
 
 @Data
 public class SISORownianiaRoznicowe extends SISO{
-    List<Double> A;
-    List<Double> B;
-    List<Double> Y;
-    List<Double> U;
+    private List<Double> A;
+    private List<Double> B;
+    private List<Double> Y;
+    private List<Double> U;
+    private List<Double[]> Bz;
+    private List<List<Double>> Uz;
+    private int liczbaZaklocen;
     private double Upp;
     private double Ypp;
     private double uMin;
@@ -23,6 +27,21 @@ public class SISORownianiaRoznicowe extends SISO{
     private int dlugosc;
     private String blad;
 
+    public SISORownianiaRoznicowe(ParObiektRownania parObiektRownania, double uMax, double uMin, String blad, ZakloceniaRownania zakloceniaRownania) {
+        this(parObiektRownania, uMax, uMin, blad);
+        List<Double[]> BzTemp = new ArrayList<>();
+        BzTemp.add(zakloceniaRownania.getB1());
+        BzTemp.add(zakloceniaRownania.getB2());
+        BzTemp.add(zakloceniaRownania.getB3());
+        BzTemp.add(zakloceniaRownania.getB4());
+        BzTemp.add(zakloceniaRownania.getB5());
+        this.Bz = BzTemp;
+        liczbaZaklocen = zakloceniaRownania.getB1().length;
+        this.Uz = new ArrayList<>();
+        for(int i = 0; i < liczbaZaklocen; i++) {
+            Uz.add(new ArrayList(Collections.nCopies(5, 0.0)));
+        }
+    }
     public SISORownianiaRoznicowe(ParObiektRownania parObiektRownania, double uMax, double uMin, String blad) {
         this(parObiektRownania.getA1(), parObiektRownania.getA2(), parObiektRownania.getA3(), parObiektRownania.getA4(), parObiektRownania.getA5(),
             parObiektRownania.getB1(), parObiektRownania.getB2(), parObiektRownania.getB3(), parObiektRownania.getB4(), parObiektRownania.getB5(),
@@ -46,6 +65,11 @@ public class SISORownianiaRoznicowe extends SISO{
         this.uMax = uMax;
         this.uMin = uMin;
         this.blad = blad;
+        this.Y = new ArrayList<>(Collections.nCopies(5, 0.0));
+        this.U = new ArrayList<>(Collections.nCopies(5, 0.0));
+        this.dlugosc = 50;
+        obliczYMax();
+
     }
     public Double getAktualna() {
         try {
@@ -56,24 +80,36 @@ public class SISORownianiaRoznicowe extends SISO{
     }
 
     public void resetObiektu() {
-        setU(new ArrayList<Double>(Collections.nCopies(U.size(), Upp)));
-        setY(new ArrayList<Double>(Collections.nCopies(Y.size(), Ypp)));
+        setU(new ArrayList<>(Collections.nCopies(U.size(), Upp)));
+        setY(new ArrayList<>(Collections.nCopies(Y.size(), Ypp)));
+        for (int i = 0; i < this.liczbaZaklocen; i++) {
+            Uz.set(i, new ArrayList(Collections.nCopies(5, 0.0)));
+        }
+    }
+    public double obliczPraceObiektu(Regulator regulator, double cel) {
+        resetObiektu();
+        regulator.setCel(new double[] {cel});
+
+        double[] YSymulacji = obliczPraceBezZaklocen(regulator);
+
+        resetObiektu();
+        return obliczBlad(YSymulacji, cel);
     }
     public double obliczPraceObiektu(Regulator regulator, double[] cel) {
         resetObiektu();
         regulator.setCel(cel);
 
-        double[] Y = obliczPraceBezZaklocen(regulator);
+        double[] YSymulacji = obliczPraceBezZaklocen(regulator);
 
         resetObiektu();
-        return obliczBlad(Y, cel[0]);
+        return obliczBlad(YSymulacji, cel[0]);
     }
     private double[] obliczPraceBezZaklocen(Regulator regulator) {
-        double[] Y = new double[dlugosc];
+        double[] YSymulacji = new double[dlugosc];
         for (int i = 0; i < this.dlugosc; i++) {
-            Y[i] = obliczKrok(regulator.policzSterowanie(getAktualna()));
+            YSymulacji[i] = obliczKrok(regulator.policzSterowanie(getAktualna()));
         }
-        return Y;
+        return YSymulacji;
     }
 
     public double obliczKrok(double du) {
@@ -84,18 +120,50 @@ public class SISORownianiaRoznicowe extends SISO{
         return Yakt;
     }
     public double obliczKrok(double du, double[] duZ) {
+        obliczUz(duZ);
         return obliczKrok(du);
     }
 
     public double obliczKrokZaklocenia(double du, int zaklocenie) {
-        return 0.0;
+        obliczUz(du, zaklocenie);
+        double Yakt = obliczWyjscieZaklocenia(zaklocenie);
+        dodajY(Yakt);
+        return Yakt;
     }
+    public double obliczWyjscieZaklocenia(int zaklocenie) {
+        double Yakt = 0.0;
+        for(int j = 0; j < Bz.size(); j++)
+            Yakt +=  Bz.get(j)[zaklocenie] *  Uz.get(zaklocenie).get(j);
+        for(int i = 0; i < A.size(); i++)
+            Yakt -= A.get(i) * Y.get(i);
+        return Yakt;
+    }
+    public void obliczUz(double[] du) {
+        for (int j = 0; j < liczbaZaklocen; j++) {
+            double Uakt = Uz.get(j).get(0) + du[j];
+            for (int i = Uz.get(j).size() - 1; i > 0; i--)
+                Uz.get(j).set(i, Uz.get(j).get(i - 1));
+            Uz.get(j).set(0, Uakt);
+        }
+    }
+    public void obliczUz(double du, int zaklocenie) {
+        double Uakt = Uz.get(zaklocenie).get(0) + du;
+        if (Uakt > uMax)
+            Uakt = uMax;
+        else if (Uakt < uMin)
+            Uakt = uMin;
 
+        for (int i = Uz.get(zaklocenie).size() - 1; i > 0; i--)
+            Uz.get(zaklocenie).set(i, Uz.get(zaklocenie).get(i - 1));
+        Uz.get(zaklocenie).set(0, Uakt);
+    }
     private double obliczWyjscie() {
         double Yakt = 0.0;
         for(int i = 0; i < B.size(); i++)
             Yakt += B.get(i) * U.get(i);
-
+        for(int i = 0; i < liczbaZaklocen; i++)
+            for(int j = 0; j < Bz.size(); j++)
+                Yakt +=  Bz.get(j)[i] *  Uz.get(i).get(j);
         for(int i = 0; i < A.size(); i++)
             Yakt -= A.get(i) * Y.get(i);
         return Yakt;
@@ -118,14 +186,24 @@ public class SISORownianiaRoznicowe extends SISO{
         Y.set(0, Yakt);
     }
 
-    public double obliczBlad(double[] Y, double yZad) {
+    public double obliczBlad(double[] YSymulacji, double yZad) {
         double bladTemp = 0.0;
         if (this.blad.equals("srednio"))
             for (int i = 0; i < this.dlugosc; i++)
-                bladTemp += Math.pow(Y[i] - yZad, 2);
+                bladTemp += Math.pow(YSymulacji[i] - yZad, 2);
         else if (this.blad.equals("absolutny"))
             for (int i = 0; i < this.dlugosc; i++)
-                bladTemp += Math.abs(Y[i] - yZad);
+                bladTemp += Math.abs(YSymulacji[i] - yZad);
         return bladTemp / this.dlugosc;
+    }
+    private void obliczYMax() {
+        double yMax = 0;
+        double yTemp = 0;
+        for(int i = 0; i < B.size(); i++)
+            yTemp += B.get(i) * this.uMax;
+        yMax += yTemp;
+        for(int i = 0; i < A.size(); i++)
+            yMax -= A.get(i) * yTemp;
+        this.YMax = yMax;
     }
 }

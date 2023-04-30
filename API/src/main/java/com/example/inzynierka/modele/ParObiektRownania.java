@@ -15,4 +15,5 @@ public class ParObiektRownania {
     private double B4;
     private double B5;
     private double uMax;
+    private double UMin;
 }
