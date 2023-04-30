@@ -15,12 +15,12 @@ public class DMCAnalitycznyTest {
 
     @Test
     public void SISOTest() {
-        SISODPA SISODPA = new SISODPA(10.0, 1.0, 1, 1.0, 0, 1.0, 1.0, 0.0, 0, 1, 100.0, -100.0, "srednio");
+        SISODPA SISODPA = new SISODPA(10.0, 1.0, 1, 1.0, 0, 1.0, 3.0, 5.0, 0, 1, 100.0, -100.0, "srednio");
         Regulator regulator = new DMCAnalityczny(4, 0.1, SISODPA, SISODPA.getYMax() / 2, 3.0, 11);;
         regulator.setCel(new double[]{30.0});
         assert(regulator.getCel()[0]==30.0);
         double tempY = SISODPA.obliczKrok(regulator.policzSterowanie(SISODPA.getAktualna()));
-        double expectedY = 20.0;
+        double expectedY = 0.7792207792207794;
         assert(tempY==expectedY);
         SISODPA.resetObiektu();
         regulator.resetujRegulator();
@@ -34,7 +34,7 @@ public class DMCAnalitycznyTest {
     {
         ObjectMapper objectMapper = new ObjectMapper();
         Integer[] PV = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("PV"), Integer[].class);
-        ParObiektDPAMIMO[] Obiekty = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("ParObiektMIMO"), ParObiektDPAMIMO[].class);
+        ParObiektDPAMIMO[] Obiekty = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("ParObiektDPAMIMO"), ParObiektDPAMIMO[].class);
         MIMODPA obiekt  = new MIMODPA(Obiekty, "srednio");
         double[] tempLambda = {0.5,0.5};
         Double[] tempStrojenie = new Double[]{1.0, 1.0};

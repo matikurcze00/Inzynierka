@@ -15,7 +15,7 @@ public class MIMODPATest {
     {
         ObjectMapper objectMapper = new ObjectMapper();
         Integer[] PV = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("PV"), Integer[].class);
-        ParObiektDPAMIMO[] Obiekty = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("ParObiektMIMO"), ParObiektDPAMIMO[].class);
+        ParObiektDPAMIMO[] Obiekty = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("ParObiektDPAMIMO"), ParObiektDPAMIMO[].class);
         MIMODPA obiekt  = new MIMODPA(Obiekty, "srednio");
         double[] expectedUMax = {100.0, 100.0};
         assertArrayEquals(obiekt.getUMax(),expectedUMax, 0.001);
@@ -27,7 +27,7 @@ public class MIMODPATest {
         double[] tempDU = {1.0,1.0};
         obiekt.obliczKrok(tempDU);
         assert(obiekt.getU().get(0).get(0)==1.0);
-        double[] expectedY = {8.746552172781682, 0.0, 0.0};
+        double[] expectedY = {8.779339058027583, 0.0, 0.0};
         double[] arrayY = obiekt.getY().get(0).stream().mapToDouble(Double::doubleValue).toArray();
         assertArrayEquals(arrayY, expectedY, 0.0001);
     }
@@ -37,7 +37,7 @@ public class MIMODPATest {
     {
         ObjectMapper objectMapper = new ObjectMapper();
         Integer[] PV = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("PV"), Integer[].class);
-        ParObiektDPAMIMO[] Obiekty = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("ParObiektMIMO"), ParObiektDPAMIMO[].class);
+        ParObiektDPAMIMO[] Obiekty = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("ParObiektDPAMIMO"), ParObiektDPAMIMO[].class);
         MIMODPA obiekt  = new MIMODPA(Obiekty, "srednio");
         obiekt.obliczKrok(1.0, 1, 0);
         assert(obiekt.getU().get(0).get(0)==0.0);
