@@ -8,9 +8,8 @@ describe('ObiektWidokComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ObiektWidokComponent ]
-    })
-    .compileComponents();
+      declarations: [ObiektWidokComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ObiektWidokComponent);
     component = fixture.componentInstance;

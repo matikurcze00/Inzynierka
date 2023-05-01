@@ -36,7 +36,7 @@
     </div>
     <div class="dane">
       <app-obiekt-widok
-        [typRegulatora]="this.typRegulatora" 
+        [typRegulatora]="this.typRegulatora"
         (updateEvent)="updateObiekt($event)"
         [hidden]="zakladka !== 'model'"
       ></app-obiekt-widok>
@@ -150,23 +150,35 @@
           >
         </div>
       </div>
-      <div class="zaklocenia"
-      [hidden]="this.zakladkaWizualizacja != 'zaklocenia'">
-        <div *ngIf="this.file==null"> <b>Ustaw proszę liczbę zakłóceń mierzalnych</b>
-        <div class="row mx-auto mb-3" style="width:50%;">
-          <div class="input-group">
-            <label class="input-group-text col-9">Liczba zakłóceń mierzalnych </label>
-            <select class="form-control col-1" (change)="zmienLiczbeZaklocen($event)">
-              <option *ngFor="let option of optionsZaklocenia" [value]="option">{{option}}</option>
-            </select>
+      <div
+        class="zaklocenia"
+        [hidden]="this.zakladkaWizualizacja != 'zaklocenia'"
+      >
+        <div *ngIf="this.file==null">
+          <b>Ustaw proszę liczbę zakłóceń mierzalnych</b>
+          <div class="row mx-auto mb-3" style="width: 50%">
+            <div class="input-group">
+              <label class="input-group-text col-9"
+                >Liczba zakłóceń mierzalnych
+              </label>
+              <select
+                class="form-control col-1"
+                (change)="zmienLiczbeZaklocen($event)"
+              >
+                <option
+                  *ngFor="let option of optionsZaklocenia"
+                  [value]="option"
+                >
+                  {{option}}
+                </option>
+              </select>
+            </div>
           </div>
-        </div>
-        <div class="mb-3" *ngIf="this.liczbaZaklocen.length!=0">
-
+          <div class="mb-3" *ngIf="this.liczbaZaklocen.length!=0">
             <h5 class="mt-5">Wprowadź wartości transmitancji:</h5>
             <div *ngFor="let zaklocenie of this.liczbaZaklocen">
               <b>Zakłócenie nr {{zaklocenie+1}}</b>
-              <div class="container ml-0 mr-0 mx-auto" >
+              <div class="container ml-0 mr-0 mx-auto">
                 <div
                   class="form-row align-items-center"
                   *ngIf="typRegulatora=='gpc'"
@@ -176,37 +188,37 @@
                     <input
                       class="form-control"
                       type="number"
-                      (input)="updateZaklocenieRownaniaValue(zaklocenie, 'b1', $event.target)"  
+                      (input)="updateZaklocenieRownaniaValue(zaklocenie, 'b1', $event.target)"
                       placeholder="1.0"
-                      />
+                    />
                     <label class="input-group-text">B2</label>
                     <input
                       class="form-control"
                       type="number"
-                      (input)="updateZaklocenieRownaniaValue(zaklocenie, 'b2', $event.target)"  
+                      (input)="updateZaklocenieRownaniaValue(zaklocenie, 'b2', $event.target)"
                       placeholder="1.0"
-                      />
+                    />
                     <label class="input-group-text">B3</label>
                     <input
                       class="form-control"
                       type="number"
-                      (input)="updateZaklocenieRownaniaValue(zaklocenie, 'b3', $event.target)"  
+                      (input)="updateZaklocenieRownaniaValue(zaklocenie, 'b3', $event.target)"
                       placeholder="1.0"
-                      />
-                      <label class="input-group-text">B4</label>
+                    />
+                    <label class="input-group-text">B4</label>
                     <input
                       class="form-control"
                       type="number"
-                      (input)="updateZaklocenieRownaniaValue(zaklocenie, 'b4', $event.target)"  
+                      (input)="updateZaklocenieRownaniaValue(zaklocenie, 'b4', $event.target)"
                       placeholder="1.0"
-                      />
+                    />
                     <label class="input-group-text">B5</label>
                     <input
                       class="form-control"
                       type="number"
-                      (input)="updateZaklocenieRownaniaValue(zaklocenie, 'b5', $event.target)"  
+                      (input)="updateZaklocenieRownaniaValue(zaklocenie, 'b5', $event.target)"
                       placeholder="1.0"
-                      />
+                    />
                   </div>
                 </div>
                 <div
@@ -218,20 +230,20 @@
                     <input
                       class="form-control"
                       type="number"
-                      (input)="updateZaklocenieDPAValue(zaklocenie, 'gain', $event.target)"                        
+                      (input)="updateZaklocenieDPAValue(zaklocenie, 'gain', $event.target)"
                       placeholder="1.0"
                     />
                     <label class="input-group-text">R1</label>
                     <input
                       class="form-control"
                       type="number"
-                      (input)="updateZaklocenieDPAValue(zaklocenie, 'r1', $event.target)"  
+                      (input)="updateZaklocenieDPAValue(zaklocenie, 'r1', $event.target)"
                       placeholder="1.0"
                     />
                     <label class="input-group-text">Q1</label>
                     <select
                       class="form-control"
-                      (input)="updateZaklocenieDPAValue(zaklocenie, 'q1', $event.target)"  
+                      (input)="updateZaklocenieDPAValue(zaklocenie, 'q1', $event.target)"
                       placeholder="1"
                     >
                       <option *ngFor="let option of optionsQ" [value]="option">
@@ -242,13 +254,13 @@
                     <input
                       class="form-control"
                       type="number"
-                      (input)="updateZaklocenieDPAValue(zaklocenie, 'r2', $event.target)"  
+                      (input)="updateZaklocenieDPAValue(zaklocenie, 'r2', $event.target)"
                       placeholder="1.0"
                     />
                     <label class="input-group-text">Q2</label>
                     <select
                       class="form-control"
-                      (input)="updateZaklocenieDPAValue(zaklocenie, 'q2', $event.target)"  
+                      (input)="updateZaklocenieDPAValue(zaklocenie, 'q2', $event.target)"
                       placeholder="1"
                     >
                       <option *ngFor="let option of optionsQ" [value]="option">
@@ -261,37 +273,37 @@
                     <input
                       class="form-control"
                       type="number"
-                      (input)="updateZaklocenieDPAValue(zaklocenie, 't1', $event.target)"  
+                      (input)="updateZaklocenieDPAValue(zaklocenie, 't1', $event.target)"
                       placeholder="1.0"
-                      />
+                    />
                     <label class="input-group-text">T2</label>
                     <input
                       class="form-control"
                       type="number"
-                      (input)="updateZaklocenieDPAValue(zaklocenie, 't2', $event.target)"  
+                      (input)="updateZaklocenieDPAValue(zaklocenie, 't2', $event.target)"
                       placeholder="1.0"
-                      />
+                    />
                     <label class="input-group-text">T3</label>
                     <input
                       class="form-control"
                       type="number"
-                      (input)="updateZaklocenieDPAValue(zaklocenie, 't3', $event.target)"  
+                      (input)="updateZaklocenieDPAValue(zaklocenie, 't3', $event.target)"
                       placeholder="1.0"
-                      />
-                      <label class="input-group-text">Tp</label>
+                    />
+                    <label class="input-group-text">Tp</label>
                     <input
                       class="form-control"
                       type="number"
-                      (input)="updateZaklocenieDPAValue(zaklocenie, 'tp', $event.target)"  
+                      (input)="updateZaklocenieDPAValue(zaklocenie, 'tp', $event.target)"
                       placeholder="1.0"
-                      />
+                    />
                     <label class="input-group-text">Delay</label>
                     <input
                       class="form-control"
                       type="number"
-                      (input)="updateZaklocenieDPAValue(zaklocenie, 'delay', $event.target)"  
+                      (input)="updateZaklocenieDPAValue(zaklocenie, 'delay', $event.target)"
                       placeholder="1.0"
-                      />
+                    />
                   </div>
                 </div>
               </div>
@@ -299,17 +311,37 @@
           </div>
         </div>
         <div *ngIf="this.file!=null">
-          <h5 class="mt-5" >Wprowadź plik przedstawiający zakłócenia mierzalne obiektu:</h5>
+          <h5 class="mt-5">
+            Wprowadź plik przedstawiający zakłócenia mierzalne obiektu:
+          </h5>
           <span class="p-3">
-            {{ strojenie.get('MIMO.plikZaklocen')?.value?.name ? 'Wybrany plik to: ' +fileZaklocen!.name : 'Wybierz plik lub go tu przyciągnij i upuść ' }}</span>
-          <input class="file-input" type="file" #fileInput  (change)="onFileZaklocenChange($event)">
+            {{ strojenie.get('MIMO.plikZaklocen')?.value?.name ? 'Wybrany plik
+            to: ' +fileZaklocen!.name : 'Wybierz plik lub go tu przyciągnij i
+            upuść ' }}</span
+          >
+          <input
+            class="file-input"
+            type="file"
+            #fileInput
+            (change)="onFileZaklocenChange($event)"
+          />
           <div class="container ml-0 mr-0 mt-5 mx-auto">
-            <button class="btn btn-secondary" (click)="infoZaklocenie()" [disabled]="fileZaklocen==null" type="button"> Wyślij obiekt </button>
+            <button
+              class="btn btn-secondary"
+              (click)="infoZaklocenie()"
+              [disabled]="fileZaklocen==null"
+              type="button"
+            >
+              Wyślij obiekt
+            </button>
           </div>
         </div>
         <div *ngIf="liczbaZaklocen.length!=0">
           <div class="text-center mt-5">
-            <b>Ustaw proszę na jaką wartość ma być ustawione sterowanie zakłócenia: </b>
+            <b
+              >Ustaw proszę na jaką wartość ma być ustawione sterowanie
+              zakłócenia:
+            </b>
             <div class="form-row align-items-center mb-3">
               <div class="input-group col align-items-center">
                 <div
@@ -330,7 +362,10 @@
             </div>
           </div>
           <div class="text-center mt-5">
-            <b>Ustaw proszę maksymalną wartość zmiany sterowania zakłócenia w jednym kroku: </b>
+            <b
+              >Ustaw proszę maksymalną wartość zmiany sterowania zakłócenia w
+              jednym kroku:
+            </b>
             <div class="form-row align-items-center mb-3">
               <div class="input-group col align-items-center">
                 <div
@@ -351,7 +386,10 @@
             </div>
           </div>
           <div class="text-center mt-5">
-            <b>Ustaw proszę krok w którym ma nastąpić skok wartości sterowania zakłócenia: </b>
+            <b
+              >Ustaw proszę krok w którym ma nastąpić skok wartości sterowania
+              zakłócenia:
+            </b>
             <div class="form-row align-items-center mb-3">
               <div class="input-group col align-items-center">
                 <div
@@ -372,7 +410,10 @@
             </div>
           </div>
           <div class="text-center mt-5">
-            <b>Ustaw proszę krok w którym ma nastąpić koniec skoku sterowania zakłócenia: </b>
+            <b
+              >Ustaw proszę krok w którym ma nastąpić koniec skoku sterowania
+              zakłócenia:
+            </b>
             <div class="form-row align-items-center mb-3">
               <div class="input-group col align-items-center">
                 <div
@@ -384,7 +425,7 @@
                     Zakłócenie {{ i + 1 }}
                   </label>
                   <input
-                  placeholder="0"
+                    placeholder="0"
                     class="form-control mx-auto d-block text-center"
                     (input)="updateWizualizacjiaZaklocenieValue(zaklocenie, 'skokPowrotnyZaklocenia', $event.target)"
                   />
@@ -685,8 +726,8 @@
                   style="margin-left: 20%; margin-right: 20%"
                 >
                   <b
-                    >Wartości strojenia regulatora podłączonego do wyjścia
-                    {{ i + 1 }}</b
+                    >Wartości strojenia regulatora podłączonego do wyjścia {{ i
+                    + 1 }}</b
                   >
                   <div class="form-row align-items-center mb-3">
                     <div class="input-group col-2 align-items-center">
@@ -749,25 +790,27 @@
           </div>
         </div>
 
-          <div
-            class="form-row align-items-center mb-3 justify-content-center"
-            style="margin-left: 20%; margin-right: 20%; display: flex"
-          >
-            <label class="input-group-text d-block text-center">
-              Czy chcesz wybrać inny obiekt symulacji niż regulowany obiekt?
-            </label>
-            <label class="input-group-text d-block text-center">
-              <input
-                type="checkbox"
-                (change)="obiektSymulacjiInputs()"
-                [checked]="czyInnyObiekt"
-              />
-            </label>
-          </div>
-          <div *ngIf="
+        <div
+          class="form-row align-items-center mb-3 justify-content-center"
+          style="margin-left: 20%; margin-right: 20%; display: flex"
+        >
+          <label class="input-group-text d-block text-center">
+            Czy chcesz wybrać inny obiekt symulacji niż regulowany obiekt?
+          </label>
+          <label class="input-group-text d-block text-center">
+            <input
+              type="checkbox"
+              (change)="obiektSymulacjiInputs()"
+              [checked]="czyInnyObiekt"
+            />
+          </label>
+        </div>
+        <div
+          *ngIf="
           this.file==null
-        ">
-            <div [hidden]="this.typRegulatora=='gpc'">
+        "
+        >
+          <div [hidden]="this.typRegulatora=='gpc'">
             <h5 class="mt-5">Wprowadź wartości transmitancji:</h5>
             <div class="container ml-0 mr-0 mx-auto">
               <div class="form-group mb-3" [formGroup]="strojenie">
@@ -819,45 +862,45 @@
                     </select>
                   </div>
                   <div class="input-group col-3">
-                    <label class="input-group-text">{{
-                      zmienne[5].nazwa
-                    }}</label>
+                    <label class="input-group-text"
+                      >{{ zmienne[5].nazwa }}</label
+                    >
                     <input
                       class="form-control"
                       type="number"
                       formControlName="t1"
                       [disabled]="czyInnyObiekt"
                     />
-                    <label class="input-group-text">{{
-                      zmienne[6].nazwa
-                    }}</label>
+                    <label class="input-group-text"
+                      >{{ zmienne[6].nazwa }}</label
+                    >
                     <input
                       class="form-control"
                       type="number"
                       formControlName="t2"
                       [disabled]="czyInnyObiekt"
                     />
-                    <label class="input-group-text">{{
-                      zmienne[7].nazwa
-                    }}</label>
+                    <label class="input-group-text"
+                      >{{ zmienne[7].nazwa }}</label
+                    >
                     <input
                       class="form-control"
                       type="number"
                       formControlName="t3"
                       [disabled]="czyInnyObiekt"
                     />
-                    <label class="input-group-text">{{
-                      zmienne[8]!.nazwa
-                    }}</label>
+                    <label class="input-group-text"
+                      >{{ zmienne[8]!.nazwa }}</label
+                    >
                     <input
                       class="form-control"
                       type="number"
                       formControlName="delay"
                       [disabled]="czyInnyObiekt"
                     />
-                    <label class="input-group-text">{{
-                      zmienne[9]!.nazwa
-                    }}</label>
+                    <label class="input-group-text"
+                      >{{ zmienne[9]!.nazwa }}</label
+                    >
                     <input
                       class="form-control"
                       type="number"
@@ -868,100 +911,110 @@
                 </div>
               </div>
             </div>
-            </div>
-            <div [hidden]="this.typRegulatora!='gpc'">
-              <div class="container ml-0 mr-0 mx-auto">
-                <div class="form-group mb-3" [formGroup]="strojenie">
-                  <div
-                    class="form-row align-items-center"
-                    formGroupName="parObiektSymulacjiRownania"
-                  >
-                    <div class="input-group col">
-                      <label class="input-group-text">A1</label>
-                      <input
-                        class="form-control"
-                        type="number"
-                        formControlName="a1"
-                        [disabled]="czyInnyObiekt"
-                      />
-                      <label class="input-group-text">A2</label>
-                      <input
-                        class="form-control"
-                        type="number"
-                        formControlName="a2"
-                        [disabled]="czyInnyObiekt"
-                      />
-                      <label class="input-group-text">A3</label>
-                      <input
-                        class="form-control"
-                        type="number"
-                        formControlName="a3"
-                        [disabled]="czyInnyObiekt"
-                      />
-                      <label class="input-group-text">A4</label>
-                      <input
-                        class="form-control"
-                        type="number"
-                        formControlName="a4"
-                        [disabled]="czyInnyObiekt"
-                      />
-                      <label class="input-group-text">A5</label>
-                      <input
-                        class="form-control"
-                        type="number"
-                        formControlName="a5"
-                        [disabled]="czyInnyObiekt"
-                      />
-                    </div>
-                    <div class="input-group col-3">
-                      <label class="input-group-text">B1</label>
-                      <input
-                        class="form-control"
-                        type="number"
-                        formControlName="b1"
-                        [disabled]="czyInnyObiekt"
-                      />
-                      <label class="input-group-text">B2</label>
-                      <input
-                        class="form-control"
-                        type="number"
-                        formControlName="b2"
-                        [disabled]="czyInnyObiekt"
-                      />
-                      <label class="input-group-text">B3</label>
-                      <input
-                        class="form-control"
-                        type="number"
-                        formControlName="b3"
-                        [disabled]="czyInnyObiekt"
-                      />
-                      <label class="input-group-text">B4</label>
-                      <input
-                        class="form-control"
-                        type="number"
-                        formControlName="b4"
-                        [disabled]="czyInnyObiekt"
-                      />
-                      <label class="input-group-text">B5</label>
-                      <input
-                        class="form-control"
-                        type="number"
-                        formControlName="b5"
-                        [disabled]="czyInnyObiekt"
-                      />
-                    </div>
+          </div>
+          <div [hidden]="this.typRegulatora!='gpc'">
+            <div class="container ml-0 mr-0 mx-auto">
+              <div class="form-group mb-3" [formGroup]="strojenie">
+                <div
+                  class="form-row align-items-center"
+                  formGroupName="parObiektSymulacjiRownania"
+                >
+                  <div class="input-group col">
+                    <label class="input-group-text">A1</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      formControlName="a1"
+                      [disabled]="czyInnyObiekt"
+                    />
+                    <label class="input-group-text">A2</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      formControlName="a2"
+                      [disabled]="czyInnyObiekt"
+                    />
+                    <label class="input-group-text">A3</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      formControlName="a3"
+                      [disabled]="czyInnyObiekt"
+                    />
+                    <label class="input-group-text">A4</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      formControlName="a4"
+                      [disabled]="czyInnyObiekt"
+                    />
+                    <label class="input-group-text">A5</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      formControlName="a5"
+                      [disabled]="czyInnyObiekt"
+                    />
+                  </div>
+                  <div class="input-group col-3">
+                    <label class="input-group-text">B1</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      formControlName="b1"
+                      [disabled]="czyInnyObiekt"
+                    />
+                    <label class="input-group-text">B2</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      formControlName="b2"
+                      [disabled]="czyInnyObiekt"
+                    />
+                    <label class="input-group-text">B3</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      formControlName="b3"
+                      [disabled]="czyInnyObiekt"
+                    />
+                    <label class="input-group-text">B4</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      formControlName="b4"
+                      [disabled]="czyInnyObiekt"
+                    />
+                    <label class="input-group-text">B5</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      formControlName="b5"
+                      [disabled]="czyInnyObiekt"
+                    />
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <div *ngIf="this.file!=null">
-            <h5 class="mt-5" [ngClass]="{'text-muted': !czyInnyObiekt}">Wprowadź plik przedstawiający obiekt symulacji:</h5>
-            <span class="p-3"  [ngClass]="{'text-muted': !czyInnyObiekt}">
-              {{ strojenie.get('MIMO.plikWizualizacji')?.value?.name ? 'Wybrany plik to: ' +fileWizualizacji!.name : 'Wybierz plik lub go tu przyciągnij i upuść ' }}</span>
-            <input class="file-input" type="file" #fileInput [disabled]="!czyInnyObiekt" (change)="onFileWizualizacjiChange($event)">
-          </div>
-        
+        </div>
+        <div *ngIf="this.file!=null">
+          <h5 class="mt-5" [ngClass]="{'text-muted': !czyInnyObiekt}">
+            Wprowadź plik przedstawiający obiekt symulacji:
+          </h5>
+          <span class="p-3" [ngClass]="{'text-muted': !czyInnyObiekt}">
+            {{ strojenie.get('MIMO.plikWizualizacji')?.value?.name ? 'Wybrany
+            plik to: ' +fileWizualizacji!.name : 'Wybierz plik lub go tu
+            przyciągnij i upuść ' }}</span
+          >
+          <input
+            class="file-input"
+            type="file"
+            #fileInput
+            [disabled]="!czyInnyObiekt"
+            (change)="onFileWizualizacjiChange($event)"
+          />
+        </div>
       </div>
       <div
         class="mt-5"
@@ -1038,7 +1091,9 @@
           <p><b>D</b> = {{ odpowiedz.wspolczynniki[regulator * 3 + 2] }}</p>
         </div>
       </div>
-      <div *ngIf="odpowiedz.typRegulatora == 'dmc' || odpowiedz.typRegulatora == 'gpc'">
+      <div
+        *ngIf="odpowiedz.typRegulatora == 'dmc' || odpowiedz.typRegulatora == 'gpc'"
+      >
         <b>Wartość Lambda:</b>
         <div *ngFor="let regulator of liczbaRegulatorow">
           <p><b>Lambda</b>= {{ odpowiedz.wspolczynniki[regulator] }}</p>
@@ -1051,8 +1106,8 @@
       <div *ngIf="odpowiedzMIMO.typRegulatora == 'pid'">
         <div *ngFor="let regulator of this.liczbaRegulatorow">
           <b
-            >Wartości parametrów regulatora podłączonego do wyjścia
-            {{ regulator + 1 }}</b
+            >Wartości parametrów regulatora podłączonego do wyjścia {{ regulator
+            + 1 }}</b
           >
 
           <p><b>P</b> = {{ odpowiedzMIMO.wspolczynniki[regulator * 3 + 0] }}</p>
@@ -1060,12 +1115,14 @@
           <p><b>D</b> = {{ odpowiedzMIMO.wspolczynniki[regulator * 3 + 2] }}</p>
         </div>
       </div>
-      <div *ngIf="odpowiedzMIMO.typRegulatora == 'dmc' || odpowiedzMIMO.typRegulatora == 'gpc'">
+      <div
+        *ngIf="odpowiedzMIMO.typRegulatora == 'dmc' || odpowiedzMIMO.typRegulatora == 'gpc'"
+      >
         <b>Wartości Lambda:</b>
         <div *ngFor="let regulator of this.liczbaRegulatorow">
           <p>
-            <b>Lambda {{ regulator + 1 }}</b> =
-            {{ odpowiedzMIMO.wspolczynniki[regulator] }}
+            <b>Lambda {{ regulator + 1 }}</b> = {{
+            odpowiedzMIMO.wspolczynniki[regulator] }}
           </p>
         </div>
       </div>

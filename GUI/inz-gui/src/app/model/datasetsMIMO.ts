@@ -1,4 +1,4 @@
-export interface datasetsMIMO{
+export interface datasetsMIMO {
   label: string;
   data: number[];
   borderColor: any;

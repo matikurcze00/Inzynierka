@@ -5,12 +5,8 @@ import { WizualizacjaComponent } from './wizualizacja';
 describe('WizualizacjaComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        RouterTestingModule
-      ],
-      declarations: [
-        WizualizacjaComponent
-      ],
+      imports: [RouterTestingModule],
+      declarations: [WizualizacjaComponent],
     }).compileComponents();
   });
 
@@ -30,6 +26,8 @@ describe('WizualizacjaComponent', () => {
     const fixture = TestBed.createComponent(WizualizacjaComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.content span')?.textContent).toContain('inz-gui app is running!');
+    expect(compiled.querySelector('.content span')?.textContent).toContain(
+      'inz-gui app is running!'
+    );
   });
 });

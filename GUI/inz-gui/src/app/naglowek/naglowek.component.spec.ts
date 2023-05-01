@@ -8,9 +8,8 @@ describe('NaglowekComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ NaglowekComponent ]
-    })
-    .compileComponents();
+      declarations: [NaglowekComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(NaglowekComponent);
     component = fixture.componentInstance;

@@ -1,3 +1,3 @@
-export interface OdpowiedzSkokowa{
-  przebieg: number[][]
+export interface OdpowiedzSkokowa {
+  przebieg: number[][];
 }

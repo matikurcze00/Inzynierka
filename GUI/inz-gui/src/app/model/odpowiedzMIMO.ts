@@ -1,4 +1,4 @@
-export interface OdpowiedzMIMO{
+export interface OdpowiedzMIMO {
   wspolczynniki: number[];
   wykres: number[][];
   cel: number[][];

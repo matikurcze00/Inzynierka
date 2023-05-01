@@ -4,43 +4,41 @@ import { Observable } from 'rxjs';
 import { OdpowiedzInfoMIMO } from '../model/odpowiedzInfoMIMO';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class InfoService {
-  constructor(private http: HttpClient) { }
-  private readonly api = 'http://localhost:8080/info'
+  constructor(private http: HttpClient) {}
+  private readonly api = 'http://localhost:8080/info';
 
-
-  makeJSON(this: any, key:string, value:any){
-    if(value ==="") {
-      return null
+  makeJSON(this: any, key: string, value: any) {
+    if (value === '') {
+      return null;
     }
     return value;
   }
 
-  public infoMIMODPAInOut(file: any): Observable<OdpowiedzInfoMIMO>{
+  public infoMIMODPAInOut(file: any): Observable<OdpowiedzInfoMIMO> {
     const formData = new FormData();
     formData.append('file', file.value);
-    return this.http.post<OdpowiedzInfoMIMO>(
-      this.api+'/MIMO/DPA',
-      formData
-    )
+    return this.http.post<OdpowiedzInfoMIMO>(this.api + '/MIMO/DPA', formData);
   }
-  
-  public infoMIMORownianiaZakloceniaInOut(file: any): Observable<OdpowiedzInfoMIMO>{
+
+  public infoMIMORownianiaZakloceniaInOut(
+    file: any
+  ): Observable<OdpowiedzInfoMIMO> {
     const formData = new FormData();
     formData.append('file', file.value);
     return this.http.post<OdpowiedzInfoMIMO>(
-      this.api+'/MIMO/Rownania/Zaklocenia',
+      this.api + '/MIMO/Rownania/Zaklocenia',
       formData
-    )
+    );
   }
-  public infoMIMORownianiaInOut(file: any): Observable<OdpowiedzInfoMIMO>{
+  public infoMIMORownianiaInOut(file: any): Observable<OdpowiedzInfoMIMO> {
     const formData = new FormData();
     formData.append('file', file.value);
     return this.http.post<OdpowiedzInfoMIMO>(
-      this.api+'/MIMO/Rownania',
+      this.api + '/MIMO/Rownania',
       formData
-    )
+    );
   }
 }

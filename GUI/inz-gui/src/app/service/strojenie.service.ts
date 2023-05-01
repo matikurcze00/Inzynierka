@@ -1,38 +1,40 @@
 import { Injectable } from '@angular/core';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import {Odpowiedz} from '../model/odpowiedz'
+import { Odpowiedz } from '../model/odpowiedz';
 import { OdpowiedzMIMO } from '../model/odpowiedzMIMO';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class StrojenieService {
+  constructor(private http: HttpClient) {}
+  private readonly api = 'http://localhost:8080/strojenie';
 
-  constructor(private http: HttpClient) { }
-  private readonly api = 'http://localhost:8080/strojenie'
-
-  makeJSON(this: any, key:string, value:any){
-    if(value ==="") {
-      return null
+  makeJSON(this: any, key: string, value: any) {
+    if (value === '') {
+      return null;
     }
     return value;
   }
   public dobierzStrojenieSISO(form: any): Observable<Odpowiedz> {
-    const headers =  {'Content-Type' : 'application/json; charset=utf-8'};
-    console.log("service")
-    console.log(JSON.stringify(form.value,this.makeJSON))
-    
+    const headers = { 'Content-Type': 'application/json; charset=utf-8' };
+    console.log('service');
+    console.log(JSON.stringify(form.value, this.makeJSON));
+
     return this.http.post<Odpowiedz>(
-      this.api+'/SISO',
-      JSON.stringify(form.value,this.makeJSON),
-      {headers: headers}
+      this.api + '/SISO',
+      JSON.stringify(form.value, this.makeJSON),
+      { headers: headers }
     );
   }
   public dobierzStrojenieMIMO(form: any): Observable<OdpowiedzMIMO> {
     const formData = new FormData();
     formData.append('file', form.controls.MIMO.controls['plik'].value);
-    const plikWizualizacji = form.controls.MIMO.controls['plikWizualizacji'].value ? form.controls.MIMO.controls['plikWizualizacji'].value : form.controls.MIMO.controls['plik'].value;
+    const plikWizualizacji = form.controls.MIMO.controls['plikWizualizacji']
+      .value
+      ? form.controls.MIMO.controls['plikWizualizacji'].value
+      : form.controls.MIMO.controls['plik'].value;
     formData.append('file', plikWizualizacji);
     formData.append('file', form.controls.MIMO.controls['plikZaklocen'].value);
     formData.append('typ', form.controls.parRegulator.value.typ);
@@ -46,15 +48,21 @@ export class StrojenieService {
     formData.append('dlugosc', form.controls.parWizualizacja.value.dlugosc);
     formData.append('strojenie', form.controls.parWizualizacja.value.strojenie);
     formData.append('blad', form.controls.parWizualizacja.value.blad);
-    if(form.controls.wizualizacjaZaklocen.value.uSkok!=null) {
-      formData.append('uSkok', form.controls.wizualizacjaZaklocen.value.uSkok)
-      formData.append('skokZaklocenia', form.controls.wizualizacjaZaklocen.value.skokZaklocenia)
-      formData.append('skokPowrotnyZaklocenia', form.controls.wizualizacjaZaklocen.value.skokPowrotnyZaklocenia)
-      formData.append('deltaU', form.controls.wizualizacjaZaklocen.value.deltaU)
+    if (form.controls.wizualizacjaZaklocen.value.uSkok != null) {
+      formData.append('uSkok', form.controls.wizualizacjaZaklocen.value.uSkok);
+      formData.append(
+        'skokZaklocenia',
+        form.controls.wizualizacjaZaklocen.value.skokZaklocenia
+      );
+      formData.append(
+        'skokPowrotnyZaklocenia',
+        form.controls.wizualizacjaZaklocen.value.skokPowrotnyZaklocenia
+      );
+      formData.append(
+        'deltaU',
+        form.controls.wizualizacjaZaklocen.value.deltaU
+      );
     }
-    return this.http.post<OdpowiedzMIMO>(
-      this.api+'/MIMO',
-      formData
-    )
+    return this.http.post<OdpowiedzMIMO>(this.api + '/MIMO', formData);
   }
 }

@@ -8,9 +8,8 @@ describe('RegulatorWidokComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ RegulatorWidokComponent ]
-    })
-    .compileComponents();
+      declarations: [RegulatorWidokComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(RegulatorWidokComponent);
     component = fixture.componentInstance;

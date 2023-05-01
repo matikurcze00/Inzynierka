@@ -16,18 +16,18 @@ import { HttpClientModule } from '@angular/common/http';
     WizualizacjaComponent,
     RegulatorWidokComponent,
     ObiektWidokComponent,
-    NaglowekComponent
+    NaglowekComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     NgbModule,
     BrowserAnimationsModule,
-    FormsModule, 
+    FormsModule,
     ReactiveFormsModule,
-    HttpClientModule
+    HttpClientModule,
   ],
   providers: [],
-  bootstrap: [WizualizacjaComponent]
+  bootstrap: [WizualizacjaComponent],
 })
-export class AppModule { }
+export class AppModule {}
