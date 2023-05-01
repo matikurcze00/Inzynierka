@@ -1,41 +1,49 @@
 package com.example.inzynierka.EA;
 
 import com.example.inzynierka.obiekty.MIMO;
-import com.example.inzynierka.obiekty.MIMODPA;
 import com.example.inzynierka.obiekty.SISO;
-import com.example.inzynierka.obiekty.SISODPA;
 import com.example.inzynierka.regulatory.Regulator;
 import lombok.Data;
 
+import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 @Data
 public class AlgorytmEwolucyjny {
     private int rozmiarPopulacji;
     private int liczbaIteracji;
-    private int rozmiarElity;
+    private int mu;
     private int iloscKrzyzowania;
     private int iloscMutacji;
     private double prawdopodobienstwoMutacji;
     private List<Osobnik> populacja;
+    private int wspolczynnikZmiany = 0;
 
-    public AlgorytmEwolucyjny(int rozmiarPopulacji, int liczbaIteracji, int rozmiarElity, double prawdopodobienstwoMutacji, double czestotliwoscKrzyzowania) {
+    public AlgorytmEwolucyjny(int rozmiarPopulacji, int liczbaIteracji, int mu, double prawdopodobienstwoMutacji, double czestotliwoscKrzyzowania) {
         this.rozmiarPopulacji = rozmiarPopulacji;
         this.liczbaIteracji = liczbaIteracji;
-        this.rozmiarElity = rozmiarElity;
+        this.mu = mu;
         this.prawdopodobienstwoMutacji = prawdopodobienstwoMutacji;
-        this.iloscKrzyzowania = (int) Math.floor(((rozmiarPopulacji - rozmiarElity)) * czestotliwoscKrzyzowania);
-        this.iloscMutacji = rozmiarPopulacji - rozmiarElity - iloscKrzyzowania;
-    }
-
-    public AlgorytmEwolucyjny() {
+        this.iloscKrzyzowania = (int) Math.floor(mu * czestotliwoscKrzyzowania);
+        this.iloscMutacji = mu - iloscKrzyzowania;
     }
 
     public double[] dobierzWartosci(int liczbaArgumentow, Regulator regulator, SISO siso) {
-        populacja = new ArrayList<Osobnik>();
+        populacja = new ArrayList<>();
         Random r = new Random();
         double[] cel = new double[]{siso.getYMax() / 2};
         regulator.setCel(cel);
+        Inicjalizacja(liczbaArgumentow, regulator, siso, r, cel);
+        Collections.sort(populacja);
+        for (int k = 0; k < liczbaIteracji; k++) {
+            ewolucje(liczbaArgumentow, regulator, siso, cel, k);
+        }
+        return populacja.get(0).getParametry();
+    }
+
+    private void Inicjalizacja(int liczbaArgumentow, Regulator regulator, SISO siso, Random r, double[] cel) {
         for (int i = 0; i < rozmiarPopulacji; i++) {
             Osobnik osobnikTemp = new Osobnik(liczbaArgumentow);
             for (int j = 0; j < liczbaArgumentow; j++) {
@@ -47,29 +55,26 @@ public class AlgorytmEwolucyjny {
             osobnikTemp.setWartosc(siso.obliczPraceObiektu(regulator, cel));
             populacja.add(osobnikTemp);
         }
-        Collections.sort(populacja);
-        for (int k = 0; k < liczbaIteracji; k++) {
-            ewolucje(liczbaArgumentow, regulator, siso, cel);
-        }
-        Collections.sort(populacja);
-        return populacja.get(0).getParametry();
     }
 
-    private void ewolucje(int liczbaArgumentow, Regulator regulator, SISO siso, double[] cel) {
+    private void ewolucje(int liczbaArgumentow, Regulator regulator, SISO siso, double[] cel, int iteracja) {
         Random r = new Random();
         List<Osobnik> reprodukcja = new ArrayList<Osobnik>();
-        Collections.sort(populacja);
-        for (int i = 0; i < rozmiarElity; i++) {
-            reprodukcja.add(populacja.get(i));
-        }
+        reprodukcja = populacja.stream().collect(Collectors.toList());
         krzyzowania(liczbaArgumentow, regulator, siso, cel, r, reprodukcja);
         mutacje(liczbaArgumentow, regulator, siso, cel, r, reprodukcja);
-        populacja = reprodukcja;
+        Collections.sort(reprodukcja);
+        if(reprodukcja.get(0).getWartosc() < populacja.get(0).getWartosc())
+            wspolczynnikZmiany += 1;
+
+        if((iteracja+1) % 15 == 0)
+            zmianaWspolczynnikaMutacji();
+        populacja = reprodukcja.stream().limit(rozmiarPopulacji).collect(Collectors.toList());
     }
 
     private void mutacje(int liczbaArgumentow, Regulator regulator, SISO siso, double[] cel, Random r, List<Osobnik> reprodukcja) {
         for (int i = 0; i < iloscMutacji; i++) {
-            int rodzic = r.nextInt(rozmiarElity);
+            int rodzic = r.nextInt(rozmiarPopulacji);
             Osobnik osobnikTemp = new Osobnik(liczbaArgumentow);
             for (int j = 0; j < liczbaArgumentow; j++) {
                 osobnikTemp.getParametry()[j] = (r.nextDouble() < getPrawdopodobienstwoMutacji()) ? Math.abs(r.nextGaussian(populacja.get(rodzic).getParametry()[j], 0.4)) : populacja.get(rodzic).getParametry()[j];
@@ -118,22 +123,25 @@ public class AlgorytmEwolucyjny {
         }
         Collections.sort(populacja);
         for (int k = 0; k < liczbaIteracji; k++) {
-            ewolucje(liczbaArgumentow, regulator, obiekt, cel);
+            ewolucje(liczbaArgumentow, regulator, obiekt, cel, k);
         }
         Collections.sort(populacja);
         return populacja.get(0).getParametry();
     }
 
-    private void ewolucje(int liczbaArgumentow, Regulator regulator, MIMO obiekt, double[] cel) {
+    private void ewolucje(int liczbaArgumentow, Regulator regulator, MIMO obiekt, double[] cel, int iteracja) {
         Random r = new Random();
-        List<Osobnik> reprodukcja = new ArrayList<Osobnik>();
-        Collections.sort(populacja);
-        for (int i = 0; i < rozmiarElity; i++) {
-            reprodukcja.add(populacja.get(i));
-        }
+        List<Osobnik> reprodukcja = new ArrayList<>();
+        reprodukcja = populacja.stream().collect(Collectors.toList());
         krzyzowania(liczbaArgumentow, regulator, obiekt, cel, r, reprodukcja);
         mutacje(liczbaArgumentow, regulator, obiekt, cel, r, reprodukcja);
-        populacja = reprodukcja;
+        Collections.sort(reprodukcja);
+        if(reprodukcja.get(0).getWartosc() < populacja.get(0).getWartosc())
+            wspolczynnikZmiany += 1;
+
+        if((iteracja+1) % 15 == 0)
+            zmianaWspolczynnikaMutacji();
+        populacja = reprodukcja.stream().limit(rozmiarPopulacji).collect(Collectors.toList());
     }
 
     private void mutacje(int liczbaArgumentow, Regulator regulator, MIMO obiekt, double[] cel, Random r, List<Osobnik> reprodukcja) {
@@ -162,6 +170,14 @@ public class AlgorytmEwolucyjny {
             obiekt.resetObiektu();
             osobnikTemp.setWartosc(obiekt.obliczPraceObiektu(regulator, cel));
             reprodukcja.add(osobnikTemp);
+        }
+    }
+
+    private void zmianaWspolczynnikaMutacji() {
+        if(wspolczynnikZmiany > 3) {
+            prawdopodobienstwoMutacji = prawdopodobienstwoMutacji * 0.8;
+        } else if (wspolczynnikZmiany < 3) {
+            prawdopodobienstwoMutacji = prawdopodobienstwoMutacji / 0.8;
         }
     }
 }

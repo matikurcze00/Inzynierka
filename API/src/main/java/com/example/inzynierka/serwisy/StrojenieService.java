@@ -175,19 +175,19 @@ public class StrojenieService {
         Regulator regulator;
         if (parRegulator.getTyp().equals("pid")) {
             regulator = new PID(0.0, 0.0, 0.0, parObiektDPA.getTp(), new double[]{obiekt.getYMax()}, parRegulator.getDuMax(), parRegulator.getUMax(), parWizualizacja.getStrojenie());
-            PIE[0] = 300;
+            PIE[0] = 100;
             PIE[1] = 40;
-            PIE[2] = 10;
+            PIE[2] = 500;
         } else if (parRegulator.getTyp().equals("dmc")) {
             regulator = new DMCAnalityczny(4, 0.1, (SISODPA) obiekt, obiekt.getYMax() / 2, parRegulator.getDuMax(), 11, parWizualizacja.getStrojenie());
-            PIE[0] = 100;
+            PIE[0] = 50;
             PIE[1] = 20;
-            PIE[2] = 3;
+            PIE[2] = 250;
         } else {
             regulator = new GPC((SISORownianiaRoznicowe) obiekt, 0.1, obiekt.getYMax() / 2, parRegulator.getDuMax(), parWizualizacja.getStrojenie());
-            PIE[0] = 100;
+            PIE[0] = 50;
             PIE[1] = 20;
-            PIE[2] = 3;
+            PIE[2] = 250;
         }
         return regulator;
     }
@@ -422,25 +422,25 @@ public class StrojenieService {
                 return null;
             }
             regulator = new ZbiorPID((MIMODPA) obiekt, PV, parRegulator.getDuMax(), parWizualizacja.getStrojenie());
-            PIE[0] = 600;
-            PIE[1] = 300;
-            PIE[2] = 10;
+            PIE[0] = 100;
+            PIE[1] = 50;
+            PIE[2] = 500;
         } else if (parRegulator.getTyp().equals("dmc")) {
             double[] tempLambda = new double[obiekt.getLiczbaIN()];
             for (int i = 0; i < obiekt.getLiczbaIN(); i++)
                 tempLambda[i] = 0.5;
             regulator = new DMCAnalityczny(4, tempLambda, (MIMODPA) obiekt, obiekt.getYMax(), parRegulator.getDuMax(), 11, parWizualizacja.getStrojenie());
-            PIE[0] = 50;
-            PIE[1] = 20;
-            PIE[2] = 1;
+            PIE[0] = 30;
+            PIE[1] = 30;
+            PIE[2] = 90;
         } else if (parRegulator.getTyp().equals("gpc")) {
             double[] tempLambda = new double[obiekt.getLiczbaIN()];
             for (int i = 0; i < obiekt.getLiczbaIN(); i++)
                 tempLambda[i] = 0.5;
             regulator = new GPC((MIMORownianiaRoznicowe) obiekt,  5, obiekt.getYMax(), parRegulator.getDuMax(), parWizualizacja.getStrojenie(), tempLambda);
-            PIE[0] = 50;
-            PIE[1] = 20;
-            PIE[2] = 1;
+            PIE[0] = 30;
+            PIE[1] = 30;
+            PIE[2] = 90;
         } else {
             throw new RuntimeException();
         }

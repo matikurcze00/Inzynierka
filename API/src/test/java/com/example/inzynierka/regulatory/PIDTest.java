@@ -31,8 +31,8 @@ public class PIDTest {
     @Test
     public void MIMOTest() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-        Integer[] PV = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("PV"), Integer[].class);
-        ParObiektDPAMIMO[] Obiekty = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMO.json")).path("ParObiektDPAMIMO"), ParObiektDPAMIMO[].class);
+        Integer[] PV = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMODPA.json")).path("PV"), Integer[].class);
+        ParObiektDPAMIMO[] Obiekty = objectMapper.treeToValue(objectMapper.readTree(new FileInputStream("src/main/java/com/example/inzynierka/ObiektMIMODPA.json")).path("ParObiektDPAMIMO"), ParObiektDPAMIMO[].class);
         MIMODPA obiekt  = new MIMODPA(Obiekty, "srednio");
         Double[] tempStrojenie = new Double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
         Regulator regulator = new ZbiorPID(obiekt,PV, 3.0, tempStrojenie);
