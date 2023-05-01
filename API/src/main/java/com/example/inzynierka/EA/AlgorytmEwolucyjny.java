@@ -5,9 +5,7 @@ import com.example.inzynierka.obiekty.SISO;
 import com.example.inzynierka.regulatory.Regulator;
 import lombok.Data;
 
-import java.sql.Timestamp;
 import java.util.*;
-import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 @Data
@@ -33,7 +31,7 @@ public class AlgorytmEwolucyjny {
     public double[] dobierzWartosci(int liczbaArgumentow, Regulator regulator, SISO siso) {
         populacja = new ArrayList<>();
         Random r = new Random();
-        double[] cel = new double[]{siso.getYMax() / 2};
+        double[] cel = new double[] {siso.getYMax() / 2};
         regulator.setCel(cel);
         Inicjalizacja(liczbaArgumentow, regulator, siso, r, cel);
         Collections.sort(populacja);
@@ -64,11 +62,13 @@ public class AlgorytmEwolucyjny {
         krzyzowania(liczbaArgumentow, regulator, siso, cel, r, reprodukcja);
         mutacje(liczbaArgumentow, regulator, siso, cel, r, reprodukcja);
         Collections.sort(reprodukcja);
-        if(reprodukcja.get(0).getWartosc() < populacja.get(0).getWartosc())
+        if (reprodukcja.get(0).getWartosc() < populacja.get(0).getWartosc()) {
             wspolczynnikZmiany += 1;
+        }
 
-        if((iteracja+1) % 15 == 0)
+        if ((iteracja + 1) % 15 == 0) {
             zmianaWspolczynnikaMutacji();
+        }
         populacja = reprodukcja.stream().limit(rozmiarPopulacji).collect(Collectors.toList());
     }
 
@@ -77,7 +77,9 @@ public class AlgorytmEwolucyjny {
             int rodzic = r.nextInt(rozmiarPopulacji);
             Osobnik osobnikTemp = new Osobnik(liczbaArgumentow);
             for (int j = 0; j < liczbaArgumentow; j++) {
-                osobnikTemp.getParametry()[j] = (r.nextDouble() < getPrawdopodobienstwoMutacji()) ? Math.abs(r.nextGaussian(populacja.get(rodzic).getParametry()[j], 0.4)) : populacja.get(rodzic).getParametry()[j];
+                osobnikTemp.getParametry()[j] =
+                    (r.nextDouble() < getPrawdopodobienstwoMutacji()) ? Math.abs(r.nextGaussian(populacja.get(rodzic).getParametry()[j], 0.4)) :
+                        populacja.get(rodzic).getParametry()[j];
             }
             regulator.zmienNastawy(osobnikTemp.getParametry());
             siso.resetObiektu();
@@ -107,8 +109,9 @@ public class AlgorytmEwolucyjny {
         populacja = new ArrayList<Osobnik>();
         Random r = new Random();
         double[] cel = Arrays.copyOf(obiekt.getYMax(), obiekt.getYMax().length);
-        for (int i = 0; i < cel.length; i++)
+        for (int i = 0; i < cel.length; i++) {
             cel[i] = cel[i] / 5;
+        }
 
         regulator.setCel(cel);
         for (int i = 0; i < rozmiarPopulacji; i++) {
@@ -136,11 +139,13 @@ public class AlgorytmEwolucyjny {
         krzyzowania(liczbaArgumentow, regulator, obiekt, cel, r, reprodukcja);
         mutacje(liczbaArgumentow, regulator, obiekt, cel, r, reprodukcja);
         Collections.sort(reprodukcja);
-        if(reprodukcja.get(0).getWartosc() < populacja.get(0).getWartosc())
+        if (reprodukcja.get(0).getWartosc() < populacja.get(0).getWartosc()) {
             wspolczynnikZmiany += 1;
+        }
 
-        if((iteracja+1) % 15 == 0)
+        if ((iteracja + 1) % 15 == 0) {
             zmianaWspolczynnikaMutacji();
+        }
         populacja = reprodukcja.stream().limit(rozmiarPopulacji).collect(Collectors.toList());
     }
 
@@ -149,7 +154,9 @@ public class AlgorytmEwolucyjny {
             int rodzic = r.nextInt(rozmiarPopulacji);
             Osobnik osobnikTemp = new Osobnik(liczbaArgumentow);
             for (int j = 0; j < liczbaArgumentow; j++) {
-                osobnikTemp.getParametry()[j] = (r.nextDouble() < getPrawdopodobienstwoMutacji()) ? Math.abs(r.nextGaussian(populacja.get(rodzic).getParametry()[j], 0.6)) : populacja.get(rodzic).getParametry()[j];
+                osobnikTemp.getParametry()[j] =
+                    (r.nextDouble() < getPrawdopodobienstwoMutacji()) ? Math.abs(r.nextGaussian(populacja.get(rodzic).getParametry()[j], 0.6)) :
+                        populacja.get(rodzic).getParametry()[j];
             }
             regulator.zmienNastawy(osobnikTemp.getParametry());
             obiekt.resetObiektu();
@@ -174,7 +181,7 @@ public class AlgorytmEwolucyjny {
     }
 
     private void zmianaWspolczynnikaMutacji() {
-        if(wspolczynnikZmiany > 3) {
+        if (wspolczynnikZmiany > 3) {
             prawdopodobienstwoMutacji = prawdopodobienstwoMutacji * 0.8;
         } else if (wspolczynnikZmiany < 3) {
             prawdopodobienstwoMutacji = prawdopodobienstwoMutacji / 0.8;

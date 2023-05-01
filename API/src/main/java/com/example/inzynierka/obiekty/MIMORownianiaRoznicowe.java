@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Data
-public class MIMORownianiaRoznicowe extends MIMO{
+public class MIMORownianiaRoznicowe extends MIMO {
     List<List<Double[]>> A;
     List<List<Double[]>> B;
     List<List<Double>> Y;
@@ -35,7 +35,7 @@ public class MIMORownianiaRoznicowe extends MIMO{
         this(parObiektRownaniaMIMOS);
         this.blad = blad;
         this.Bz = new ArrayList<>();
-        for(ZakloceniaRownania zaklocenie : zakloceniaRownania) {
+        for (ZakloceniaRownania zaklocenie : zakloceniaRownania) {
             List<Double[]> BzTemp = new ArrayList<>();
             BzTemp.add(zaklocenie.getB1());
             BzTemp.add(zaklocenie.getB2());
@@ -46,14 +46,16 @@ public class MIMORownianiaRoznicowe extends MIMO{
         }
         this.liczbaZaklocen = Bz.get(0).get(0).length;
         this.Uz = new ArrayList<>();
-        for(int i = 0; i < liczbaZaklocen; i++) {
+        for (int i = 0; i < liczbaZaklocen; i++) {
             Uz.add(new ArrayList(Collections.nCopies(5, 0.0)));
         }
     }
+
     public MIMORownianiaRoznicowe(ParObiektRownaniaMIMO[] parObiektRownaniaMIMOS, String blad) {
         this(parObiektRownaniaMIMOS);
         this.blad = blad;
     }
+
     public MIMORownianiaRoznicowe(ParObiektRownaniaMIMO[] parObiektRownaniaMIMOS) {
         this.A = new ArrayList<>();
         this.B = new ArrayList<>();
@@ -84,14 +86,14 @@ public class MIMORownianiaRoznicowe extends MIMO{
     }
 
     private void ograniczeniaMIMO(List uMinTemp, List uMaxTemp) {
-        for(int i = 0; i < uMinTemp.size(); i++) {
+        for (int i = 0; i < uMinTemp.size(); i++) {
             uMin[i] = (double) uMinTemp.get(i);
             uMax[i] = (double) uMaxTemp.get(i);
         }
     }
 
     private void przydzielABMIMO(ParObiektRownaniaMIMO[] parObiektRownaniaMIMOS, List uMinTemp, List uMaxTemp) {
-        for(ParObiektRownaniaMIMO parObiekt: parObiektRownaniaMIMOS) {
+        for (ParObiektRownaniaMIMO parObiekt : parObiektRownaniaMIMOS) {
             List Atemp = new ArrayList<>();
             Atemp.add(parObiekt.getA1());
             Atemp.add(parObiekt.getA2());
@@ -126,8 +128,9 @@ public class MIMORownianiaRoznicowe extends MIMO{
     private double obliczPraceBezZaklocen(Regulator regulator, double[] cel, double blad) {
         double[] tempCel = new double[liczbaOUT];
         for (int k = 0; k < liczbaOUT; k++) {
-            for (int i = 0; i < liczbaOUT; i++)
+            for (int i = 0; i < liczbaOUT; i++) {
                 tempCel[i] = 0;
+            }
             tempCel[k] = cel[k];
             regulator.setCel(tempCel);
             resetObiektu();
@@ -135,10 +138,11 @@ public class MIMORownianiaRoznicowe extends MIMO{
             for (int i = 0; i < this.dlugosc; i++) {
                 double[] Ytepm = obliczKrok(regulator.policzSterowanie(getAktualne()));
                 for (int j = 0; j < Ytepm.length; j++) {
-                    if (this.blad.equals("srednio"))
+                    if (this.blad.equals("srednio")) {
                         blad += Math.pow(Ytepm[j] - tempCel[j], 2);
-                    else if (this.blad.equals("absolutny"))
+                    } else if (this.blad.equals("absolutny")) {
                         blad += Math.abs(Ytepm[j] - tempCel[j]);
+                    }
                 }
             }
         }
@@ -149,16 +153,18 @@ public class MIMORownianiaRoznicowe extends MIMO{
         obliczU(du);
         double[] Yakt = new double[liczbaOUT];
 
-        for(int i = 0; i < liczbaOUT; i++) {
+        for (int i = 0; i < liczbaOUT; i++) {
             Yakt[i] = obliczWyjscie(i);
         }
         dodajY(Yakt);
         return Yakt;
     }
-    public double[] obliczKrok(double[] du, double[]duZ) {
+
+    public double[] obliczKrok(double[] du, double[] duZ) {
         obliczUz(duZ);
         return obliczKrok(du);
     }
+
     public double obliczKrokZaklocenia(double du, int IN, int OUT) {
         return 0.0;
     }
@@ -172,26 +178,34 @@ public class MIMORownianiaRoznicowe extends MIMO{
 
     public double[] getAktualne() {
         double[] YAkt = new double[liczbaOUT];
-        for (int i = 0; i < liczbaOUT; i++)
+        for (int i = 0; i < liczbaOUT; i++) {
             YAkt[i] = Y.get(i).get(0);
+        }
         return YAkt;
     }
 
-    private double obliczWyjscie(int out ) {
+    private double obliczWyjscie(int out) {
         Double Yakt = 0.0;
-        for(int j = 0; j < B.get(out).size(); j++)
-            for(int k = 0; k < liczbaIN; k++)
-                Yakt +=  B.get(out).get(j)[k] *  U.get(k).get(j);
+        for (int j = 0; j < B.get(out).size(); j++) {
+            for (int k = 0; k < liczbaIN; k++) {
+                Yakt += B.get(out).get(j)[k] * U.get(k).get(j);
+            }
+        }
 
-        for(int i = 0; i < liczbaZaklocen; i++)
-            for(int j = 0; j < Bz.size(); j++)
-                Yakt +=  Bz.get(out).get(j)[i] *  Uz.get(i).get(j);
+        for (int i = 0; i < liczbaZaklocen; i++) {
+            for (int j = 0; j < Bz.size(); j++) {
+                Yakt += Bz.get(out).get(j)[i] * Uz.get(i).get(j);
+            }
+        }
 
-        for(int j = 0; j < A.get(out).size(); j++)
-            for(int k = 0; k < liczbaIN; k++)
+        for (int j = 0; j < A.get(out).size(); j++) {
+            for (int k = 0; k < liczbaIN; k++) {
                 Yakt -= A.get(out).get(j)[k] * Y.get(out).get(j);
+            }
+        }
         return Yakt;
     }
+
     public void resetObiektu() {
         for (int i = 0; i < this.liczbaOUT; i++) {
             Y.set(i, new ArrayList(Collections.nCopies(5, 0.0)));
@@ -203,19 +217,23 @@ public class MIMORownianiaRoznicowe extends MIMO{
             Uz.set(i, new ArrayList(Collections.nCopies(5, 0.0)));
         }
     }
+
     public void obliczU(double[] du) {
         for (int j = 0; j < liczbaIN; j++) {
             double Uakt = U.get(j).get(0) + du[j];
-            if (Uakt > uMax[j])
+            if (Uakt > uMax[j]) {
                 Uakt = uMax[j];
-            else if (Uakt < uMin[j])
+            } else if (Uakt < uMin[j]) {
                 Uakt = uMin[j];
+            }
 
-            for (int i = U.get(j).size() - 1; i > 0; i--)
+            for (int i = U.get(j).size() - 1; i > 0; i--) {
                 U.get(j).set(i, U.get(j).get(i - 1));
+            }
             U.get(j).set(0, Uakt);
         }
     }
+
     public void obliczU(double du, int IN) {
         double Uakt = U.get(IN).get(0) + du;
         if (Uakt > uMax[IN]) {
@@ -223,51 +241,60 @@ public class MIMORownianiaRoznicowe extends MIMO{
         } else if (Uakt < uMin[IN]) {
             Uakt = uMin[IN];
         }
-        for (int i = U.get(IN).size() - 1; i > 0; i--)
+        for (int i = U.get(IN).size() - 1; i > 0; i--) {
             U.get(IN).set(i, U.get(IN).get(i - 1));
+        }
         U.get(IN).set(0, Uakt);
     }
+
     public void obliczUz(double[] du) {
         for (int j = 0; j < liczbaZaklocen; j++) {
             double Uakt = Uz.get(j).get(0) + du[j];
-            for (int i = Uz.get(j).size() - 1; i > 0; i--)
+            for (int i = Uz.get(j).size() - 1; i > 0; i--) {
                 Uz.get(j).set(i, Uz.get(j).get(i - 1));
+            }
             Uz.get(j).set(0, Uakt);
         }
     }
+
     private void dodajY(double[] Yakt) {
         for (int i = 0; i < liczbaOUT; i++) {
             List<Double> Ytemp = Y.get(i);
-            for (int j = Y.get(i).size() - 1; j > 0; j--)
+            for (int j = Y.get(i).size() - 1; j > 0; j--) {
                 Ytemp.set(j, Ytemp.get(j - 1));
+            }
             Ytemp.set(0, Yakt[i]);
             Y.set(i, Ytemp);
         }
     }
+
     private void dodajY(int OUT, double YaktIN) {
         List<Double> Ytemp = Y.get(OUT);
-        for (int j = Y.get(OUT).size() - 1; j > 0; j--)
+        for (int j = Y.get(OUT).size() - 1; j > 0; j--) {
             Ytemp.set(j, Ytemp.get(j - 1));
+        }
         Ytemp.set(0, YaktIN);
         Y.set(OUT, Ytemp);
     }
+
     private void obliczYMax() {
         double[] Ytemp;
 
         this.YMax = new double[liczbaOUT];
-        for (int i = 0; i < liczbaOUT; i++)
+        for (int i = 0; i < liczbaOUT; i++) {
             this.YMax[i] = 0.0;
-        double[] uMax = new double[liczbaIN];
-        for (int i = 0; i < liczbaIN; i++) {
-            uMax[i] = this.uMax[i];
         }
+        double[] uMax = new double[liczbaIN];
+        System.arraycopy(this.uMax, 0, uMax, 0, liczbaIN);
         for (int i = 0; i < dlugosc * 2; i++) {
             obliczKrok(uMax);
         }
         Ytemp = getAktualne();
         resetObiektu();
-        for (int i = 0; i < this.YMax.length; i++)
-            if (this.YMax[i] < Ytemp[i])
+        for (int i = 0; i < this.YMax.length; i++) {
+            if (this.YMax[i] < Ytemp[i]) {
                 this.YMax[i] = Ytemp[i];
+            }
+        }
     }
 }

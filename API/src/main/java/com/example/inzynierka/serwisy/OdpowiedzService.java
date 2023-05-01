@@ -32,8 +32,9 @@ public class OdpowiedzService {
         double Utemp = 0;
         odpSkokowa[0][0] = obiekt.obliczKrok(Utemp);
         odpSkokowa[0][1] = obiekt.obliczKrok(U);
-        for (int i = 2; i < parWizualizacja.getDlugosc(); i++)
+        for (int i = 2; i < parWizualizacja.getDlugosc(); i++) {
             odpSkokowa[0][i] = obiekt.obliczKrok(Utemp);
+        }
     }
 
     public OdpowiedzSkokowa MIMOOdpowiedz(MultipartFile file, ParRegulator parRegulator, ParWizualizacja parWizualizacja) {
@@ -63,8 +64,9 @@ public class OdpowiedzService {
                 obiekt.resetObiektu();
                 odpSkokowa[k * obiekt.getLiczbaIN() + j][0] = obiekt.obliczKrok(Utemp, k, j);
                 odpSkokowa[k * obiekt.getLiczbaIN() + j][1] = obiekt.obliczKrok(U, k, j);
-                for (int i = 2; i < parWizualizacja.getDlugosc(); i++)
+                for (int i = 2; i < parWizualizacja.getDlugosc(); i++) {
                     odpSkokowa[k * obiekt.getLiczbaIN() + j][i] = obiekt.obliczKrok(Utemp, k, j);
+                }
             }
         }
     }

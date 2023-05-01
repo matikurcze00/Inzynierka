@@ -13,8 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class InfoService {
-    public OdpowiedzInfoMIMO InfoWejsciaWyjsciaDPA(MultipartFile file)
-    {
+    public OdpowiedzInfoMIMO InfoWejsciaWyjsciaDPA(MultipartFile file) {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode root;
         ParObiektDPAMIMO[] obiekty;
@@ -32,8 +31,8 @@ public class InfoService {
         odpowiedz.setWyjscia(obiekt.getLiczbaOUT());
         return odpowiedz;
     }
-    public OdpowiedzInfoMIMO InfoWejsciaWyjsciaRownania(MultipartFile file)
-    {
+
+    public OdpowiedzInfoMIMO InfoWejsciaWyjsciaRownania(MultipartFile file) {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode root;
         ParObiektRownaniaMIMO[] obiekty;
@@ -51,8 +50,8 @@ public class InfoService {
         odpowiedz.setWyjscia(obiekt.getLiczbaOUT());
         return odpowiedz;
     }
-    public OdpowiedzInfoMIMO InfoWejsciaWyjsciaZakloceniaRownania(MultipartFile file)
-    {
+
+    public OdpowiedzInfoMIMO InfoWejsciaWyjsciaZakloceniaRownania(MultipartFile file) {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode root;
         ZakloceniaRownania[] obiekty;

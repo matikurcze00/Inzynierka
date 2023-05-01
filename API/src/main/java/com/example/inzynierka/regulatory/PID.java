@@ -21,59 +21,31 @@ public class PID extends Regulator {
     private Double[] strojenieZadane;
     private int liczbaStrojeniaZadanego;
 
-    @Override
-    public double policzSterowanie(double aktualna) {
-        //Wyliczanie błędu
-        E.set(2, E.get(1));
-        E.set(1, E.get(0));
-        E.set(0, cel[0] - aktualna);
-
-        //
-        double du = r0 * E.get(0) + r1 * E.get(1) + r2 * E.get(2);
-        if (du > duMax)
-            du = duMax;
-        else if (du < -duMax)
-            du = -duMax;
-        return du;
-    }
-
-    @Override
-    public double policzSterowanie(double aktualna, double[] UZ) {
-        return policzSterowanie(aktualna);
-    }
-
-        @Override
-    public double[] policzSterowanie(double[] aktualna) {
-        return new double[0];
-    }
-
-    @Override
-    public double[] policzSterowanie(double[] aktualna, double[] UZ) {
-        return new double[0];
-    }
-
-
     public PID(double P, double I, double D, double Ts, double[] cel, double duMax,
                double uMax, Double[] strojenieZadane) {
 
         this(P, I, D, Ts, cel, duMax, uMax);
-        if (strojenieZadane[0] != null)
+        if (strojenieZadane[0] != null) {
             this.K = strojenieZadane[0];
-        if (strojenieZadane[1] != null)
+        }
+        if (strojenieZadane[1] != null) {
             this.Ti = strojenieZadane[1];
-        if (strojenieZadane[2] != null)
+        }
+        if (strojenieZadane[2] != null) {
             this.Td = strojenieZadane[2];
+        }
         policzWartosci();
         resetujRegulator();
         this.strojenieZadane = strojenieZadane;
         int liczbaTemp = 0;
-        for (Double wartosc : strojenieZadane)
-            if (wartosc != null)
+        for (Double wartosc : strojenieZadane) {
+            if (wartosc != null) {
                 liczbaTemp += 1;
+            }
+        }
         this.liczbaStrojeniaZadanego = liczbaTemp;
 
     }
-
 
     public PID(double P, double I, double D, double Ts, double[] cel, double duMax, double uMax) {
         this.K = P;
@@ -85,6 +57,38 @@ public class PID extends Regulator {
         this.uMax = uMax;
         policzWartosci();
         resetujRegulator();
+    }
+
+    @Override
+    public double policzSterowanie(double aktualna) {
+        //Wyliczanie błędu
+        E.set(2, E.get(1));
+        E.set(1, E.get(0));
+        E.set(0, cel[0] - aktualna);
+
+        //
+        double du = r0 * E.get(0) + r1 * E.get(1) + r2 * E.get(2);
+        if (du > duMax) {
+            du = duMax;
+        } else if (du < -duMax) {
+            du = -duMax;
+        }
+        return du;
+    }
+
+    @Override
+    public double policzSterowanie(double aktualna, double[] UZ) {
+        return policzSterowanie(aktualna);
+    }
+
+    @Override
+    public double[] policzSterowanie(double[] aktualna) {
+        return new double[0];
+    }
+
+    @Override
+    public double[] policzSterowanie(double[] aktualna, double[] UZ) {
+        return new double[0];
     }
 
     @Override

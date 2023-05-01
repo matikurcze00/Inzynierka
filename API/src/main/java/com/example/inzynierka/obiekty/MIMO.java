@@ -18,11 +18,17 @@ public abstract class MIMO {
     private double[] uMax;
 
     public abstract double[] obliczKrok(double[] du);
+
     public abstract double[] obliczKrok(double[] du, double[] dUz);
+
     public abstract double obliczKrok(double du, int IN, int OUT);
+
     public abstract double obliczKrokZaklocenia(double du, int IN, int OUT);
+
     public abstract double[] getAktualne();
+
     public abstract double obliczPraceObiektu(Regulator regulator, double[] cel);
+
     public abstract void resetObiektu();
 
 }
