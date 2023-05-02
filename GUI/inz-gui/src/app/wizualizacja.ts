@@ -365,7 +365,7 @@ export class WizualizacjaComponent {
       ?.setValue(Array.from({ length: liczbaZaklocenTemp }, () => 1.0));
     this.strojenie
       .get('zakloceniaDPA.tp')
-      ?.setValue(Array.from({ length: liczbaZaklocenTemp }, () => 1.0));
+      ?.setValue(Array.from({ length: liczbaZaklocenTemp }, () => this.strojenie.controls.parObiektDPA.controls.tp.value));
     this.strojenie
       .get('zakloceniaDPA.delay')
       ?.setValue(Array.from({ length: liczbaZaklocenTemp }, () => 1.0));
