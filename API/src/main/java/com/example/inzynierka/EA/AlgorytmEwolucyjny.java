@@ -19,6 +19,8 @@ public class AlgorytmEwolucyjny {
     private List<Osobnik> populacja;
     private int wspolczynnikZmiany = 0;
 
+    private static int sigma = 15;
+
     public AlgorytmEwolucyjny(int rozmiarPopulacji, int liczbaIteracji, int mu, double prawdopodobienstwoMutacji, double czestotliwoscKrzyzowania) {
         this.rozmiarPopulacji = rozmiarPopulacji;
         this.liczbaIteracji = liczbaIteracji;
@@ -31,7 +33,7 @@ public class AlgorytmEwolucyjny {
     public double[] dobierzWartosci(int liczbaArgumentow, Regulator regulator, SISO siso) {
         populacja = new ArrayList<>();
         Random r = new Random();
-        double[] cel = new double[] {siso.getYMax() / 2};
+        double[] cel = new double[] {siso.getYMax() / 5};
         regulator.setCel(cel);
         Inicjalizacja(liczbaArgumentow, regulator, siso, r, cel);
         Collections.sort(populacja);
@@ -57,8 +59,8 @@ public class AlgorytmEwolucyjny {
 
     private void ewolucje(int liczbaArgumentow, Regulator regulator, SISO siso, double[] cel, int iteracja) {
         Random r = new Random();
-        List<Osobnik> reprodukcja = new ArrayList<Osobnik>();
-        reprodukcja = populacja.stream().collect(Collectors.toList());
+        List<Osobnik> reprodukcja;
+        reprodukcja = populacja.stream().toList();
         krzyzowania(liczbaArgumentow, regulator, siso, cel, r, reprodukcja);
         mutacje(liczbaArgumentow, regulator, siso, cel, r, reprodukcja);
         Collections.sort(reprodukcja);
@@ -66,7 +68,7 @@ public class AlgorytmEwolucyjny {
             wspolczynnikZmiany += 1;
         }
 
-        if ((iteracja + 1) % 15 == 0) {
+        if ((iteracja + 1) % sigma == 0) {
             zmianaWspolczynnikaMutacji();
         }
         populacja = reprodukcja.stream().limit(rozmiarPopulacji).collect(Collectors.toList());
@@ -106,7 +108,7 @@ public class AlgorytmEwolucyjny {
     }
 
     public double[] dobierzWartosci(int liczbaArgumentow, Regulator regulator, MIMO obiekt) {
-        populacja = new ArrayList<Osobnik>();
+        populacja = new ArrayList<>();
         Random r = new Random();
         double[] cel = Arrays.copyOf(obiekt.getYMax(), obiekt.getYMax().length);
         for (int i = 0; i < cel.length; i++) {
@@ -134,8 +136,8 @@ public class AlgorytmEwolucyjny {
 
     private void ewolucje(int liczbaArgumentow, Regulator regulator, MIMO obiekt, double[] cel, int iteracja) {
         Random r = new Random();
-        List<Osobnik> reprodukcja = new ArrayList<>();
-        reprodukcja = populacja.stream().collect(Collectors.toList());
+        List<Osobnik> reprodukcja;
+        reprodukcja = populacja.stream().toList();
         krzyzowania(liczbaArgumentow, regulator, obiekt, cel, r, reprodukcja);
         mutacje(liczbaArgumentow, regulator, obiekt, cel, r, reprodukcja);
         Collections.sort(reprodukcja);
@@ -143,7 +145,7 @@ public class AlgorytmEwolucyjny {
             wspolczynnikZmiany += 1;
         }
 
-        if ((iteracja + 1) % 15 == 0) {
+        if ((iteracja + 1) % sigma == 0) {
             zmianaWspolczynnikaMutacji();
         }
         populacja = reprodukcja.stream().limit(rozmiarPopulacji).collect(Collectors.toList());
@@ -181,10 +183,11 @@ public class AlgorytmEwolucyjny {
     }
 
     private void zmianaWspolczynnikaMutacji() {
-        if (wspolczynnikZmiany > 3) {
-            prawdopodobienstwoMutacji = prawdopodobienstwoMutacji * 0.8;
-        } else if (wspolczynnikZmiany < 3) {
-            prawdopodobienstwoMutacji = prawdopodobienstwoMutacji / 0.8;
+        if (wspolczynnikZmiany > sigma / 5) {
+            prawdopodobienstwoMutacji = prawdopodobienstwoMutacji * 0.9;
+        } else if (wspolczynnikZmiany < sigma / 5) {
+            prawdopodobienstwoMutacji = prawdopodobienstwoMutacji / 0.9;
         }
+        wspolczynnikZmiany = 0;
     }
 }

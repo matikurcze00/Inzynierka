@@ -91,7 +91,6 @@ public class StrojenieService {
 
     private static MIMO ustawObiektSymulacji(MultipartFile[] file, ParRegulator parRegulator, ParWizualizacja parWizualizacja, ObjectMapper objectMapper,
                                              MIMO obiekt) {
-        JsonNode root;
         if (file.length > 1) {
             if (parRegulator.getTyp().equals("pid") || parRegulator.getTyp().equals("dmc")) {
                 obiekt = ustawObiektSymulacjiDPA(file, parWizualizacja, objectMapper);
@@ -161,7 +160,8 @@ public class StrojenieService {
         if (parStrojenie.getZakloceniaRownania().getB1() != null && parStrojenie.getZakloceniaRownania().getB1().length != 0) {
             zakloceniaRownania = parStrojenie.getZakloceniaRownania();
         }
-        Integer[] PIE = new Integer[3];
+
+        Integer[] wartosciEA = new Integer[3];
         OdpowiedzStrojenie odpowiedzStrojenie = new OdpowiedzStrojenie();
 
         SISO obiekt = dobierzObiektSISO(parObiektDPA, parObiektRownania, parRegulator, parWizualizacja, zakloceniaDPA, zakloceniaRownania);
@@ -169,12 +169,20 @@ public class StrojenieService {
             return null;
         }
         Regulator regulator;
-        regulator = dobierzRegulatorSISO(parObiektDPA, parRegulator, parWizualizacja, obiekt, PIE);
+        regulator = dobierzRegulatorSISO(parObiektDPA, parRegulator, parWizualizacja, obiekt, wartosciEA);
         if (regulator == null) {
             return null;
         }
-        AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(PIE[0], PIE[1], PIE[2], 0.3, 0.2);
-        dobierzStrojenieSISO(parWizualizacja, obiekt, regulator, GA, odpowiedzStrojenie);
+        if(regulator.liczbaZmiennych()!=0) {
+            AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(wartosciEA[0], wartosciEA[1], wartosciEA[2], 0.3, 0.2);
+            dobierzStrojenieSISO(parWizualizacja, obiekt, regulator, GA, odpowiedzStrojenie);
+        } else {
+            double[] primitiveArray = new double[parWizualizacja.getStrojenie().length];
+            for(int i = 0; i < parWizualizacja.getStrojenie().length; i++) {
+                primitiveArray[i] = parWizualizacja.getStrojenie()[i];
+            }
+            odpowiedzStrojenie.setWspolczynniki(primitiveArray);
+        }
         if (parStrojenie.getParObiektSymulacjiDPA() != null) {
             if (zakloceniaDPA != null) {
                 obiekt = new SISODPA(parStrojenie.getParObiektSymulacjiDPA(), parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad(),
@@ -279,24 +287,26 @@ public class StrojenieService {
         }
     }
 
-    private Regulator dobierzRegulatorSISO(ParObiektDPA parObiektDPA, ParRegulator parRegulator, ParWizualizacja parWizualizacja, SISO obiekt, Integer[] PIE) {
+    private Regulator dobierzRegulatorSISO(ParObiektDPA parObiektDPA, ParRegulator parRegulator, ParWizualizacja parWizualizacja, SISO obiekt, Integer[] wartosciEA) {
         Regulator regulator;
         if (parRegulator.getTyp().equals("pid")) {
             regulator = new PID(0.0, 0.0, 0.0, parObiektDPA.getTp(), new double[] {obiekt.getYMax()}, parRegulator.getDuMax(), parRegulator.getUMax(),
                 parWizualizacja.getStrojenie());
-            PIE[0] = 100;
-            PIE[1] = 40;
-            PIE[2] = 500;
+            wartosciEA[0] = 200;
+            wartosciEA[1] = 200;
+            wartosciEA[2] = 500;
         } else if (parRegulator.getTyp().equals("dmc")) {
             regulator = new DMCAnalityczny(4, 0.1, (SISODPA) obiekt, obiekt.getYMax() / 2, parRegulator.getDuMax(), 11, parWizualizacja.getStrojenie());
-            PIE[0] = 50;
-            PIE[1] = 20;
-            PIE[2] = 250;
-        } else {
+            wartosciEA[0] = 50;
+            wartosciEA[1] = 20;
+            wartosciEA[2] = 250;
+        } else if (parRegulator.getTyp().equals("gpc")){
             regulator = new GPC((SISORownianiaRoznicowe) obiekt, 0.1, obiekt.getYMax() / 2, parRegulator.getDuMax(), parWizualizacja.getStrojenie());
-            PIE[0] = 50;
-            PIE[1] = 20;
-            PIE[2] = 250;
+            wartosciEA[0] = 50;
+            wartosciEA[1] = 20;
+            wartosciEA[2] = 250;
+        } else {
+            return null;
         }
         return regulator;
     }
@@ -309,11 +319,11 @@ public class StrojenieService {
         regulator.resetujRegulator();
         Y[0] = obiekt.getYpp();
         U[0] = parWizualizacja.getUPP()[0];
-        for (int i = 0; i < parWizualizacja.getSkok()[0]; i++) {
+        for (int i = 1; i < parWizualizacja.getSkok()[0] ; i++) {
             U[i] = parWizualizacja.getUPP()[0];
             Y[i] = obiekt.obliczKrok(parWizualizacja.getUPP()[0]);
         }
-        for (int i = parWizualizacja.getSkok()[0]; i < parWizualizacja.getDlugosc(); i++) {
+        for (int i = Math.max(1, parWizualizacja.getSkok()[0]); i < parWizualizacja.getDlugosc(); i++) {
             {
                 Y[i] = obiekt.obliczKrok(regulator.policzSterowanie(obiekt.getAktualna()));
                 U[i] = obiekt.getU().get(0);
@@ -368,18 +378,25 @@ public class StrojenieService {
         ObjectMapper objectMapper = new ObjectMapper();
         MIMO obiekt;
 
-        Integer[] PIE = new Integer[3];
+        Integer[] wartosciEA = new Integer[3];
         OdpowiedzStrojenieMIMO odpowiedz = new OdpowiedzStrojenieMIMO();
         obiekt = ustawObiekt(file, parRegulator, parWizualizacja, objectMapper);
         if (obiekt == null) {
             return null;
         }
-        Regulator regulator = dobierzRegulatorMIMO(parRegulator, parWizualizacja, objectMapper, obiekt, PIE, file);
+        Regulator regulator = dobierzRegulatorMIMO(parRegulator, parWizualizacja, objectMapper, obiekt, wartosciEA, file);
         if (regulator == null) {
             return null;
         }
-        AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(PIE[0], PIE[1], PIE[2], 0.5, 0.5);
-        dobierzStrojenieMIMO(parWizualizacja, obiekt, regulator, GA, odpowiedz);
+        if(regulator.liczbaZmiennych() != 0) {
+            AlgorytmEwolucyjny GA = new AlgorytmEwolucyjny(wartosciEA[0], wartosciEA[1], wartosciEA[2], 0.5, 0.5);
+            dobierzStrojenieMIMO(parWizualizacja, obiekt, regulator, GA, odpowiedz);
+        } else {
+            double[] tempWartosci = new double[parWizualizacja.getStrojenie().length];
+            for(int i = 0; i < parWizualizacja.getStrojenie().length; i++)
+                tempWartosci[i] = (double) parWizualizacja.getStrojenie()[i];
+            odpowiedz.setWspolczynniki(tempWartosci);
+        }
         obiekt = ustawObiektSymulacji(file, parRegulator, parWizualizacja, objectMapper, obiekt);
         if (obiekt == null) {
             return null;
@@ -420,7 +437,7 @@ public class StrojenieService {
     }
 
     private Regulator dobierzRegulatorMIMO(ParRegulator parRegulator, ParWizualizacja parWizualizacja,
-                                           ObjectMapper objectMapper, MIMO obiekt, Integer[] PIE, MultipartFile[] file) {
+                                           ObjectMapper objectMapper, MIMO obiekt, Integer[] wartosciEA, MultipartFile[] file) {
         Regulator regulator;
         if (parRegulator.getTyp().equals("pid")) {
             Integer[] PV;
@@ -432,27 +449,27 @@ public class StrojenieService {
                 return null;
             }
             regulator = new ZbiorPID((MIMODPA) obiekt, PV, parRegulator.getDuMax(), parWizualizacja.getStrojenie());
-            PIE[0] = 100;
-            PIE[1] = 50;
-            PIE[2] = 500;
+            wartosciEA[0] = 100;
+            wartosciEA[1] = 50;
+            wartosciEA[2] = 500;
         } else if (parRegulator.getTyp().equals("dmc")) {
             double[] tempLambda = new double[obiekt.getLiczbaIN()];
             for (int i = 0; i < obiekt.getLiczbaIN(); i++) {
                 tempLambda[i] = 0.5;
             }
             regulator = new DMCAnalityczny(4, tempLambda, (MIMODPA) obiekt, obiekt.getYMax(), parRegulator.getDuMax(), 11, parWizualizacja.getStrojenie());
-            PIE[0] = 30;
-            PIE[1] = 30;
-            PIE[2] = 90;
+            wartosciEA[0] = 30;
+            wartosciEA[1] = 30;
+            wartosciEA[2] = 90;
         } else if (parRegulator.getTyp().equals("gpc")) {
             double[] tempLambda = new double[obiekt.getLiczbaIN()];
             for (int i = 0; i < obiekt.getLiczbaIN(); i++) {
                 tempLambda[i] = 0.5;
             }
             regulator = new GPC((MIMORownianiaRoznicowe) obiekt, 5, obiekt.getYMax(), parRegulator.getDuMax(), parWizualizacja.getStrojenie(), tempLambda);
-            PIE[0] = 30;
-            PIE[1] = 30;
-            PIE[2] = 90;
+            wartosciEA[0] = 30;
+            wartosciEA[1] = 30;
+            wartosciEA[2] = 90;
         } else {
             throw new RuntimeException();
         }

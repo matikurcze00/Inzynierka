@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
   EventEmitter,
@@ -29,6 +29,7 @@ export class ObiektWidokComponent implements OnInit {
   czyError = false;
   @Input() typRegulatora: any;
   @Output() updateEvent = new EventEmitter<FormArray>();
+  errorMessage = '';
   obiektForm = new FormGroup({
     obiekt: new FormArray([
       new FormGroup({
@@ -125,7 +126,15 @@ export class ObiektWidokComponent implements OnInit {
               .get('obiekt')
               ?.get([1])
               ?.patchValue({ plik: null, liczbaWejsc: 1, liczbaWyjsc: 1 });
-            this.file = null;
+              const httpError = error as HttpErrorResponse
+              if(httpError.status == 400) {
+                this.errorMessage = 'Plik który został wysłany nie może zostać przekonwertowany na obiekt'
+              } else {
+                this.errorMessage = 'Błąd serwera'
+              }
+              console.log("aaaaaaa")
+              console.log(this.errorMessage)
+              this.file = null;
           },
         });
     } else {
@@ -147,7 +156,15 @@ export class ObiektWidokComponent implements OnInit {
               .get('obiekt')
               ?.get([1])
               ?.patchValue({ plik: null, liczbaWejsc: 1, liczbaWyjsc: 1 });
-            this.file = null;
+              const httpError = error as HttpErrorResponse
+              if(httpError.status == 400) {
+                this.errorMessage = 'Plik który został wysłany nie może zostać przekonwertowany na obiekt'
+              } else {
+                this.errorMessage = 'Błąd serwera - sprawdź czy jest włączony'
+              }
+              console.log("aaaaaaa")
+              console.log(this.errorMessage)
+              this.file = null;
           },
         });
     }

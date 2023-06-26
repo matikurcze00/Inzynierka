@@ -49,7 +49,7 @@
           this.obiektForm.get('obiekt.1.liczbaWyjsc')?.value != 1
         "
       >
-        <h2>
+        <h5>
           <ul class="mt-5" style="list-style: none">
             <li>
               <b>Liczba Wejsc:</b>
@@ -60,10 +60,10 @@
               {{ this.obiektForm.get("obiekt.1.liczbaWyjsc")?.value }}
             </li>
           </ul>
-        </h2>
+        </h5>
       </div>
-      <div *ngIf="this.czyError" class="alert alert-danger" role="alert">
-        Obiekt jest zły
+      <div *ngIf="this.czyError" class="alert alert-danger mt-3" role="alert">
+        {{errorMessage}}
       </div>
     </div>
   </div>

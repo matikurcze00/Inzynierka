@@ -5,6 +5,7 @@ import com.example.inzynierka.obiekty.MIMODPA;
 import com.example.inzynierka.obiekty.SISODPA;
 import lombok.Data;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,7 +19,6 @@ public class DMCAnalityczny extends RegulatorMPC {
     protected List<List<Double>> Sz;
     protected Matrix dU;
     protected Matrix dUz;
-    protected Matrix M;
     protected Matrix Mp;
     protected Double[] strojenieZadane;
     protected int liczbaStrojeniaZadanego;
@@ -32,7 +32,9 @@ public class DMCAnalityczny extends RegulatorMPC {
         if (strojenieZadane[0] != null) {
             liczbaStrojeniaZadanego = 1;
             this.strojenieZadane = strojenieZadane;
-            this.getLambda().set(0, strojenieZadane[0]);
+            List temp = new ArrayList();
+            temp.add(strojenieZadane[0]);
+            this.setLambda(temp);
             this.policzWartosci(SISODPA);
         }
     }
@@ -242,24 +244,24 @@ public class DMCAnalityczny extends RegulatorMPC {
     protected void policzS(SISODPA SISODPA) {
         double U = 1;
         int i = 2;
-        List<Double> Stemp = new ArrayList<Double>();
+        List<Double> Stemp = new ArrayList<>();
         double Utemp = 0;
         SISODPA.resetObiektu();
         Stemp.add((SISODPA.obliczKrok(U) - SISODPA.getYpp()) / U);
         Stemp.add((SISODPA.obliczKrok(Utemp) - SISODPA.getYpp()) / U);
-        while (!(Math.abs(Stemp.get(i - 1) - Stemp.get(i - 2)) < 0.002) || Stemp.get(i - 2) == 0.0) {
+        while (!(Math.abs(Stemp.get(i - 1) - Stemp.get(i - 2)) >= 0.0002) || Stemp.get(i - 2) == 0.0) {
             Stemp.add((SISODPA.obliczKrok(Utemp) - SISODPA.getYpp()) / U);
             i++;
         }
         this.S.add(Stemp);
         this.D = S.get(0).size();
-        this.N = D;
+        this.N = this.D;
     }
 
     protected void policzSz(SISODPA obiekt) {
         this.Sz = new ArrayList<>();
         for (int i = 0; i < obiekt.getZakloceniaMierzalne().size(); i++) {
-            List<Double> Stemp = new ArrayList<Double>();
+            List<Double> Stemp = new ArrayList<>();
             double Utemp = 0;
             obiekt.resetObiektu();
             Stemp.add(obiekt.obliczKrokZaklocenia(1, i));
@@ -297,7 +299,7 @@ public class DMCAnalityczny extends RegulatorMPC {
                 List<Double> Stemp = new ArrayList<>();
                 Stemp.add((obiekt.obliczKrok(U, j, i) - obiekt.getYpp(i)) / U);
                 Stemp.add((obiekt.obliczKrok(Utemp, j, i) - obiekt.getYpp(i)) / U);
-                while (!(Math.abs(Stemp.get(k - 1) - Stemp.get(k - 2)) < 0.005) || Stemp.get(k - 2) == 0.0) {
+                while (!(Math.abs(Stemp.get(k - 1) - Stemp.get(k - 2)) >= 0.005) || Stemp.get(k - 2) == 0.0) {
                     Stemp.add((obiekt.obliczKrok(Utemp, j, i) - obiekt.getYpp(i)) / U);
                     k++;
                 }
@@ -315,35 +317,35 @@ public class DMCAnalityczny extends RegulatorMPC {
                 S.get(i).add(S.get(i).get(S.get(i).size() - 1));
             }
         }
-        this.N = D;
+        this.N = this.D;
     }
 
     protected void policzM() {
-        Matrix M = new Matrix(N, Nu);
+        Matrix MTemp = new Matrix(N, Nu);
         for (int i = 0; i < Nu; i++) {
             for (int j = 0; j < N; j++) {
                 if (j >= i) {
-                    M.set(j, i, S.get(0).get(j - i));
+                    MTemp.set(j, i, S.get(0).get(j - i));
                 }
             }
         }
-        this.M = M;
+        this.M = MTemp;
     }
 
     protected void policzM(int IN, int OUT) {
-        Matrix M = new Matrix(N * OUT, Nu * IN);
+        Matrix MTemp = new Matrix(N * OUT, Nu * IN);
         for (int i = 0; i < Nu; i++) {
             for (int j = 0; j < N; j++) {
                 if (j >= i) {
                     for (int k = 0; k < OUT; k++) {
                         for (int m = 0; m < IN; m++) {
-                            M.set(j * OUT + k, i * IN + m, S.get(k * IN + m).get(j - i));
+                            MTemp.set(j * OUT + k, i * IN + m, S.get(k * IN + m).get(j - i));
                         }
                     }
                 }
             }
         }
-        this.M = M;
+        this.M = MTemp;
     }
 
     protected void policzMp() {
@@ -377,16 +379,16 @@ public class DMCAnalityczny extends RegulatorMPC {
     }
 
     protected void policzMz(int IN, int OUT) {
-        Matrix Mz = new Matrix(N * OUT, (D) * IN);
+        Matrix MzTemp = new Matrix(N * OUT, (D) * IN);
         for (int i = 0; i < D; i++) { //wszerz
             for (int j = -1; j < N - 1; j++) { //wzdłuż
                 if (i > 1 + Nu) {
                     for (int k = 0; k < OUT; k++) {
                         for (int m = 0; m < IN; m++) {
                             if (j < Nu) {
-                                Mz.set((j + 1) * OUT + k, i * IN + m, 0.0);
+                                MzTemp.set((j + 1) * OUT + k, i * IN + m, 0.0);
                             } else {
-                                Mz.set((j + 1) * OUT + k, i * IN + m, Mz.get((j + 1) * OUT + k, (i - 1) * IN + m) * 0.6);
+                                MzTemp.set((j + 1) * OUT + k, i * IN + m, MzTemp.get((j + 1) * OUT + k, (i - 1) * IN + m) * 0.6);
                             }
                         }
                     }
@@ -394,16 +396,16 @@ public class DMCAnalityczny extends RegulatorMPC {
                     for (int k = 0; k < OUT; k++) {
                         for (int m = 0; m < IN; m++) {
                             if (j - i >= D) {
-                                Mz.set((j + 1) * OUT + k, i * IN + m, Sz.get(k * IN + m).get(D));
+                                MzTemp.set((j + 1) * OUT + k, i * IN + m, Sz.get(k * IN + m).get(D));
                             } else {
-                                Mz.set((j + 1) * OUT + k, i * IN + m, Sz.get(k * IN + m).get(j - i + 1));
+                                MzTemp.set((j + 1) * OUT + k, i * IN + m, Sz.get(k * IN + m).get(j - i + 1));
                             }
                         }
                     }
                 }
             }
         }
-        this.Mz = Mz;
+        this.Mz = MzTemp;
     }
 
     protected void policzMpz(int IN, int OUT) {

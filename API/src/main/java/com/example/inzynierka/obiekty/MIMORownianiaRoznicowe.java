@@ -116,13 +116,13 @@ public class MIMORownianiaRoznicowe extends MIMO {
     public double obliczPraceObiektu(Regulator regulator, double[] cel) {
 
         resetObiektu();
-        double blad = 0.0;
+        double wartoscBlad = 0.0;
 
-        blad = obliczPraceBezZaklocen(regulator, cel, blad);
+        wartoscBlad = obliczPraceBezZaklocen(regulator, cel, wartoscBlad);
 
-        blad = blad / this.dlugosc * liczbaOUT * liczbaOUT;
+        wartoscBlad = wartoscBlad / this.dlugosc * liczbaOUT * liczbaOUT;
         resetObiektu();
-        return blad;
+        return wartoscBlad;
     }
 
     private double obliczPraceBezZaklocen(Regulator regulator, double[] cel, double blad) {
@@ -199,8 +199,8 @@ public class MIMORownianiaRoznicowe extends MIMO {
         }
 
         for (int j = 0; j < A.get(out).size(); j++) {
-            for (int k = 0; k < liczbaIN; k++) {
-                Yakt -= A.get(out).get(j)[k] * Y.get(out).get(j);
+            for (int k = 0; k < liczbaOUT; k++) {
+                Yakt -= A.get(out).get(j)[k] * Y.get(k).get(j);
             }
         }
         return Yakt;
@@ -284,10 +284,10 @@ public class MIMORownianiaRoznicowe extends MIMO {
         for (int i = 0; i < liczbaOUT; i++) {
             this.YMax[i] = 0.0;
         }
-        double[] uMax = new double[liczbaIN];
-        System.arraycopy(this.uMax, 0, uMax, 0, liczbaIN);
+        double[] uMaxTemp = new double[liczbaIN];
+        System.arraycopy(this.uMax, 0, uMaxTemp, 0, liczbaIN);
         for (int i = 0; i < dlugosc * 2; i++) {
-            obliczKrok(uMax);
+            obliczKrok(uMaxTemp);
         }
         Ytemp = getAktualne();
         resetObiektu();
