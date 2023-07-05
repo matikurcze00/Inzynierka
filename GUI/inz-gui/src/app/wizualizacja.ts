@@ -548,6 +548,9 @@ export class WizualizacjaComponent {
         next: (response) => {
           this.czyLaduje = false;
           this.odpowiedz = response;
+          for(let i = 0; i <  this.odpowiedz.wspolczynniki.length; i++) {
+            this.odpowiedz.wspolczynniki[i] = parseFloat(this.odpowiedz.wspolczynniki[i].toFixed(4))
+          }
           this.liczbaRegulatorow = [0];
           console.log(this.liczbaRegulatorow);
           if (this.odpowiedz != null)
@@ -579,6 +582,9 @@ export class WizualizacjaComponent {
               this.strojenie.controls.parRegulator.value['typ'];
           console.log('odpowiedz');
           console.log(this.odpowiedzMIMO);
+          for(let i = 0; i <  this.odpowiedzMIMO.wspolczynniki.length; i++) {
+            this.odpowiedzMIMO.wspolczynniki[i] = parseFloat(this.odpowiedzMIMO.wspolczynniki[i].toFixed(4))
+          }
           this.liczbaRegulatorow = Array.from(
             { length: this.odpowiedzMIMO.cel.length },
             (_, i) => i
