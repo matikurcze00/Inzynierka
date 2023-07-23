@@ -6,7 +6,6 @@ import com.example.inzynierka.obiekty.SISORownianiaRoznicowe;
 import lombok.Data;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -40,7 +39,7 @@ public class GPC extends RegulatorMPC {
     }
 
     public GPC(SISORownianiaRoznicowe sisoRownianiaRoznicowe, double lambda, double cel, double duMax) {
-        this.Lambda = List.of(lambda);
+        this.Lambda = new ArrayList<>(List.of(lambda));
         this.cel = new double[] {cel};
         this.duMax = duMax;
         policzWartosci(sisoRownianiaRoznicowe);
@@ -146,7 +145,7 @@ public class GPC extends RegulatorMPC {
         ustawABSISO(sisoRownianiaRoznicowe);
         this.IN = 1;
         this.OUT = 1;
-        this.Nu = 4;
+        this.Nu = 5;
         ustawUYSISO();
         this.uMax = new double[] {sisoRownianiaRoznicowe.getUMax()};
         this.uMin = new double[] {sisoRownianiaRoznicowe.getUMin()};
@@ -240,7 +239,7 @@ public class GPC extends RegulatorMPC {
                 int k = 2;
                 obliczSk(i, j, Stemp, 0);
                 obliczSk(i, j, Stemp, 1);
-                while (!(Math.abs(Stemp.get(k - 1) - Stemp.get(k - 2)) >= 0.00005) || Stemp.get(k - 2) == 0.0) {
+                while (!(Math.abs(Stemp.get(k - 1) - Stemp.get(k - 2)) <= 0.05) || Stemp.get(k - 2) == 0.0) {
                     obliczSk(i, j, Stemp, k);
                     k++;
                 }
@@ -327,14 +326,13 @@ public class GPC extends RegulatorMPC {
         for (int j = U.get(0).size() - 1; j > 0; j--) {
             U.get(0).set(j, U.get(0).get(j - 1));
         }
-        if(U.get(0).get(0) + du > uMax[0]) {
+        if (U.get(0).get(0) + du > uMax[0]) {
             U.get(0).set(0, uMax[0]);
-        } else if(U.get(0).get(0) + du < uMin[0]) {
+        } else if (U.get(0).get(0) + du < uMin[0]) {
             U.get(0).set(0, uMin[0]);
         } else {
             U.get(0).set(0, U.get(0).get(0) + du);
         }
-        U.get(0).set(0, U.get(0).get(0) + du);
     }
 
     public void zapiszY(double[] aktualna) {
@@ -360,9 +358,9 @@ public class GPC extends RegulatorMPC {
             for (int j = U.get(i).size() - 1; j > 0; j--) {
                 U.get(i).set(j, U.get(i).get(j - 1));
             }
-            if(U.get(i).get(0) + du[i] > uMax[i]) {
+            if (U.get(i).get(0) + du[i] > uMax[i]) {
                 U.get(i).set(0, uMax[i]);
-            } else if(U.get(i).get(0) + du[i] < uMin[i]) {
+            } else if (U.get(i).get(0) + du[i] < uMin[i]) {
                 U.get(i).set(0, uMin[i]);
             } else {
                 U.get(i).set(0, U.get(i).get(0) + du[i]);

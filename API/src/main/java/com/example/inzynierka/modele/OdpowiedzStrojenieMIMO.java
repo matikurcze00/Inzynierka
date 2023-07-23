@@ -8,4 +8,5 @@ public class OdpowiedzStrojenieMIMO {
     private double[][] wykres;
     private double[][] cel;
     private double[][] sterowanie;
+    private double[][] sterowanieZaklocenia;
 }

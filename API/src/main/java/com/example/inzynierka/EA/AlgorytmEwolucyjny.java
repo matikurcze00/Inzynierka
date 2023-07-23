@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 @Data
 public class AlgorytmEwolucyjny {
+    private static int sigma = 15;
     private int rozmiarPopulacji;
     private int liczbaIteracji;
     private int mu;
@@ -18,8 +19,6 @@ public class AlgorytmEwolucyjny {
     private double prawdopodobienstwoMutacji;
     private List<Osobnik> populacja;
     private int wspolczynnikZmiany = 0;
-
-    private static int sigma = 15;
 
     public AlgorytmEwolucyjny(int rozmiarPopulacji, int liczbaIteracji, int mu, double prawdopodobienstwoMutacji, double czestotliwoscKrzyzowania) {
         this.rozmiarPopulacji = rozmiarPopulacji;
@@ -59,8 +58,7 @@ public class AlgorytmEwolucyjny {
 
     private void ewolucje(int liczbaArgumentow, Regulator regulator, SISO siso, double[] cel, int iteracja) {
         Random r = new Random();
-        List<Osobnik> reprodukcja;
-        reprodukcja = populacja.stream().toList();
+        List<Osobnik> reprodukcja = new ArrayList<>(populacja);
         krzyzowania(liczbaArgumentow, regulator, siso, cel, r, reprodukcja);
         mutacje(liczbaArgumentow, regulator, siso, cel, r, reprodukcja);
         Collections.sort(reprodukcja);
@@ -136,8 +134,7 @@ public class AlgorytmEwolucyjny {
 
     private void ewolucje(int liczbaArgumentow, Regulator regulator, MIMO obiekt, double[] cel, int iteracja) {
         Random r = new Random();
-        List<Osobnik> reprodukcja;
-        reprodukcja = populacja.stream().toList();
+        List<Osobnik> reprodukcja = new ArrayList<>(populacja);
         krzyzowania(liczbaArgumentow, regulator, obiekt, cel, r, reprodukcja);
         mutacje(liczbaArgumentow, regulator, obiekt, cel, r, reprodukcja);
         Collections.sort(reprodukcja);
