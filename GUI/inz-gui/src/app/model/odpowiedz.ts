@@ -4,4 +4,5 @@ export interface Odpowiedz {
   cel: number[];
   typRegulatora: string;
   sterowanie: number[];
+  sterowanieZaklocenia: number[][];
 }

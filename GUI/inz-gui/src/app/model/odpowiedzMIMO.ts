@@ -4,4 +4,5 @@ export interface OdpowiedzMIMO {
   cel: number[][];
   typRegulatora: string;
   sterowanie: number[][];
+  sterowanieZaklocenia: number[][];
 }
