@@ -11,17 +11,13 @@ import java.util.List;
 
 @Data
 public class GPC extends RegulatorMPC {
-    protected List<List<Double>> S;
     protected List<List<Double[]>> A;
     protected List<List<Double[]>> B; //IN->OUT
     protected List<List<Double>> U;
     protected List<List<Double[]>> Bz;
     protected List<List<Double>> Uz;
     protected List<List<Double>> Y;
-    protected Double[] strojenieZadane;
-    protected int liczbaStrojeniaZadanego = 0;
     protected int liczbaZaklocen = 0;
-    private Matrix K;
     private double[] uMin;
     private double[] uMax;
     private Integer IN;
@@ -71,7 +67,7 @@ public class GPC extends RegulatorMPC {
         zapiszY(aktualna);
         Matrix yZad = ustawMatrixYZad();
         Matrix yAktualne = ustawMatrixYSISO();
-        Matrix Utemp = K.times(yZad.transpose().minus(yAktualne.transpose()));
+        Matrix Utemp = this.K.times(yZad.transpose().minus(yAktualne.transpose()));
         double du = poprawaUTemp(Utemp.get(0, 0));
         zapiszU(du);
         return du;

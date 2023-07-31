@@ -89,11 +89,11 @@
                 <input
                   class="form-control"
                   type="number"
-                  placeholder="1.0"
+                  placeholder="0.0"
                   formControlName="r1"
                 />
                 <label class="input-group-text">{{ zmienne[2].nazwa }}</label>
-                <select class="form-control" formControlName="q1">
+                <select class="form-control" [(ngModel)]="optionsQ[2]" formControlName="q1">
                   <option *ngFor="let option of optionsQ" [value]="option">
                     {{ option }}
                   </option>
@@ -102,11 +102,11 @@
                 <input
                   class="form-control"
                   type="number"
-                  placeholder="1.0"
+                  placeholder="0.0"
                   formControlName="r2"
                 />
                 <label class="input-group-text">{{ zmienne[4].nazwa }}</label>
-                <select class="form-control" formControlName="q2">
+                <select class="form-control" [(ngModel)]="optionsQ[1]" formControlName="q2">
                   <option *ngFor="let option of optionsQ" [value]="option">
                     {{ option }}
                   </option>
@@ -117,28 +117,28 @@
                 <input
                   class="form-control"
                   type="number"
-                  placeholder="1.0"
+                  placeholder="10.0"
                   formControlName="t1"
                 />
                 <label class="input-group-text">{{ zmienne[6].nazwa }}</label>
                 <input
                   class="form-control"
                   type="number"
-                  placeholder="1.0"
+                  placeholder="2.0"
                   formControlName="t2"
                 />
                 <label class="input-group-text">{{ zmienne[7].nazwa }}</label>
                 <input
                   class="form-control"
                   type="number"
-                  placeholder="1.0"
+                  placeholder="0.0"
                   formControlName="t3"
                 />
                 <label class="input-group-text">{{ zmienne[8].nazwa }}</label>
                 <input
                   class="form-control"
                   type="number"
-                  placeholder="1.0"
+                  placeholder="0.0"
                   formControlName="delay"
                 />
                 <label class="input-group-text">{{ zmienne[9].nazwa }}</label>
@@ -164,35 +164,35 @@
                 <input
                   class="form-control"
                   type="number"
-                  placeholder="1.0"
+                  placeholder="-0.8"
                   formControlName="a1"
                 />
                 <label class="input-group-text">A2</label>
                 <input
                   class="form-control"
                   type="number"
-                  placeholder="1.0"
+                  placeholder="0.0"
                   formControlName="a2"
                 />
                 <label class="input-group-text">A3</label>
                 <input
                   class="form-control"
                   type="number"
-                  placeholder="1.0"
+                  placeholder="0.0"
                   formControlName="a3"
                 />
                 <label class="input-group-text">A4</label>
                 <input
                   class="form-control"
                   type="number"
-                  placeholder="1.0"
+                  placeholder="0.0"
                   formControlName="a4"
                 />
                 <label class="input-group-text">A5</label>
                 <input
                   class="form-control"
                   type="number"
-                  placeholder="1.0"
+                  placeholder="0.0"
                   formControlName="a5"
                 />
               </div>
@@ -208,28 +208,28 @@
                 <input
                   class="form-control"
                   type="number"
-                  placeholder="1.0"
+                  placeholder="0.5"
                   formControlName="b2"
                 />
                 <label class="input-group-text">B3</label>
                 <input
                   class="form-control"
                   type="number"
-                  placeholder="1.0"
+                  placeholder="0.2"
                   formControlName="b3"
                 />
                 <label class="input-group-text">B5</label>
                 <input
                   class="form-control"
                   type="number"
-                  placeholder="1.0"
+                  placeholder="0.0"
                   formControlName="b4"
                 />
                 <label class="input-group-text">B5</label>
                 <input
                   class="form-control"
                   type="number"
-                  placeholder="1.0"
+                  placeholder="0.0"
                   formControlName="b5"
                 />
               </div>

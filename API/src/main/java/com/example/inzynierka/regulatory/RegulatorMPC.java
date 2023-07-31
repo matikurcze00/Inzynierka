@@ -11,7 +11,10 @@ abstract public class RegulatorMPC extends Regulator {
     protected Integer N;
     protected Integer Nu;
     protected Matrix M;
+    List<List<Double>> S;
     protected double duMax;
     protected List<Double> Lambda;
-    private Matrix K;
+    protected Matrix K;
+    protected Double[] strojenieZadane;
+    protected int liczbaStrojeniaZadanego = 0;
 }

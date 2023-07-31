@@ -15,14 +15,10 @@ public class DMCAnalityczny extends RegulatorMPC {
 
     protected Matrix Mpz;
     protected Matrix Mz;
-    protected List<List<Double>> S;
     protected List<List<Double>> Sz;
     protected Matrix dU;
     protected Matrix dUz;
     protected Matrix Mp;
-    protected Double[] strojenieZadane;
-    protected int liczbaStrojeniaZadanego;
-    private Matrix K;
 
     public DMCAnalityczny() {
     }
@@ -249,7 +245,7 @@ public class DMCAnalityczny extends RegulatorMPC {
         SISODPA.resetObiektu();
         Stemp.add((SISODPA.obliczKrok(U) - SISODPA.getYpp()) / U);
         Stemp.add((SISODPA.obliczKrok(Utemp) - SISODPA.getYpp()) / U);
-        while (!(Math.abs(Stemp.get(i - 1) - Stemp.get(i - 2)) >= 0.0002) || Stemp.get(i - 2) == 0.0) {
+        while ((Math.abs(Stemp.get(i - 1) - Stemp.get(i - 2)) >= 0.002) || Stemp.get(i - 2) == 0.0) {
             Stemp.add((SISODPA.obliczKrok(Utemp) - SISODPA.getYpp()) / U);
             i++;
         }
@@ -299,7 +295,7 @@ public class DMCAnalityczny extends RegulatorMPC {
                 List<Double> Stemp = new ArrayList<>();
                 Stemp.add((obiekt.obliczKrok(U, j, i) - obiekt.getYpp(i)) / U);
                 Stemp.add((obiekt.obliczKrok(Utemp, j, i) - obiekt.getYpp(i)) / U);
-                while (!(Math.abs(Stemp.get(k - 1) - Stemp.get(k - 2)) >= 0.005) || Stemp.get(k - 2) == 0.0) {
+                while ((Math.abs(Stemp.get(k - 1) - Stemp.get(k - 2)) >= 0.005) || Stemp.get(k - 2) == 0.0) {
                     Stemp.add((obiekt.obliczKrok(Utemp, j, i) - obiekt.getYpp(i)) / U);
                     k++;
                 }
@@ -470,10 +466,11 @@ public class DMCAnalityczny extends RegulatorMPC {
     }
 
     protected void dodajdU(double dUAktualne) {
-        for (int i = D - 1; i > D - 11; i--) {
+        int horyzont = D>12? 11: 1;
+        for (int i = D - 1; i > D - horyzont; i--) {
             dU.set(0, i - 1, (dU.get(0, i - 1) + 3 * dU.get(0, i - 2)) / 4);
         }
-        for (int i = D - 11; i > 1; i--) {
+        for (int i = D - horyzont; i > 1; i--) {
             dU.set(0, i - 1, dU.get(0, i - 2));
         }
         dU.set(0, 0, dUAktualne);

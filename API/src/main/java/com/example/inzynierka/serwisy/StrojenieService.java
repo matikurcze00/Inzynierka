@@ -477,18 +477,18 @@ public class StrojenieService {
                 tempLambda[i] = 0.5;
             }
             regulator = new DMCAnalityczny(4, tempLambda, (MIMODPA) obiekt, obiekt.getYMax(), parRegulator.getDuMax(), 11, parWizualizacja.getStrojenie());
-            wartosciEA[0] = 30;
-            wartosciEA[1] = 30;
-            wartosciEA[2] = 90;
+            wartosciEA[0] = 15;
+            wartosciEA[1] = 25;
+            wartosciEA[2] = 75;
         } else if (parRegulator.getTyp().equals("gpc")) {
             double[] tempLambda = new double[obiekt.getLiczbaIN()];
             for (int i = 0; i < obiekt.getLiczbaIN(); i++) {
                 tempLambda[i] = 0.5;
             }
             regulator = new GPC((MIMORownianiaRoznicowe) obiekt, 5, obiekt.getYMax(), parRegulator.getDuMax(), parWizualizacja.getStrojenie(), tempLambda);
-            wartosciEA[0] = 30;
-            wartosciEA[1] = 30;
-            wartosciEA[2] = 90;
+            wartosciEA[0] = 15;
+            wartosciEA[1] = 25;
+            wartosciEA[2] = 75;
         } else {
             throw new RuntimeException();
         }
