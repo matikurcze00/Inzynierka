@@ -1,9 +1,9 @@
 package com.example.inzynierka.controller;
 
-import com.example.inzynierka.modele.*;
-import com.example.inzynierka.serwisy.InfoService;
-import com.example.inzynierka.serwisy.OdpowiedzService;
-import com.example.inzynierka.serwisy.StrojenieService;
+import com.example.inzynierka.models.*;
+import com.example.inzynierka.services.InfoService;
+import com.example.inzynierka.services.StepResponseService;
+import com.example.inzynierka.services.TuningService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,23 +15,23 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 public class Controller {
 
-    private final StrojenieService strojenieService;
-    private final OdpowiedzService odpowiedzService;
+    private final TuningService tuningService;
+    private final StepResponseService stepResponseService;
     private final InfoService infoService;
 
     @Autowired
-    public Controller(StrojenieService strojenieService, OdpowiedzService odpowiedzService,
+    public Controller(TuningService tuningService, StepResponseService stepResponseService,
                       InfoService infoService) {
-        this.strojenieService = strojenieService;
-        this.odpowiedzService = odpowiedzService;
+        this.tuningService = tuningService;
+        this.stepResponseService = stepResponseService;
         this.infoService = infoService;
     }
 
-    @RequestMapping(value = "/strojenie/SISO", method = RequestMethod.POST)
+    @PostMapping(value = "/strojenie/SISO")
     @ResponseBody
-    public ResponseEntity<OdpowiedzStrojenie> strojenieSISO(@RequestBody ParStrojenie parStrojenie) {
+    public ResponseEntity<OdpowiedzStrojenie> tuningSISO(@RequestBody ParStrojenie parStrojenie) {
         System.out.println("strojenieSISO::start ");
-        OdpowiedzStrojenie odpowiedz = strojenieService.SISOStrojenie(parStrojenie);
+        OdpowiedzStrojenie odpowiedz = tuningService.SISOTuning(parStrojenie);
 
         if (odpowiedz == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -41,11 +41,11 @@ public class Controller {
 
     }
 
-    @RequestMapping(value = "/info/MIMO/DPA", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, method = RequestMethod.POST)
+    @PostMapping(value = "/info/MIMO/DPA", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
     public ResponseEntity<OdpowiedzInfoMIMO> infoMIMODPA(@RequestPart("file") MultipartFile file) {
         System.out.println("infoMIMO:: start ");
-        OdpowiedzInfoMIMO odpowiedz = infoService.InfoWejsciaWyjsciaDPA(file);
+        OdpowiedzInfoMIMO odpowiedz = infoService.InfoMIMODPA(file);
         System.out.println("infoMIMO:: koniec");
         if (odpowiedz == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -54,11 +54,11 @@ public class Controller {
         }
     }
 
-    @RequestMapping(value = "/info/MIMO/Rownania", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, method = RequestMethod.POST)
+    @PostMapping(value = "/info/MIMO/Rownania", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
-    public ResponseEntity<OdpowiedzInfoMIMO> infoMIMORownania(@RequestPart("file") MultipartFile file) {
+    public ResponseEntity<OdpowiedzInfoMIMO> infoMIMODiscrete(@RequestPart("file") MultipartFile file) {
         System.out.println("infoMIMO:: start ");
-        OdpowiedzInfoMIMO odpowiedz = infoService.InfoWejsciaWyjsciaRownania(file);
+        OdpowiedzInfoMIMO odpowiedz = infoService.InfoMIMODiscrete(file);
         System.out.println("infoMIMO:: koniec");
         if (odpowiedz == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -67,11 +67,11 @@ public class Controller {
         }
     }
 
-    @RequestMapping(value = "/info/MIMO/Rownania/Zaklocenia", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, method = RequestMethod.POST)
+    @PostMapping(value = "/info/MIMO/Rownania/Zaklocenia", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
-    public ResponseEntity<OdpowiedzInfoMIMO> infoMIMOZakloceniaRownania(@RequestPart("file") MultipartFile file) {
+    public ResponseEntity<OdpowiedzInfoMIMO> infoMIMODiscreteDisturbance(@RequestPart("file") MultipartFile file) {
         System.out.println("infoMIMO:: start ");
-        OdpowiedzInfoMIMO odpowiedz = infoService.InfoWejsciaWyjsciaZakloceniaRownania(file);
+        OdpowiedzInfoMIMO odpowiedz = infoService.InfoMIMODiscreteDisturbance(file);
         System.out.println("infoMIMO:: koniec");
         if (odpowiedz == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -80,13 +80,13 @@ public class Controller {
         }
     }
 
-    @RequestMapping(value = "/strojenie/MIMO", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, method = RequestMethod.POST)
+    @PostMapping(value = "/strojenie/MIMO", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
-    public ResponseEntity<OdpowiedzStrojenieMIMO> strojenieMIMO(@RequestPart("file") MultipartFile[] file, @ModelAttribute ParRegulator parRegulator,
-                                                                @ModelAttribute ParWizualizacja parWizualizacja,
-                                                                @ModelAttribute WizualizacjaZaklocen wizualizacjaZaklocen) {
+    public ResponseEntity<OdpowiedzStrojenieMIMO> tuningMIMO(@RequestPart("file") MultipartFile[] file, @ModelAttribute ParRegulator parRegulator,
+                                                             @ModelAttribute ParWizualizacja parWizualizacja,
+                                                             @ModelAttribute WizualizacjaZaklocen wizualizacjaZaklocen) {
         System.out.println("strojenieMIMO::start ");
-        OdpowiedzStrojenieMIMO odpowiedz = strojenieService.MIMOStrojenie(file, parRegulator, parWizualizacja, wizualizacjaZaklocen);
+        OdpowiedzStrojenieMIMO odpowiedz = tuningService.MIMOTuning(file, parRegulator, parWizualizacja, wizualizacjaZaklocen);
         if (odpowiedz == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } else {
@@ -94,11 +94,11 @@ public class Controller {
         }
     }
 
-    @RequestMapping(value = "/odpowiedz/SISO", method = RequestMethod.POST)
+    @PostMapping(value = "/odpowiedz/SISO")
     @ResponseBody
-    public ResponseEntity<OdpowiedzSkokowa> odpowiedzSISO(@RequestBody ParStrojenie parStrojenie) {
+    public ResponseEntity<OdpowiedzSkokowa> stepResponseSISO(@RequestBody ParStrojenie parStrojenie) {
         System.out.println("odpowiedzSISO::start ");
-        OdpowiedzSkokowa odpowiedzSkokowa = odpowiedzService.SISOOdpowiedz(parStrojenie);
+        OdpowiedzSkokowa odpowiedzSkokowa = stepResponseService.SISOOdpowiedz(parStrojenie);
         if (odpowiedzSkokowa == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } else {
@@ -106,12 +106,12 @@ public class Controller {
         }
     }
 
-    @RequestMapping(value = "/odpowiedz/MIMO", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, method = RequestMethod.POST)
+    @PostMapping(value = "/odpowiedz/MIMO", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
-    public ResponseEntity<OdpowiedzSkokowa> odpowiedzMIMO(@RequestPart("file") MultipartFile file, @ModelAttribute ParRegulator parRegulator,
-                                                          @ModelAttribute ParWizualizacja parWizualizacja) {
+    public ResponseEntity<OdpowiedzSkokowa> stepResponseMIMO(@RequestPart("file") MultipartFile file, @ModelAttribute ParRegulator parRegulator,
+                                                             @ModelAttribute ParWizualizacja parWizualizacja) {
         System.out.println("odpowiedzMIMO::start ");
-        OdpowiedzSkokowa odpowiedzSkokowa = odpowiedzService.MIMOOdpowiedz(file, parRegulator, parWizualizacja);
+        OdpowiedzSkokowa odpowiedzSkokowa = stepResponseService.MIMOStepResponse(file, parRegulator, parWizualizacja);
         if (odpowiedzSkokowa == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } else {
