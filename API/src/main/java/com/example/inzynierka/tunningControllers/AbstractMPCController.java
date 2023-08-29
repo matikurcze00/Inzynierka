@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public abstract class ControllerTunningMPC extends ControllerTunning {
+public abstract class AbstractMPCController extends AbstractController {
     protected Integer D;
     protected Integer N;
     protected Integer Nu;

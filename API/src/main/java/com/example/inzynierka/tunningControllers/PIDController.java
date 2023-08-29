@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Data
-public class PID extends ControllerTunning {
+public class PIDController extends AbstractController {
     private double K;
     private double Ti;
     private double Td;
@@ -18,8 +18,8 @@ public class PID extends ControllerTunning {
     private double r2;
     private double uMax;
 
-    public PID(double P, double I, double D, double Ts, double[] cel, double duMax,
-               double uMax, Double[] presetControls) {
+    public PIDController(double P, double I, double D, double Ts, double[] cel, double duMax,
+                         double uMax, Double[] presetControls) {
 
         this(P, I, D, Ts, cel, duMax, uMax);
         if (presetControls[0] != null) {
@@ -44,7 +44,7 @@ public class PID extends ControllerTunning {
 
     }
 
-    public PID(double P, double I, double D, double Ts, double[] cel, double duMax, double uMax) {
+    public PIDController(double P, double I, double D, double Ts, double[] cel, double duMax, double uMax) {
         this.K = P;
         this.Ti = I;
         this.Td = D;

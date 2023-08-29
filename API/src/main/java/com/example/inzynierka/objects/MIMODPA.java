@@ -1,7 +1,7 @@
 package com.example.inzynierka.objects;
 
 import com.example.inzynierka.models.ParObiektDPAMIMO;
-import com.example.inzynierka.tunningControllers.ControllerTunning;
+import com.example.inzynierka.tunningControllers.AbstractController;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -189,21 +189,21 @@ public class MIMODPA extends MIMO {
         return YAkt;
     }
 
-    public double simulateObjectRegulation(ControllerTunning controllerTunning, double[] cel) {
+    public double simulateObjectRegulation(AbstractController abstractController, double[] cel) {
 
         resetObject();
         double simulationError = 0.0;
         if (disturbance != null) {
-            simulationError = simulateObjectWithDisturbance(controllerTunning, cel, simulationError);
+            simulationError = simulateObjectWithDisturbance(abstractController, cel, simulationError);
         } else {
-            simulationError = simulateObjectWithoutDisturbance(controllerTunning, cel, simulationError);
+            simulationError = simulateObjectWithoutDisturbance(abstractController, cel, simulationError);
         }
         simulationError = simulationError / this.length * outputNumber * outputNumber;
         resetObject();
         return simulationError;
     }
 
-    private double simulateObjectWithoutDisturbance(ControllerTunning controllerTunning, double[] cel, double simulationError) {
+    private double simulateObjectWithoutDisturbance(AbstractController abstractController, double[] cel, double simulationError) {
         double[] tempCel = new double[outputNumber];
         for (int k = 0; k < outputNumber; k++) {
             for (int i = 0; i < outputNumber; i++) {
@@ -211,11 +211,11 @@ public class MIMODPA extends MIMO {
             }
             tempCel[k] = cel[k];
             resetObject();
-            controllerTunning.resetController();
-            controllerTunning.setSetpoint(tempCel);
+            abstractController.resetController();
+            abstractController.setSetpoint(tempCel);
             double[] Ymed = new double[outputNumber];
             for (int i = 0; i < this.length; i++) {
-                double[] Ytepm = simulateStep(controllerTunning.countControls(getOutput()));
+                double[] Ytepm = simulateStep(abstractController.countControls(getOutput()));
                 for (int j = 0; j < outputNumber; j++) {
                     if (this.typeOfError.equals("srednio")) {
                         simulationError += Math.pow(Ytepm[j] - tempCel[j], 2);
@@ -237,7 +237,7 @@ public class MIMODPA extends MIMO {
         return simulationError;
     }
 
-    private double simulateObjectWithDisturbance(ControllerTunning controllerTunning, double[] cel, double simulationError) {
+    private double simulateObjectWithDisturbance(AbstractController abstractController, double[] cel, double simulationError) {
         double[] tempCel = new double[outputNumber];
         double[] Ymed = new double[outputNumber];
         for (int k = 0; k < outputNumber; k++) {
@@ -245,10 +245,10 @@ public class MIMODPA extends MIMO {
                 tempCel[i] = 0;
             }
             tempCel[k] = cel[k];
-            controllerTunning.setSetpoint(tempCel);
+            abstractController.setSetpoint(tempCel);
             resetObject();
-            controllerTunning.resetController();
-            double[] Ytepm = simulateStep(controllerTunning.countControls(getOutput()));
+            abstractController.resetController();
+            double[] Ytepm = simulateStep(abstractController.countControls(getOutput()));
             for (int i = 0; i < Math.floorDiv(this.length, 2); i++) {
                 for (int j = 0; j < Ytepm.length; j++) {
                     if (this.typeOfError.equals("srednio")) {
@@ -273,7 +273,7 @@ public class MIMODPA extends MIMO {
             }
 
             for (int i = 0; i < Math.floorDiv(this.length, 8); i++) {
-                Ytepm = simulateStep(controllerTunning.countControls(getOutput(), UDisturbance), UDisturbance);
+                Ytepm = simulateStep(abstractController.countControls(getOutput(), UDisturbance), UDisturbance);
                 for (int j = 0; j < Ytepm.length; j++) {
                     if (this.typeOfError.equals("srednio")) {
                         simulationError += Math.pow(Ytepm[j] - tempCel[j], 2);
@@ -296,7 +296,7 @@ public class MIMODPA extends MIMO {
             }
 
             for (int i = 0; i < Math.floorDiv(this.length * 3, 8); i++) {
-                Ytepm = simulateStep(controllerTunning.countControls(getOutput(), UDisturbance), UDisturbance);
+                Ytepm = simulateStep(abstractController.countControls(getOutput(), UDisturbance), UDisturbance);
                 for (int j = 0; j < Ytepm.length; j++) {
                     if (this.typeOfError.equals("srednio")) {
                         simulationError += Math.pow(Ytepm[j] - tempCel[j], 2);

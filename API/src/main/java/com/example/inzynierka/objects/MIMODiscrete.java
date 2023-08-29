@@ -2,7 +2,7 @@ package com.example.inzynierka.objects;
 
 import com.example.inzynierka.models.ParObiektRownaniaMIMO;
 import com.example.inzynierka.models.DisturbanceDiscrete;
-import com.example.inzynierka.tunningControllers.ControllerTunning;
+import com.example.inzynierka.tunningControllers.AbstractController;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -103,19 +103,19 @@ public class MIMODiscrete extends MIMO {
         }
     }
 
-    public double simulateObjectRegulation(ControllerTunning controllerTunning, double[] cel) {
+    public double simulateObjectRegulation(AbstractController abstractController, double[] cel) {
 
         resetObject();
         double wartoscBlad = 0.0;
 
-        wartoscBlad = simulateObjectWithoutDisturbance(controllerTunning, cel, wartoscBlad);
+        wartoscBlad = simulateObjectWithoutDisturbance(abstractController, cel, wartoscBlad);
 
         wartoscBlad = wartoscBlad / this.length * outputNumber * outputNumber;
         resetObject();
         return wartoscBlad;
     }
 
-    private double simulateObjectWithoutDisturbance(ControllerTunning controllerTunning, double[] cel, double blad) {
+    private double simulateObjectWithoutDisturbance(AbstractController abstractController, double[] cel, double blad) {
         double[] tempCel = new double[outputNumber];
         double[] Ymed = new double[outputNumber];
         for (int k = 0; k < outputNumber; k++) {
@@ -123,11 +123,11 @@ public class MIMODiscrete extends MIMO {
                 tempCel[i] = 0;
             }
             tempCel[k] = cel[k];
-            controllerTunning.setSetpoint(tempCel);
+            abstractController.setSetpoint(tempCel);
             resetObject();
-            controllerTunning.resetController();
+            abstractController.resetController();
             for (int i = 0; i < this.length; i++) {
-                double[] Ytepm = simulateStep(controllerTunning.countControls(getOutput()));
+                double[] Ytepm = simulateStep(abstractController.countControls(getOutput()));
                 for (int j = 0; j < Ytepm.length; j++) {
                     if (this.typeOfError.equals("srednio")) {
                         blad += Math.pow(Ytepm[j] - tempCel[j], 2);

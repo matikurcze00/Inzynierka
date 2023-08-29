@@ -160,8 +160,8 @@ public class TuningService {
         } else {
             zakloceniaDPA = null;
         }
-        if (parStrojenie.getDisturbanceDiscrete().getB1() != null && parStrojenie.getDisturbanceDiscrete().getB1().length != 0) {
-            disturbanceDiscrete = parStrojenie.getDisturbanceDiscrete();
+        if (parStrojenie.getZakloceniaRownania().getB1() != null && parStrojenie.getZakloceniaRownania().getB1().length != 0) {
+            disturbanceDiscrete = parStrojenie.getZakloceniaRownania();
         } else {
             disturbanceDiscrete = null;
         }
@@ -173,14 +173,14 @@ public class TuningService {
         if (object == null) {
             return null;
         }
-        ControllerTunning controllerTunning;
-        controllerTunning = getSISOController(parObiektDPA, parRegulator, parWizualizacja, object, EAParameters);
-        if (controllerTunning == null) {
+        AbstractController abstractController;
+        abstractController = getSISOController(parObiektDPA, parRegulator, parWizualizacja, object, EAParameters);
+        if (abstractController == null) {
             return null;
         }
-        if (controllerTunning.getNumberOfTuningParameters() != 0) {
+        if (abstractController.getNumberOfTuningParameters() != 0) {
             EvolutionaryAlgorithm GA = new EvolutionaryAlgorithm(EAParameters[0], EAParameters[1], EAParameters[2], 0.3, 0.2);
-            getSISOTuning(parWizualizacja, object, controllerTunning, GA, odpowiedzStrojenie);
+            getSISOTuning(parWizualizacja, object, abstractController, GA, odpowiedzStrojenie);
         } else {
             double[] primitiveArray = new double[parWizualizacja.getStrojenie().length];
             for (int i = 0; i < parWizualizacja.getStrojenie().length; i++) {
@@ -196,38 +196,38 @@ public class TuningService {
                 object = new SISODPA(parStrojenie.getParObiektSymulacjiDPA(), parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
             }
         }
-        double[] Y = simulateSISO(parWizualizacja, object, controllerTunning, odpowiedzStrojenie, parStrojenie.getWizualizacjaZaklocen());
+        double[] Y = simulateSISO(parWizualizacja, object, abstractController, odpowiedzStrojenie, parStrojenie.getWizualizacjaZaklocen());
         System.out.println("strojenie::OK");
-        getSISOError(parWizualizacja, controllerTunning, Y);
+        getSISOError(parWizualizacja, abstractController, Y);
         return odpowiedzStrojenie;
     }
 
-    private void getSISOError(ParWizualizacja parWizualizacja, ControllerTunning controllerTunning, double[] Y) {
+    private void getSISOError(ParWizualizacja parWizualizacja, AbstractController abstractController, double[] Y) {
         double error = 0.0;
         for (int i = 0; i < parWizualizacja.getSkok()[0]; i++) {
             error += Math.pow(Y[i] - parWizualizacja.getYPP()[0], 2);
         }
         for (int i = parWizualizacja.getSkok()[0]; i < parWizualizacja.getDlugosc(); i++) {
-            error += Math.pow(Y[i] - controllerTunning.getSetpoint()[0], 2);
+            error += Math.pow(Y[i] - abstractController.getSetpoint()[0], 2);
         }
         error = error / parWizualizacja.getDlugosc();
         System.out.println("BLAD:" + error);
     }
 
-    private double[] simulateSISO(ParWizualizacja parWizualizacja, SISO object, ControllerTunning controllerTunning,
+    private double[] simulateSISO(ParWizualizacja parWizualizacja, SISO object, AbstractController abstractController,
                                   OdpowiedzStrojenie odpowiedzStrojenie, WizualizacjaZaklocen wizualizacjaZaklocen) {
-        setSetpoint(parWizualizacja, controllerTunning, odpowiedzStrojenie);
+        setSetpoint(parWizualizacja, abstractController, odpowiedzStrojenie);
         if (wizualizacjaZaklocen.getUSkok() != null && wizualizacjaZaklocen.getUSkok().length != 0) {
-            return simulationSISO(parWizualizacja, object, controllerTunning, odpowiedzStrojenie,
+            return simulationSISO(parWizualizacja, object, abstractController, odpowiedzStrojenie,
                 setDisturbanceTuning(parWizualizacja, wizualizacjaZaklocen));
         } else {
-            return simulationSISO(parWizualizacja, object, controllerTunning, odpowiedzStrojenie);
+            return simulationSISO(parWizualizacja, object, abstractController, odpowiedzStrojenie);
         }
 
     }
 
-    private void setSetpoint(ParWizualizacja parWizualizacja, ControllerTunning controllerTunning, OdpowiedzStrojenie odpowiedzStrojenie) {
-        controllerTunning.setSetpoint(new double[] {parWizualizacja.getYZad()[0]});
+    private void setSetpoint(ParWizualizacja parWizualizacja, AbstractController abstractController, OdpowiedzStrojenie odpowiedzStrojenie) {
+        abstractController.setSetpoint(new double[] {parWizualizacja.getYZad()[0]});
         double[] setpointTemp = new double[parWizualizacja.getDlugosc()];
         for (int i = 0; i < parWizualizacja.getDlugosc(); i++) {
             if (i < parWizualizacja.getSkok()[0]) {
@@ -260,12 +260,12 @@ public class TuningService {
         return dUZTemp;
     }
 
-    private void getSISOTuning(ParWizualizacja parWizualizacja, SISO object, ControllerTunning controllerTunning, EvolutionaryAlgorithm GA,
+    private void getSISOTuning(ParWizualizacja parWizualizacja, SISO object, AbstractController abstractController, EvolutionaryAlgorithm GA,
                                OdpowiedzStrojenie odpowiedzStrojenie) {
-        double[] tempGAParameters = GA.getParameters(controllerTunning.getNumberOfTuningParameters(), controllerTunning, object);
+        double[] tempGAParameters = GA.getTuningParameters(abstractController.getNumberOfTuningParameters(), abstractController, object);
         double[] tempTuning = setTuning(parWizualizacja, tempGAParameters);
         odpowiedzStrojenie.setWspolczynniki(tempTuning);
-        controllerTunning.changeTuning(tempTuning);
+        abstractController.changeTuning(tempTuning);
     }
 
     private SISO getSISOObject(ParObiektDPA parObiektDPA, ParObiektRownania parObiektRownania, ParRegulator parRegulator,
@@ -292,37 +292,37 @@ public class TuningService {
         }
     }
 
-    private ControllerTunning getSISOController(ParObiektDPA parObiektDPA, ParRegulator parRegulator, ParWizualizacja parWizualizacja, SISO object,
-                                                Integer[] EAParameters) {
-        ControllerTunning controllerTunning;
+    private AbstractController getSISOController(ParObiektDPA parObiektDPA, ParRegulator parRegulator, ParWizualizacja parWizualizacja, SISO object,
+                                                 Integer[] EAParameters) {
+        AbstractController abstractController;
         if (parRegulator.getTyp().equals("pid")) {
-            controllerTunning = new PID(0.0, 0.0, 0.0, parObiektDPA.getTp(), new double[] {object.getYMax()}, parRegulator.getDuMax(), parRegulator.getUMax(),
+            abstractController = new PIDController(0.0, 0.0, 0.0, parObiektDPA.getTp(), new double[] {object.getYMax()}, parRegulator.getDuMax(), parRegulator.getUMax(),
                 parWizualizacja.getStrojenie());
-            EAParameters[0] = 200;
-            EAParameters[1] = 200;
-            EAParameters[2] = 500;
+            EAParameters[0] = 150;
+            EAParameters[1] = 50;
+            EAParameters[2] = 600;
         } else if (parRegulator.getTyp().equals("dmc")) {
-            controllerTunning = new DMCAnalityczny(4, 0.1, (SISODPA) object, object.getYMax() / 2, parRegulator.getDuMax(), 11, parWizualizacja.getStrojenie());
+            abstractController = new DMCController(4, 0.1, (SISODPA) object, object.getYMax() / 2, parRegulator.getDuMax(), 11, parWizualizacja.getStrojenie());
             EAParameters[0] = 50;
-            EAParameters[1] = 20;
-            EAParameters[2] = 250;
+            EAParameters[1] = 25;
+            EAParameters[2] = 200;
         } else if (parRegulator.getTyp().equals("gpc")) {
-            controllerTunning = new GPC((SISODiscrete) object, 0.1, object.getYMax() / 2, parRegulator.getDuMax(), parWizualizacja.getStrojenie());
+            abstractController = new GPCController((SISODiscrete) object, 0.1, object.getYMax() / 2, parRegulator.getDuMax(), parWizualizacja.getStrojenie());
             EAParameters[0] = 50;
-            EAParameters[1] = 20;
-            EAParameters[2] = 250;
+            EAParameters[1] = 25;
+            EAParameters[2] = 200;
         } else {
             return null;
         }
-        return controllerTunning;
+        return abstractController;
     }
 
-    private double[] simulationSISO(ParWizualizacja parWizualizacja, SISO object, ControllerTunning controllerTunning,
+    private double[] simulationSISO(ParWizualizacja parWizualizacja, SISO object, AbstractController abstractController,
                                     OdpowiedzStrojenie odpowiedzStrojenie) {
         double[] Y = new double[parWizualizacja.getDlugosc()];
         double[] U = new double[parWizualizacja.getDlugosc()];
         object.resetObject();
-        controllerTunning.resetController();
+        abstractController.resetController();
         Y[0] = object.getYpp();
         U[0] = parWizualizacja.getUPP()[0];
         for (int i = 1; i < parWizualizacja.getSkok()[0]; i++) {
@@ -331,7 +331,7 @@ public class TuningService {
         }
         for (int i = Math.max(1, parWizualizacja.getSkok()[0]); i < parWizualizacja.getDlugosc(); i++) {
             {
-                Y[i] = object.simulateStep(controllerTunning.countControls(object.getOutput()));
+                Y[i] = object.simulateStep(abstractController.countControls(object.getOutput()));
                 U[i] = object.getU().get(0);
             }
         }
@@ -340,25 +340,25 @@ public class TuningService {
         return Y;
     }
 
-    private double[] simulationSISO(ParWizualizacja parWizualizacja, SISO object, ControllerTunning controllerTunning,
+    private double[] simulationSISO(ParWizualizacja parWizualizacja, SISO object, AbstractController abstractController,
                                     OdpowiedzStrojenie odpowiedzStrojenie, double[][] dUZ) {
         double[] Y = new double[parWizualizacja.getDlugosc()];
         double[] U = new double[parWizualizacja.getDlugosc()];
         double[][] Uz = new double[dUZ[0].length][parWizualizacja.getDlugosc()];
         object.resetObject();
-        controllerTunning.resetController();
+        abstractController.resetController();
         Y[0] = object.getYpp();
         U[0] = parWizualizacja.getUPP()[0];
 
-        controllerTunning.setSetpoint(parWizualizacja.getYPP());
+        abstractController.setSetpoint(parWizualizacja.getYPP());
         for (int i = 0; i < parWizualizacja.getSkok()[0]; i++) {
-            Y[i] = object.simulateStep(controllerTunning.countControls(object.getOutput(), dUZ[i]), dUZ[i]);
+            Y[i] = object.simulateStep(abstractController.countControls(object.getOutput(), dUZ[i]), dUZ[i]);
             U[i] = object.getU().get(0);
         }
-        controllerTunning.setSetpoint(new double[] {parWizualizacja.getYZad()[0]});
+        abstractController.setSetpoint(new double[] {parWizualizacja.getYZad()[0]});
         for (int i = parWizualizacja.getSkok()[0]; i < parWizualizacja.getDlugosc(); i++) {
             {
-                Y[i] = object.simulateStep(controllerTunning.countControls(object.getOutput(), dUZ[i]), dUZ[i]);
+                Y[i] = object.simulateStep(abstractController.countControls(object.getOutput(), dUZ[i]), dUZ[i]);
                 U[i] = object.getU().get(0);
             }
         }
@@ -402,13 +402,13 @@ public class TuningService {
         if (object == null) {
             return null;
         }
-        ControllerTunning controllerTunning = getMIMOController(parRegulator, parWizualizacja, objectMapper, object, EAParameters, file);
-        if (controllerTunning == null) {
+        AbstractController abstractController = getMIMOController(parRegulator, parWizualizacja, objectMapper, object, EAParameters, file);
+        if (abstractController == null) {
             return null;
         }
-        if (controllerTunning.getNumberOfTuningParameters() != 0) {
+        if (abstractController.getNumberOfTuningParameters() != 0) {
             EvolutionaryAlgorithm GA = new EvolutionaryAlgorithm(EAParameters[0], EAParameters[1], EAParameters[2], 0.5, 0.5);
-            getMIMOTuning(parWizualizacja, object, controllerTunning, GA, odpowiedz);
+            getMIMOTuning(parWizualizacja, object, abstractController, GA, odpowiedz);
         } else {
             double[] tuningTemp = new double[parWizualizacja.getStrojenie().length];
             for (int i = 0; i < parWizualizacja.getStrojenie().length; i++) {
@@ -420,44 +420,44 @@ public class TuningService {
         if (object == null) {
             return null;
         }
-        double[][] Y = simulateMIMO(parWizualizacja, object, controllerTunning, odpowiedz, wizualizacjaZaklocen);
+        double[][] Y = simulateMIMO(parWizualizacja, object, abstractController, odpowiedz, wizualizacjaZaklocen);
         System.out.println("strojenie::OK");
-        getMIMOError(controllerTunning, parWizualizacja.getDlugosc(), Y);
+        getMIMOError(abstractController, parWizualizacja.getDlugosc(), Y);
         return odpowiedz;
     }
 
     private double[][] simulateMIMO(ParWizualizacja parWizualizacja, MIMO object,
-                                    ControllerTunning controllerTunning, OdpowiedzStrojenieMIMO odpowiedz, WizualizacjaZaklocen wizualizacjaZaklocen) {
+                                    AbstractController abstractController, OdpowiedzStrojenieMIMO odpowiedz, WizualizacjaZaklocen wizualizacjaZaklocen) {
         double[][] setpointTemp = getSetpointMIMO(parWizualizacja, object, parWizualizacja.getDlugosc());
         odpowiedz.setCel(setpointTemp);
         if (wizualizacjaZaklocen.getUSkok() != null && wizualizacjaZaklocen.getUSkok().length != 0) {
-            return simulationMIMO(object, controllerTunning, odpowiedz, parWizualizacja.getDlugosc(), setpointTemp,
+            return simulationMIMO(object, abstractController, odpowiedz, parWizualizacja.getDlugosc(), setpointTemp,
                 setDisturbanceTuning(parWizualizacja, wizualizacjaZaklocen));
         } else {
-            return simulationMIMO(object, controllerTunning, odpowiedz, parWizualizacja.getDlugosc(), setpointTemp);
+            return simulationMIMO(object, abstractController, odpowiedz, parWizualizacja.getDlugosc(), setpointTemp);
         }
     }
 
-    private void getMIMOTuning(ParWizualizacja parWizualizacja, MIMO object, ControllerTunning controllerTunning, EvolutionaryAlgorithm GA,
+    private void getMIMOTuning(ParWizualizacja parWizualizacja, MIMO object, AbstractController abstractController, EvolutionaryAlgorithm GA,
                                OdpowiedzStrojenieMIMO odpowiedz) {
-        double[] tempWartosciGA = GA.getParameters(controllerTunning.getNumberOfTuningParameters(), controllerTunning, object);
-        controllerTunning.changeTuning(tempWartosciGA);
+        double[] tempWartosciGA = GA.getTuningParameters(abstractController.getNumberOfTuningParameters(), abstractController, object);
+        abstractController.changeTuning(tempWartosciGA);
         double[] tempStrojenie = setTuning(parWizualizacja, tempWartosciGA);
         odpowiedz.setWspolczynniki(tempStrojenie);
     }
 
-    private void getMIMOError(ControllerTunning controllerTunning, int simulationLength, double[][] Y) {
+    private void getMIMOError(AbstractController abstractController, int simulationLength, double[][] Y) {
         double error = 0.0;
         for (int i = 0; i < simulationLength; i++) {
-            error += Math.pow(Y[0][i] - controllerTunning.getSetpoint()[0], 2);
+            error += Math.pow(Y[0][i] - abstractController.getSetpoint()[0], 2);
         }
         error = error / Y[0].length;
         System.out.println(error);
     }
 
-    private ControllerTunning getMIMOController(ParRegulator parRegulator, ParWizualizacja parWizualizacja,
-                                                ObjectMapper objectMapper, MIMO object, Integer[] EAParameters, MultipartFile[] file) {
-        ControllerTunning controllerTunning;
+    private AbstractController getMIMOController(ParRegulator parRegulator, ParWizualizacja parWizualizacja,
+                                                 ObjectMapper objectMapper, MIMO object, Integer[] EAParameters, MultipartFile[] file) {
+        AbstractController abstractController;
         if (parRegulator.getTyp().equals("pid")) {
             Integer[] PV;
             try {
@@ -467,37 +467,37 @@ public class TuningService {
                 ex.printStackTrace();
                 return null;
             }
-            controllerTunning = new PIDCollection((MIMODPA) object, PV, parRegulator.getDuMax(), parWizualizacja.getStrojenie());
-            EAParameters[0] = 100;
-            EAParameters[1] = 50;
-            EAParameters[2] = 500;
+            abstractController = new PIDCollection((MIMODPA) object, PV, parRegulator.getDuMax(), parWizualizacja.getStrojenie());
+            EAParameters[0] = 50;
+            EAParameters[1] = 25;
+            EAParameters[2] = 200;
         } else if (parRegulator.getTyp().equals("dmc")) {
             double[] tempLambda = new double[object.getEntriesNumber()];
             for (int i = 0; i < object.getEntriesNumber(); i++) {
                 tempLambda[i] = 0.5;
             }
-            controllerTunning = new DMCAnalityczny(4, tempLambda, (MIMODPA) object, object.getYMax(), parRegulator.getDuMax(), 11, parWizualizacja.getStrojenie());
-            EAParameters[0] = 15;
+            abstractController = new DMCController(4, tempLambda, (MIMODPA) object, object.getYMax(), parRegulator.getDuMax(), 11, parWizualizacja.getStrojenie());
+            EAParameters[0] = 25;
             EAParameters[1] = 25;
-            EAParameters[2] = 75;
+            EAParameters[2] = 100;
         } else if (parRegulator.getTyp().equals("gpc")) {
             double[] tempLambda = new double[object.getEntriesNumber()];
             for (int i = 0; i < object.getEntriesNumber(); i++) {
                 tempLambda[i] = 0.5;
             }
-            controllerTunning = new GPC((MIMODiscrete) object, 5, object.getYMax(), parRegulator.getDuMax(), parWizualizacja.getStrojenie(), tempLambda);
-            EAParameters[0] = 15;
+            abstractController = new GPCController((MIMODiscrete) object, 5, object.getYMax(), parRegulator.getDuMax(), parWizualizacja.getStrojenie(), tempLambda);
+            EAParameters[0] = 25;
             EAParameters[1] = 25;
-            EAParameters[2] = 75;
+            EAParameters[2] = 100;
         } else {
             throw new RuntimeException();
         }
-        return controllerTunning;
+        return abstractController;
     }
 
-    private double[][] simulationMIMO(MIMO object, ControllerTunning controllerTunning, OdpowiedzStrojenieMIMO odpowiedz, int simulationLength, double[][] setpointTemp) {
+    private double[][] simulationMIMO(MIMO object, AbstractController abstractController, OdpowiedzStrojenieMIMO odpowiedz, int simulationLength, double[][] setpointTemp) {
         object.resetObject();
-        controllerTunning.resetController();
+        abstractController.resetController();
         double[][] Y = new double[object.getOutputNumber()][simulationLength];
         double[][] U = new double[object.getEntriesNumber()][simulationLength];
         for (int i = 0; i < simulationLength; i++) {
@@ -507,8 +507,8 @@ public class TuningService {
                 temp[m] = setpointTemp[m][i];
             }
             //ustawiane
-            controllerTunning.setSetpoint(temp);
-            double[] tempY = object.simulateStep(controllerTunning.countControls(object.getOutput()));
+            abstractController.setSetpoint(temp);
+            double[] tempY = object.simulateStep(abstractController.countControls(object.getOutput()));
             for (int j = 0; j < object.getOutputNumber(); j++) {
                 Y[j][i] = tempY[j];
             }
@@ -521,11 +521,11 @@ public class TuningService {
         return Y;
     }
 
-    private double[][] simulationMIMO(MIMO object, ControllerTunning controllerTunning,
+    private double[][] simulationMIMO(MIMO object, AbstractController abstractController,
                                       OdpowiedzStrojenieMIMO odpowiedz, int simulationLength,
                                       double[][] setpointTemp, double[][] dUZ) {
         object.resetObject();
-        controllerTunning.resetController();
+        abstractController.resetController();
         double[][] Y = new double[object.getOutputNumber()][simulationLength];
         double[][] U = new double[object.getEntriesNumber()][simulationLength];
         double[][] Uz = new double[dUZ[0].length][simulationLength];
@@ -537,8 +537,8 @@ public class TuningService {
                 temp[m] = setpointTemp[m][i];
             }
             //ustawiane
-            controllerTunning.setSetpoint(temp);
-            double[] tempY = object.simulateStep(controllerTunning.countControls(object.getOutput(), dUZ[i]), dUZ[i]);
+            abstractController.setSetpoint(temp);
+            double[] tempY = object.simulateStep(abstractController.countControls(object.getOutput(), dUZ[i]), dUZ[i]);
             for (int j = 0; j < object.getOutputNumber(); j++) {
                 Y[j][i] = tempY[j];
             }

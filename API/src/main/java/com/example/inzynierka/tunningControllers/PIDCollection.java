@@ -5,9 +5,9 @@ import com.example.inzynierka.objects.MIMODPA;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PIDCollection extends ControllerTunning {
+public class PIDCollection extends AbstractController {
 
-    private final List<PID> PIDy;
+    private final List<PIDController> PIDy;
     private final Integer[] PV;
     private final double[] uMax;
 
@@ -16,7 +16,7 @@ public class PIDCollection extends ControllerTunning {
         uMax = object.getUMax();
         for (int i = 0; i < PV.length; i++) {
             double[] yMaxTemp = new double[] {object.getYMax()[i] / 2};
-            PIDy.add(new PID((presetControls[i * 3] == null) ? 1.0 : presetControls[i * 3],
+            PIDy.add(new PIDController((presetControls[i * 3] == null) ? 1.0 : presetControls[i * 3],
                 (presetControls[i * 3 + 1] == null) ? 1.0 : presetControls[i * 3 + 1],
                 (presetControls[i * 3 + 2] == null) ? 1.0 : presetControls[i * 3 + 2],
                 object.getTp(PV[i]), yMaxTemp, duMax, uMax[PV[i]]));
@@ -66,8 +66,8 @@ public class PIDCollection extends ControllerTunning {
 
     @Override
     public void resetController() {
-        for (PID pid : PIDy) {
-            pid.resetController();
+        for (PIDController pidController : PIDy) {
+            pidController.resetController();
         }
     }
 

@@ -1,6 +1,6 @@
 package com.example.inzynierka.objects;
 
-import com.example.inzynierka.tunningControllers.ControllerTunning;
+import com.example.inzynierka.tunningControllers.AbstractController;
 import lombok.Data;
 
 import java.util.List;
@@ -28,7 +28,7 @@ public abstract class MIMO {
 
     public abstract double[] getOutput();
 
-    public abstract double simulateObjectRegulation(ControllerTunning controllerTunning, double[] cel);
+    public abstract double simulateObjectRegulation(AbstractController abstractController, double[] cel);
 
     public abstract void resetObject();
 

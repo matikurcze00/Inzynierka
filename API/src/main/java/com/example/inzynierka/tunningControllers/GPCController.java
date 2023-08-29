@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Data
-public class GPC extends ControllerTunningMPC {
+public class GPCController extends AbstractMPCController {
     protected List<List<Double[]>> A;
     protected List<List<Double[]>> B; //IN->OUT
     protected List<List<Double>> U;
@@ -23,8 +23,8 @@ public class GPC extends ControllerTunningMPC {
     private Integer IN;
     private Integer OUT;
 
-    public GPC(SISODiscrete sisoDiscrete, double lambda, double cel,
-               double duMax, Double[] presetTuning) {
+    public GPCController(SISODiscrete sisoDiscrete, double lambda, double cel,
+                         double duMax, Double[] presetTuning) {
         this(sisoDiscrete, lambda, cel, duMax);
         if (presetTuning[0] != null) {
             presetControlsNumbers = 1;
@@ -34,14 +34,14 @@ public class GPC extends ControllerTunningMPC {
         calculateK();
     }
 
-    public GPC(SISODiscrete sisoDiscrete, double lambda, double cel, double duMax) {
+    public GPCController(SISODiscrete sisoDiscrete, double lambda, double cel, double duMax) {
         this.Lambda = new ArrayList<>(List.of(lambda));
         this.setpoint = new double[] {cel};
         this.duMax = duMax;
         calculateParameters(sisoDiscrete);
     }
 
-    public GPC(MIMODiscrete mimoDiscrete, int Nu, double[] cel, double duMax, Double[] presetTuning, double[] lambda) {
+    public GPCController(MIMODiscrete mimoDiscrete, int Nu, double[] cel, double duMax, Double[] presetTuning, double[] lambda) {
         this.presetControls = presetTuning;
         this.setpoint = cel;
         this.duMax = duMax;

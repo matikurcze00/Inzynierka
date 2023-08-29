@@ -11,20 +11,20 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertArrayEquals;
 
-class PIDTest {
+class PIDControllerTest {
 
     @Test
     void SISOTest() {
         SISODPA SISODPA = new SISODPA(10.0, 1.0, 1, 1.0, 0, 1.0, 1.0, 0.0, 0, 1, 100.0, -100.0, "srednio");
-        ControllerTunning controllerTunning = new PID(1.0, 1.0, 1.0, 1.0, new double[] {100.0}, 3.0, 100.0, new Double[] {null, null, null});
-        controllerTunning.setSetpoint(new double[] {30.0});
-        assert (controllerTunning.getSetpoint()[0] == 30.0);
-        double tempY = SISODPA.simulateStep(controllerTunning.countControls(SISODPA.getOutput()));
+        AbstractController abstractController = new PIDController(1.0, 1.0, 1.0, 1.0, new double[] {100.0}, 3.0, 100.0, new Double[] {null, null, null});
+        abstractController.setSetpoint(new double[] {30.0});
+        assert (abstractController.getSetpoint()[0] == 30.0);
+        double tempY = SISODPA.simulateStep(abstractController.countControls(SISODPA.getOutput()));
         double expectedY = 20.0;
         assert (tempY == expectedY);
         SISODPA.resetObject();
-        controllerTunning.resetController();
-        tempY = SISODPA.simulateStep(controllerTunning.countControls(SISODPA.getOutput()));
+        abstractController.resetController();
+        tempY = SISODPA.simulateStep(abstractController.countControls(SISODPA.getOutput()));
         assert (tempY == expectedY);
     }
 
@@ -39,16 +39,16 @@ class PIDTest {
             ParObiektDPAMIMO[].class);
         MIMODPA obiekt = new MIMODPA(Obiekty, "srednio");
         Double[] tempStrojenie = new Double[] {1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
-        ControllerTunning controllerTunning = new PIDCollection(obiekt, PV, 3.0, tempStrojenie);
+        AbstractController abstractController = new PIDCollection(obiekt, PV, 3.0, tempStrojenie);
         double[] tempCel = {30.0, 30.0};
-        controllerTunning.setSetpoint(tempCel);
-        assert (controllerTunning.getSetpoint()[0] == 30.0);
-        double[] tempY = obiekt.simulateStep(controllerTunning.countControls(obiekt.getOutput()));
+        abstractController.setSetpoint(tempCel);
+        assert (abstractController.getSetpoint()[0] == 30.0);
+        double[] tempY = obiekt.simulateStep(abstractController.countControls(obiekt.getOutput()));
         double[] tempExpectedY = {26.23965651834505, 26.23965651834505};
         assertArrayEquals(tempY, tempExpectedY, 0.1);
         obiekt.resetObject();
-        controllerTunning.resetController();
-        tempY = obiekt.simulateStep(controllerTunning.countControls(obiekt.getOutput()));
+        abstractController.resetController();
+        tempY = obiekt.simulateStep(abstractController.countControls(obiekt.getOutput()));
         assertArrayEquals(tempY, tempExpectedY, 0.1);
     }
 }

@@ -3,7 +3,7 @@ package com.example.inzynierka.objects;
 
 import com.example.inzynierka.models.ParObiektRownania;
 import com.example.inzynierka.models.DisturbanceDiscrete;
-import com.example.inzynierka.tunningControllers.ControllerTunning;
+import com.example.inzynierka.tunningControllers.AbstractController;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -83,30 +83,30 @@ public class SISODiscrete extends SISO {
         }
     }
 
-    public double simulateObjectRegulation(ControllerTunning controllerTunning, double setpoint) {
+    public double simulateObjectRegulation(AbstractController abstractController, double setpoint) {
         resetObject();
-        controllerTunning.setSetpoint(new double[] {setpoint});
+        abstractController.setSetpoint(new double[] {setpoint});
 
-        double[] YSimulated = simulateObjectWithoutDisturbance(controllerTunning);
+        double[] YSimulated = simulateObjectWithoutDisturbance(abstractController);
 
         resetObject();
         return calculateError(YSimulated, setpoint);
     }
 
-    public double simulateObjectRegulation(ControllerTunning controllerTunning, double[] setpoint) {
+    public double simulateObjectRegulation(AbstractController abstractController, double[] setpoint) {
         resetObject();
-        controllerTunning.setSetpoint(setpoint);
+        abstractController.setSetpoint(setpoint);
 
-        double[] YSimulated = simulateObjectWithoutDisturbance(controllerTunning);
+        double[] YSimulated = simulateObjectWithoutDisturbance(abstractController);
 
         resetObject();
         return calculateError(YSimulated, setpoint[0]);
     }
 
-    private double[] simulateObjectWithoutDisturbance(ControllerTunning controllerTunning) {
+    private double[] simulateObjectWithoutDisturbance(AbstractController abstractController) {
         double[] YSimulated = new double[length];
         for (int i = 0; i < this.length; i++) {
-            YSimulated[i] = simulateStep(controllerTunning.countControls(getOutput()));
+            YSimulated[i] = simulateStep(abstractController.countControls(getOutput()));
         }
         return YSimulated;
     }

@@ -8,7 +8,7 @@ public class ParStrojenie {
 
     public ParStrojenie(ParRegulator parRegulator, ParObiektDPA parObiektDPA, ParObiektRownania parObiektRownania, ParWizualizacja parWizualizacja,
                         ParObiektDPA parObiektSymulacjiDPA, ParObiektRownania parObiektSymulacjiRownania, ZakloceniaDPA zakloceniaDPA,
-                        DisturbanceDiscrete disturbanceDiscrete, WizualizacjaZaklocen wizualizacjaZaklocen) {
+                        DisturbanceDiscrete zakloceniaRownania, WizualizacjaZaklocen wizualizacjaZaklocen) {
         this.parRegulator = parRegulator;
         this.parObiektDPA = parObiektDPA;
         this.parObiektRownania = parObiektRownania;
@@ -16,7 +16,7 @@ public class ParStrojenie {
         this.parObiektSymulacjiDPA = parObiektSymulacjiDPA;
         this.parObiektSymulacjiRownania = parObiektSymulacjiRownania;
         this.zakloceniaDPA = zakloceniaDPA;
-        this.disturbanceDiscrete = disturbanceDiscrete;
+        this.zakloceniaRownania = zakloceniaRownania;
         this.wizualizacjaZaklocen = wizualizacjaZaklocen;
     }
 
@@ -28,6 +28,6 @@ public class ParStrojenie {
     private ParObiektDPA parObiektSymulacjiDPA;
     private ParObiektRownania parObiektSymulacjiRownania;
     private ZakloceniaDPA zakloceniaDPA;
-    private DisturbanceDiscrete disturbanceDiscrete;
+    private DisturbanceDiscrete zakloceniaRownania;
     private WizualizacjaZaklocen wizualizacjaZaklocen;
 }

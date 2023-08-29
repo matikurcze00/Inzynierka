@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Data
-public class DMCAnalityczny extends ControllerTunningMPC {
+public class DMCController extends AbstractMPCController {
 
     protected Matrix Mpz;
     protected Matrix Mz;
@@ -19,10 +19,10 @@ public class DMCAnalityczny extends ControllerTunningMPC {
     protected Matrix dUz;
     protected Matrix Mp;
 
-    public DMCAnalityczny() {
+    public DMCController() {
     }
 
-    public DMCAnalityczny(int Nu, double lambda, SISODPA object, double cel, double duMax, int N, Double[] presetTuning) {
+    public DMCController(int Nu, double lambda, SISODPA object, double cel, double duMax, int N, Double[] presetTuning) {
         this(Nu, lambda, object, cel, duMax, N);
         if (presetTuning[0] != null) {
             presetControlsNumbers = 1;
@@ -34,7 +34,7 @@ public class DMCAnalityczny extends ControllerTunningMPC {
         }
     }
 
-    public DMCAnalityczny(int Nu, double lambda, SISODPA object, double cel, double duMax, int N) {
+    public DMCController(int Nu, double lambda, SISODPA object, double cel, double duMax, int N) {
         this.Lambda = List.of(lambda);
         this.Nu = Nu;
         this.N = N;
@@ -44,7 +44,7 @@ public class DMCAnalityczny extends ControllerTunningMPC {
 
     }
 
-    public DMCAnalityczny(int Nu, double[] lambda, MIMODPA object, double[] cel, double duMax, int N, Double[] presetTuning) {
+    public DMCController(int Nu, double[] lambda, MIMODPA object, double[] cel, double duMax, int N, Double[] presetTuning) {
         this(Nu, lambda, object, cel, duMax, N);
         this.presetControlsNumbers = 0;
         this.presetControls = presetTuning;
@@ -57,7 +57,7 @@ public class DMCAnalityczny extends ControllerTunningMPC {
         this.calculateParameters(object);
     }
 
-    public DMCAnalityczny(int Nu, double[] lambda, MIMODPA object, double[] setpoint, double duMax, int N) {
+    public DMCController(int Nu, double[] lambda, MIMODPA object, double[] setpoint, double duMax, int N) {
         List<Double> tempLambda = new ArrayList<>();
         for (double wartosc : lambda) {
             tempLambda.add(wartosc);

@@ -2,7 +2,7 @@ package com.example.inzynierka.objects;
 
 import com.example.inzynierka.models.ParObiektDPA;
 import com.example.inzynierka.models.ZakloceniaDPA;
-import com.example.inzynierka.tunningControllers.ControllerTunning;
+import com.example.inzynierka.tunningControllers.AbstractController;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -74,44 +74,44 @@ public class SISODPA extends SISO {
         }
     }
 
-    public double simulateObjectRegulation(ControllerTunning controllerTunning, double[] setpoint) {
+    public double simulateObjectRegulation(AbstractController abstractController, double[] setpoint) {
         resetObject();
-        controllerTunning.setSetpoint(setpoint);
+        abstractController.setSetpoint(setpoint);
         double[] YSymulacji;
         if (disturbance != null && !disturbance.isEmpty()) {
-            YSymulacji = simulateObjectWithDisturbance(controllerTunning);
+            YSymulacji = simulateObjectWithDisturbance(abstractController);
         } else {
-            YSymulacji = simulateObjectWithoutDisturbance(controllerTunning);
+            YSymulacji = simulateObjectWithoutDisturbance(abstractController);
         }
         resetObject();
         return calculateError(YSymulacji, setpoint[0]);
     }
 
-    private double[] simulateObjectWithoutDisturbance(ControllerTunning controllerTunning) {
+    private double[] simulateObjectWithoutDisturbance(AbstractController abstractController) {
         double[] YSimulated = new double[length];
         for (int i = 0; i < this.length; i++) {
-            YSimulated[i] = simulateStep(controllerTunning.countControls(getOutput()));
+            YSimulated[i] = simulateStep(abstractController.countControls(getOutput()));
         }
         return YSimulated;
     }
 
-    public double[] simulateObjectWithDisturbance(ControllerTunning controllerTunning) {
+    public double[] simulateObjectWithDisturbance(AbstractController abstractController) {
         double[] YSimulated = new double[length];
         for (int i = 0; i < Math.floorDiv(this.length, 2); i++) {
-            YSimulated[i] = simulateStep(controllerTunning.countControls(getOutput()));
+            YSimulated[i] = simulateStep(abstractController.countControls(getOutput()));
         }
         double[] UDisturbance = new double[disturbance.size()];
         for (int i = 0; i < UDisturbance.length; i++) {
             UDisturbance[i] = 3 * transmittance.getGain() / disturbance.get(i).getGain();
         }
         for (int i = Math.floorDiv(this.length, 2); i < Math.floorDiv(this.length * 3, 4); i++) {
-            YSimulated[i] = simulateStep(controllerTunning.countControls(getOutput(), UDisturbance), UDisturbance);
+            YSimulated[i] = simulateStep(abstractController.countControls(getOutput(), UDisturbance), UDisturbance);
         }
         for (int i = 0; i < UDisturbance.length; i++) {
             UDisturbance[i] = 0.0;
         }
         for (int i = Math.floorDiv(this.length * 3, 4); i < length; i++) {
-            YSimulated[i] = simulateStep(controllerTunning.countControls(getOutput(), UDisturbance), UDisturbance);
+            YSimulated[i] = simulateStep(abstractController.countControls(getOutput(), UDisturbance), UDisturbance);
         }
 
         return YSimulated;
