@@ -13,7 +13,7 @@ public class StepResponseService {
     public OdpowiedzSkokowa SISOOdpowiedz(ParStrojenie parStrojenie) {
         ParRegulator parRegulator = parStrojenie.getParRegulator();
         ParWizualizacja parWizualizacja = parStrojenie.getParWizualizacja();
-        if(parRegulator.getTyp().equals("pid") || parRegulator.getTyp().equals("dmc")) {
+        if (parRegulator.getTyp().equals("pid") || parRegulator.getTyp().equals("dmc")) {
 
             return getStepResponseSISODPA(parStrojenie, parRegulator, parWizualizacja);
         } else {
@@ -25,7 +25,7 @@ public class StepResponseService {
         ParObiektRownania parObiektRownania = parStrojenie.getParObiektRownania();
         SISODiscrete obiekt;
         try {
-            obiekt = new SISODiscrete(parObiektRownania, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
+            obiekt = new SISODiscrete(parObiektRownania, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getErr());
         } catch (Exception ex) {
             ex.printStackTrace();
             return null;
@@ -40,7 +40,7 @@ public class StepResponseService {
         ParObiektDPA parObiektDPA = parStrojenie.getParObiektDPA();
         SISODPA object;
         try {
-            object = new SISODPA(parObiektDPA, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
+            object = new SISODPA(parObiektDPA, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getErr());
         } catch (Exception ex) {
             ex.printStackTrace();
             return null;
@@ -63,7 +63,7 @@ public class StepResponseService {
 
     public OdpowiedzSkokowa MIMOStepResponse(MultipartFile file, ParRegulator parRegulator, ParWizualizacja parWizualizacja) {
         ObjectMapper objectMapper = new ObjectMapper();
-        if(parRegulator.getTyp().equals("pid") || parRegulator.getTyp().equals("dmc")) {
+        if (parRegulator.getTyp().equals("pid") || parRegulator.getTyp().equals("dmc")) {
             return getStepResponseMIMODPA(file, parWizualizacja, objectMapper);
         } else {
             return getStepResponseMIMODiscrete(file, parWizualizacja, objectMapper);
@@ -77,7 +77,7 @@ public class StepResponseService {
         try {
             root = objectMapper.readTree(file.getInputStream());
             transmittances = objectMapper.treeToValue(root.path("ParObiektDPAMIMO"), ParObiektDPAMIMO[].class);
-            object = new MIMODPA(transmittances, parWizualizacja.getBlad());
+            object = new MIMODPA(transmittances, parWizualizacja.getErr());
         } catch (Exception ex) {
             ex.printStackTrace();
             return null;
@@ -89,6 +89,7 @@ public class StepResponseService {
         getStepResponseMIMO(parWizualizacja, object, U, Utemp, stepResponse);
         return new OdpowiedzSkokowa(stepResponse);
     }
+
     private OdpowiedzSkokowa getStepResponseMIMODiscrete(MultipartFile file, ParWizualizacja parWizualizacja, ObjectMapper objectMapper) {
         JsonNode root;
         ParObiektRownaniaMIMO[] transmittances;
@@ -96,7 +97,7 @@ public class StepResponseService {
         try {
             root = objectMapper.readTree(file.getInputStream());
             transmittances = objectMapper.treeToValue(root.path("ParObiektRownaniaMIMO"), ParObiektRownaniaMIMO[].class);
-            object = new MIMODiscrete(transmittances, parWizualizacja.getBlad());
+            object = new MIMODiscrete(transmittances, parWizualizacja.getErr());
         } catch (Exception ex) {
             ex.printStackTrace();
             return null;

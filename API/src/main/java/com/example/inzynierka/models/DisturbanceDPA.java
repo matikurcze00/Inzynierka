@@ -3,7 +3,7 @@ package com.example.inzynierka.models;
 import lombok.Data;
 
 @Data
-public class ZakloceniaDPA {
+public class DisturbanceDPA {
     private Double[] gain;
     private Double[] R1;
     private Double[] R2;

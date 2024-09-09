@@ -1,4 +1,4 @@
-package com.example.inzynierka.tunningControllers;
+package com.example.inzynierka.controllers;
 
 import Jama.Matrix;
 import com.example.inzynierka.objects.MIMODPA;
@@ -22,8 +22,8 @@ public class DMCController extends AbstractMPCController {
     public DMCController() {
     }
 
-    public DMCController(int Nu, double lambda, SISODPA object, double cel, double duMax, int N, Double[] presetTuning) {
-        this(Nu, lambda, object, cel, duMax, N);
+    public DMCController(int Nu, double lambda, SISODPA object, double goal, double duMax, int N, Double[] presetTuning) {
+        this(Nu, lambda, object, goal, duMax, N);
         if (presetTuning[0] != null) {
             presetControlsNumbers = 1;
             this.presetControls = presetTuning;
@@ -34,18 +34,18 @@ public class DMCController extends AbstractMPCController {
         }
     }
 
-    public DMCController(int Nu, double lambda, SISODPA object, double cel, double duMax, int N) {
+    public DMCController(int Nu, double lambda, SISODPA object, double goal, double duMax, int N) {
         this.Lambda = List.of(lambda);
         this.Nu = Nu;
         this.N = N;
-        this.setpoint = new double[] {cel};
+        this.setpoint = new double[] {goal};
         this.duMax = duMax;
         calculateParameters(object);
 
     }
 
-    public DMCController(int Nu, double[] lambda, MIMODPA object, double[] cel, double duMax, int N, Double[] presetTuning) {
-        this(Nu, lambda, object, cel, duMax, N);
+    public DMCController(int Nu, double[] lambda, MIMODPA object, double[] goal, double duMax, int N, Double[] presetTuning) {
+        this(Nu, lambda, object, goal, duMax, N);
         this.presetControlsNumbers = 0;
         this.presetControls = presetTuning;
         for (int i = 0; i < presetTuning.length; i++) {
@@ -96,11 +96,11 @@ public class DMCController extends AbstractMPCController {
 
     public double[] countControls(double[] previousOutput) {
         int OUT = setpoint.length;
-        double[] celTemp = new double[N * OUT];
+        double[] goalTemp = new double[N * OUT];
         for (int i = 0; i < N * OUT; i++) {
-            celTemp[i] = setpoint[i % OUT];
+            goalTemp[i] = setpoint[i % OUT];
         }
-        Matrix yZad = new Matrix(celTemp, 1);
+        Matrix yZad = new Matrix(goalTemp, 1);
         double[] yTemp = new double[N * OUT];
         for (int i = 0; i < N * OUT; i++) {
             yTemp[i] = previousOutput[i % OUT];
@@ -119,11 +119,11 @@ public class DMCController extends AbstractMPCController {
     public double[] countControls(double[] aktualna, double[] disturbanceTuning) {
         int OUT = setpoint.length;
         savedUz(disturbanceTuning);
-        double[] celTemp = new double[N * OUT];
+        double[] goalTemp = new double[N * OUT];
         for (int i = 0; i < N * OUT; i++) {
-            celTemp[i] = setpoint[i % OUT];
+            goalTemp[i] = setpoint[i % OUT];
         }
-        Matrix yZad = new Matrix(celTemp, 1);
+        Matrix yZad = new Matrix(goalTemp, 1);
         double[] yTemp = new double[N * OUT];
         for (int i = 0; i < N * OUT; i++) {
             yTemp[i] = aktualna[i % OUT];
@@ -358,16 +358,20 @@ public class DMCController extends AbstractMPCController {
 
     protected void calculateMp(int IN, int OUT) {
         Mp = new Matrix(N * OUT, (D - 1) * IN);
-        for (int i = 0; i < D - 1; i++) { //bok ,wszerz
-            for (int j = 0; j < N; j++) { //dół
-                for (int k = 0; k < OUT; k++) {
-                    for (int m = 0; m < IN; m++) {
-                        if ((j + i + 1) < D) {
-                            Mp.set(j * OUT + k, i * IN + m, S.get(k * IN + m).get(j + i + 1) - S.get(k * IN + m).get(i));
-                        } else {
-                            Mp.set(j * OUT + k, i * IN + m, S.get(k * IN + m).get(D - 1) - S.get(k * IN + m).get(i));
-                        }
-                    }
+        for (int i = 0; i < D - 1; i++) { //row
+            for (int j = 0; j < N; j++) { //column
+                setMpPerOut(IN, OUT, i, j);
+            }
+        }
+    }
+
+    private void setMpPerOut(int IN, int OUT, int i, int j) {
+        for (int k = 0; k < OUT; k++) {
+            for (int m = 0; m < IN; m++) {
+                if ((j + i + 1) < D) {
+                    Mp.set(j * OUT + k, i * IN + m, S.get(k * IN + m).get(j + i + 1) - S.get(k * IN + m).get(i));
+                } else {
+                    Mp.set(j * OUT + k, i * IN + m, S.get(k * IN + m).get(D - 1) - S.get(k * IN + m).get(i));
                 }
             }
         }
@@ -375,37 +379,65 @@ public class DMCController extends AbstractMPCController {
 
     protected void calculateMz(int IN, int OUT) {
         Matrix MzTemp = new Matrix(N * OUT, (D) * IN);
-        for (int i = 0; i < D; i++) { //wszerz
-            for (int j = -1; j < N - 1; j++) { //wzdłuż
+        for (int i = 0; i < D; i++) { //row
+            for (int j = -1; j < N - 1; j++) { //column
                 if (i > 1 + Nu) {
-                    for (int k = 0; k < OUT; k++) {
-                        for (int m = 0; m < IN; m++) {
-                            if (j < Nu) {
-                                MzTemp.set((j + 1) * OUT + k, i * IN + m, 0.0);
-                            } else {
-                                MzTemp.set((j + 1) * OUT + k, i * IN + m, MzTemp.get((j + 1) * OUT + k, (i - 1) * IN + m) * 0.6);
-                            }
-                        }
-                    }
+                    setMzPerOut(IN, OUT, MzTemp, i, j);
                 } else if (j >= i) {
-                    for (int k = 0; k < OUT; k++) {
-                        for (int m = 0; m < IN; m++) {
-                            if (j - i >= D) {
-                                MzTemp.set((j + 1) * OUT + k, i * IN + m, Sz.get(k * IN + m).get(D));
-                            } else {
-                                MzTemp.set((j + 1) * OUT + k, i * IN + m, Sz.get(k * IN + m).get(j - i + 1));
-                            }
-                        }
-                    }
+                    setDefaultMzPerOut(IN, OUT, MzTemp, i, j);
                 }
             }
         }
         this.Mz = MzTemp;
     }
 
+    private void setDefaultMzPerOut(int IN, int OUT, Matrix MzTemp, int i, int j) {
+        for (int k = 0; k < OUT; k++) {
+            for (int m = 0; m < IN; m++) {
+                if (j - i >= D) {
+                    MzTemp.set((j + 1) * OUT + k, i * IN + m, Sz.get(k * IN + m).get(D));
+                } else {
+                    MzTemp.set((j + 1) * OUT + k, i * IN + m, Sz.get(k * IN + m).get(j - i + 1));
+                }
+            }
+        }
+    }
+
+    private void setMzPerOut(int IN, int OUT, Matrix MzTemp, int i, int j) {
+        for (int k = 0; k < OUT; k++) {
+            for (int m = 0; m < IN; m++) {
+                if (j < Nu) {
+                    MzTemp.set((j + 1) * OUT + k, i * IN + m, 0.0);
+                } else {
+                    MzTemp.set((j + 1) * OUT + k, i * IN + m, MzTemp.get((j + 1) * OUT + k, (i - 1) * IN + m) * 0.6);
+                }
+            }
+        }
+    }
+
     protected void calculateMpz(int IN, int OUT) {
         Mpz = new Matrix(N * OUT, (D) * IN);
-        //pierwsza kolumna
+        setFirstColumn(IN, OUT);
+        for (int i = 0; i < D - 1; i++) {
+            for (int j = 0; j < N; j++) {
+                setMpzPerOut(IN, OUT, i, j);
+            }
+        }
+    }
+
+    private void setMpzPerOut(int IN, int OUT, int i, int j) {
+        for (int k = 0; k < OUT; k++) {
+            for (int m = 0; m < IN; m++) {
+                if ((j + i + 1) < D + 1) {
+                    Mpz.set(j * OUT + k, (i + 1) * IN + m, (Sz.get(k * IN + m).get(j + i + 1) - Sz.get(k * IN + m).get(i)));
+                } else {
+                    Mpz.set(j * OUT + k, (i + 1) * IN + m, (Sz.get(k * IN + m).get(D) - Sz.get(k * IN + m).get(i)));
+                }
+            }
+        }
+    }
+
+    private void setFirstColumn(int IN, int OUT) {
         for (int j = 0; j < N; j++) {
             for (int k = 0; k < OUT; k++) {
                 for (int m = 0; m < IN; m++) {
@@ -413,20 +445,6 @@ public class DMCController extends AbstractMPCController {
                         Mpz.set(j * OUT + k, m, Sz.get(k * IN + m).get(j));
                     } else {
                         Mpz.set(j * OUT + k, m, Sz.get(k * IN + m).get(D));
-                    }
-                }
-            }
-        }
-        //kolejne
-        for (int i = 0; i < D - 1; i++) {
-            for (int j = 0; j < N; j++) {
-                for (int k = 0; k < OUT; k++) {
-                    for (int m = 0; m < IN; m++) {
-                        if ((j + i + 1) < D + 1) {
-                            Mpz.set(j * OUT + k, (i + 1) * IN + m, (Sz.get(k * IN + m).get(j + i + 1) - Sz.get(k * IN + m).get(i)));
-                        } else {
-                            Mpz.set(j * OUT + k, (i + 1) * IN + m, (Sz.get(k * IN + m).get(D) - Sz.get(k * IN + m).get(i)));
-                        }
                     }
                 }
             }
@@ -465,7 +483,7 @@ public class DMCController extends AbstractMPCController {
     }
 
     protected void savedU(double dUNewest) {
-        int horyzont = D>12? 11: 1;
+        int horyzont = D > 12 ? 11 : 1;
         for (int i = D - 1; i > D - horyzont; i--) {
             dU.set(0, i - 1, (dU.get(0, i - 1) + 3 * dU.get(0, i - 2)) / 4);
         }

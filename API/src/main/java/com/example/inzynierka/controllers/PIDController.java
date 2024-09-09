@@ -1,4 +1,4 @@
-package com.example.inzynierka.tunningControllers;
+package com.example.inzynierka.controllers;
 
 
 import lombok.Data;
@@ -18,10 +18,10 @@ public class PIDController extends AbstractController {
     private double r2;
     private double uMax;
 
-    public PIDController(double P, double I, double D, double Ts, double[] cel, double duMax,
+    public PIDController(double P, double I, double D, double Ts, double[] goal, double duMax,
                          double uMax, Double[] presetControls) {
 
-        this(P, I, D, Ts, cel, duMax, uMax);
+        this(P, I, D, Ts, goal, duMax, uMax);
         if (presetControls[0] != null) {
             this.K = presetControls[0];
         }
@@ -44,12 +44,12 @@ public class PIDController extends AbstractController {
 
     }
 
-    public PIDController(double P, double I, double D, double Ts, double[] cel, double duMax, double uMax) {
+    public PIDController(double P, double I, double D, double Ts, double[] goal, double duMax, double uMax) {
         this.K = P;
         this.Ti = I;
         this.Td = D;
         this.Ts = Ts;
-        this.setpoint = cel;
+        this.setpoint = goal;
         this.duMax = duMax;
         this.uMax = uMax;
         calculateParameters();

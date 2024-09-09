@@ -1,7 +1,7 @@
 package com.example.inzynierka.objects;
 
+import com.example.inzynierka.controllers.AbstractController;
 import com.example.inzynierka.models.ParObiektDPAMIMO;
-import com.example.inzynierka.tunningControllers.AbstractController;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -189,135 +189,131 @@ public class MIMODPA extends MIMO {
         return YAkt;
     }
 
-    public double simulateObjectRegulation(AbstractController abstractController, double[] cel) {
+    public double simulateObjectRegulation(AbstractController abstractController, double[] goal) {
 
         resetObject();
-        double simulationError = 0.0;
+        double simulationError;
         if (disturbance != null) {
-            simulationError = simulateObjectWithDisturbance(abstractController, cel, simulationError);
+            simulationError = simulateObjectWithDisturbance(abstractController, goal);
         } else {
-            simulationError = simulateObjectWithoutDisturbance(abstractController, cel, simulationError);
+            simulationError = simulateObjectWithoutDisturbance(abstractController, goal);
         }
-        simulationError = simulationError / this.length * outputNumber * outputNumber;
+        simulationError = simulationError / this.simulationLength * outputNumber * outputNumber;
         resetObject();
         return simulationError;
     }
 
-    private double simulateObjectWithoutDisturbance(AbstractController abstractController, double[] cel, double simulationError) {
-        double[] tempCel = new double[outputNumber];
+    private double simulateObjectWithoutDisturbance(AbstractController abstractController, double[] goal) {
+        double[] tempGoal = new double[outputNumber];
+        double simulationError = 0.0;
+
         for (int k = 0; k < outputNumber; k++) {
             for (int i = 0; i < outputNumber; i++) {
-                tempCel[i] = 0;
+                tempGoal[i] = 0;
             }
-            tempCel[k] = cel[k];
+            tempGoal[k] = goal[k];
             resetObject();
             abstractController.resetController();
-            abstractController.setSetpoint(tempCel);
-            double[] Ymed = new double[outputNumber];
-            for (int i = 0; i < this.length; i++) {
+            abstractController.setSetpoint(tempGoal);
+            for (int i = 0; i < this.simulationLength; i++) {
                 double[] Ytepm = simulateStep(abstractController.countControls(getOutput()));
-                for (int j = 0; j < outputNumber; j++) {
-                    if (this.typeOfError.equals("srednio")) {
-                        simulationError += Math.pow(Ytepm[j] - tempCel[j], 2);
-                    } else if (this.typeOfError.equals("absolutny")) {
-                        simulationError += Math.abs(Ytepm[j] - tempCel[j]);
-                    } else if (this.typeOfError.equals("mediana")) {
-                        if (i == Math.floorDiv(this.length,2)) {
-                            Ymed = Ytepm;
-                        }
-                    }
-                }
-            }
-            if(this.typeOfError.equals("mediana")) {
-                for (int j = 0; j < outputNumber; j++) {
-                    simulationError += Math.abs(Ymed[j] - tempCel[j]);
-                }
+                simulationError = calculateError(Ytepm, simulationError, tempGoal, i, 4);
             }
         }
         return simulationError;
     }
 
-    private double simulateObjectWithDisturbance(AbstractController abstractController, double[] cel, double simulationError) {
-        double[] tempCel = new double[outputNumber];
-        double[] Ymed = new double[outputNumber];
+    private double simulateObjectWithDisturbance(AbstractController abstractController, double[] goal) {
+        double[] tempGoal = new double[outputNumber];
+        double simulationError = 0.0;
         for (int k = 0; k < outputNumber; k++) {
             for (int i = 0; i < outputNumber; i++) {
-                tempCel[i] = 0;
+                tempGoal[i] = 0;
             }
-            tempCel[k] = cel[k];
-            abstractController.setSetpoint(tempCel);
+            tempGoal[k] = goal[k];
+            abstractController.setSetpoint(tempGoal);
             resetObject();
             abstractController.resetController();
-            double[] Ytepm = simulateStep(abstractController.countControls(getOutput()));
-            for (int i = 0; i < Math.floorDiv(this.length, 2); i++) {
-                for (int j = 0; j < Ytepm.length; j++) {
-                    if (this.typeOfError.equals("srednio")) {
-                        simulationError += Math.pow(Ytepm[j] - tempCel[j], 2);
-                    } else if (this.typeOfError.equals("absolutny")) {
-                        simulationError += Math.abs(Ytepm[j] - tempCel[j]);
-                    } else if (this.typeOfError.equals("mediana")) {
-                        if (i == Math.floorDiv(this.length, 4)) {
-                            Ymed = Ytepm;
-                        }
-                    }
-                }
-            }
-            if(this.typeOfError.equals("mediana")) {
-                for (int j = 0; j < outputNumber; j++) {
-                    simulationError += Math.abs(Ymed[j] - tempCel[j]);
-                }
-            }
-            double[] UDisturbance = new double[disturbance.getTransmittance().size()];
-            for (int i = 0; i < disturbance.getTransmittance().size(); i++) {
-                UDisturbance[i] = disturbance.getUMax(i) / this.length;
-            }
+            simulationError += simulateFirstHalf(abstractController, tempGoal);
+            double[] UDisturbance = calculateDisturbanceVector();
+            simulationError += simulateDisturbance(abstractController, tempGoal, UDisturbance);
+            simulationError += simulatePartAfterDisturbance(abstractController, tempGoal, UDisturbance);
+        }
+        return simulationError;
+    }
 
-            for (int i = 0; i < Math.floorDiv(this.length, 8); i++) {
-                Ytepm = simulateStep(abstractController.countControls(getOutput(), UDisturbance), UDisturbance);
-                for (int j = 0; j < Ytepm.length; j++) {
-                    if (this.typeOfError.equals("srednio")) {
-                        simulationError += Math.pow(Ytepm[j] - tempCel[j], 2);
-                    } else if (this.typeOfError.equals("absolutny")) {
-                        simulationError += Math.abs(Ytepm[j] - tempCel[j]);
-                    } else if (this.typeOfError.equals("mediana")) {
-                        if (i == Math.floorDiv(this.length, 16)) {
-                            Ymed = Ytepm;
-                        }
-                    }
-                }
-            }
-            if(this.typeOfError.equals("mediana")) {
-                for (int j = 0; j < outputNumber; j++) {
-                    simulationError += Math.abs(Ymed[j] - tempCel[j]);
-                }
-            }
-            for (int i = 0; i < disturbance.getTransmittance().size(); i++) {
-                UDisturbance[i] = 0.0;
-            }
+    private double[] calculateDisturbanceVector() {
+        double[] UDisturbance = new double[disturbance.getTransmittance().size()];
+        for (int i = 0; i < disturbance.getTransmittance().size(); i++) {
+            UDisturbance[i] = disturbance.getUMax(i) / this.simulationLength;
+        }
+        return UDisturbance;
+    }
 
-            for (int i = 0; i < Math.floorDiv(this.length * 3, 8); i++) {
-                Ytepm = simulateStep(abstractController.countControls(getOutput(), UDisturbance), UDisturbance);
-                for (int j = 0; j < Ytepm.length; j++) {
-                    if (this.typeOfError.equals("srednio")) {
-                        simulationError += Math.pow(Ytepm[j] - tempCel[j], 2);
-                    } else if (this.typeOfError.equals("absolutny")) {
-                        simulationError += Math.abs(Ytepm[j] - tempCel[j]);
-                    } else if (this.typeOfError.equals("mediana")) {
-                        if (i == Math.floorDiv(this.length, 16)) {
-                            Ymed = Ytepm;
-                        }
-                    }
-                }
-            }
-            if(this.typeOfError.equals("mediana")) {
-                for (int j = 0; j < outputNumber; j++) {
-                    simulationError += Math.abs(Ymed[j] - tempCel[j]);
+
+    /*
+    Simulating part without disturbance with goal
+     */
+    private double simulateFirstHalf(AbstractController abstractController, double[] tempGoal) {
+        double simulationError = 0.0;
+        double[] Ytepm = simulateStep(abstractController.countControls(getOutput()));
+        int half = 4;
+
+        for (int i = 0; i < Math.floorDiv(this.simulationLength, 2); i++) {
+            simulationError = calculateError(Ytepm, simulationError, tempGoal, i, 4);
+        }
+
+        return simulationError;
+    }
+
+    private double calculateError(double[] Ytepm, double simulationError, double[] tempGoal, int i, int y) {
+        for (int j = 0; j < Ytepm.length; j++) {
+            if (this.typeOfError.equals("srednio")) {
+                simulationError += Math.pow(Ytepm[j] - tempGoal[j], 2);
+            } else if (this.typeOfError.equals("absolutny")) {
+                simulationError += Math.abs(Ytepm[j] - tempGoal[j]);
+            } else if (this.typeOfError.equals("mediana") && i == Math.floorDiv(this.simulationLength, y)) {
+                for (int out = 0; out < outputNumber; out++) {
+                    simulationError += Math.abs(Ytepm[j] - tempGoal[out]);
                 }
             }
         }
         return simulationError;
     }
 
+    /*
+    Adding disturbance to the simulation
+     */
+    private double simulateDisturbance(AbstractController abstractController, double[] tempGoal, double[] UDisturbance) {
+        double simulationError = 0.0;
+        double[] Ytepm;
+        int half = 16;
+
+        for (int i = 0; i < Math.floorDiv(this.simulationLength, 8); i++) {
+            Ytepm = simulateStep(abstractController.countControls(getOutput(), UDisturbance), UDisturbance);
+            simulationError = calculateError(Ytepm, simulationError, tempGoal, i, half);
+        }
+
+        return simulationError;
+    }
+
+    /*
+    Simulating part after disturbance to check if controller can stand it
+     */
+    private double simulatePartAfterDisturbance(AbstractController abstractController, double[] tempGoal, double[] UDisturbance) {
+        double simulationError = 0.0;
+        double[] Ytepm;
+        int half = 48;
+        for (int i = 0; i < disturbance.getTransmittance().size(); i++) {
+            UDisturbance[i] = 0.0;
+        }
+
+        for (int i = 0; i < Math.floorDiv(this.simulationLength * 3, 8); i++) {
+            Ytepm = simulateStep(abstractController.countControls(getOutput(), UDisturbance), UDisturbance);
+            simulationError = calculateError(Ytepm, simulationError, tempGoal, i, half);
+        }
+        return simulationError;
+    }
 
     public double getUMax(int IN) {
         return getUMax()[IN];
@@ -327,25 +323,25 @@ public class MIMODPA extends MIMO {
         return 0.0;
     }
 
-    public double countError(int dlugosc, List<double[]> wyjscie, double[] cel) {
+    public double countError(int dlugosc, List<double[]> wyjscie, double[] goal) {
         double error = 0.0;
         switch (this.typeOfError) {
             case "mediana":
                 for (int i = 0; i < entriesNumber; i++) {
-                    error += wyjscie.get(0)[Math.floorDiv(dlugosc, 2)] - cel[i];
+                    error += wyjscie.get(0)[Math.floorDiv(dlugosc, 2)] - goal[i];
                 }
                 break;
             case "srednio":
                 for (int i = 0; i < dlugosc; i++) {
-                    for (int j = 0; j < cel.length; j++) {
-                        error += Math.pow(wyjscie.get(j)[i] - cel[j], 2);
+                    for (int j = 0; j < goal.length; j++) {
+                        error += Math.pow(wyjscie.get(j)[i] - goal[j], 2);
                     }
                 }
                 break;
             case "absolutny":
                 for (int i = 0; i < dlugosc; i++) {
-                    for (int j = 0; j < cel.length; j++) {
-                        error += Math.abs(wyjscie.get(j)[i] - cel[j]);
+                    for (int j = 0; j < goal.length; j++) {
+                        error += Math.abs(wyjscie.get(j)[i] - goal[j]);
                     }
                 }
                 break;
@@ -364,7 +360,7 @@ public class MIMODPA extends MIMO {
         }
         double[] uMaxTemp = new double[entriesNumber];
         System.arraycopy(this.uMax, 0, uMaxTemp, 0, entriesNumber);
-        for (int i = 0; i < length * 2; i++) {
+        for (int i = 0; i < simulationLength * 2; i++) {
             simulateStep(uMaxTemp);
         }
         Ytemp = getOutput();
@@ -412,10 +408,10 @@ public class MIMODPA extends MIMO {
                 double Utemp = 0;
 
                 int k = 2;
-                List<Double> simulation = new ArrayList<Double>();
+                List<Double> simulation = new ArrayList<>();
                 simulation.add((this.simulateStep(Uskok, j, i) - this.getYpp(i)) / Uskok);
                 simulation.add((this.simulateStep(Utemp, j, i) - this.getYpp(i)) / Uskok);
-                while ((!(Math.abs(simulation.get(k - 1) - simulation.get(k - 2)) < 0.005) || simulation.get(k - 2) == 0.0)
+                while (((Math.abs(simulation.get(k - 1) - simulation.get(k - 2)) >= 0.005) || simulation.get(k - 2) == 0.0)
                     && ((k <= 10) || (k > 10 && simulation.get(k - 2) != 0.0))) {
                     simulation.add((this.simulateStep(Utemp, j, i) - this.getYpp(i)) / Uskok);
                     k++;
@@ -425,7 +421,7 @@ public class MIMODPA extends MIMO {
                 }
             }
         }
-        this.length = lengthTemp;
+        this.simulationLength = lengthTemp;
 
     }
 

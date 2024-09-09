@@ -1,4 +1,4 @@
-package com.example.inzynierka.tunningControllers;
+package com.example.inzynierka.controllers;
 
 import Jama.Matrix;
 import lombok.Data;
@@ -11,8 +11,8 @@ public abstract class AbstractMPCController extends AbstractController {
     protected Integer N;
     protected Integer Nu;
     protected Matrix M;
-    List<List<Double>> S;
     protected List<Double> Lambda;
     protected Matrix K;
+    List<List<Double>> S;
 
 }

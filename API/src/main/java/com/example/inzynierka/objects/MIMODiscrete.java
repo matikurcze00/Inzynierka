@@ -1,8 +1,8 @@
 package com.example.inzynierka.objects;
 
-import com.example.inzynierka.models.ParObiektRownaniaMIMO;
+import com.example.inzynierka.controllers.AbstractController;
 import com.example.inzynierka.models.DisturbanceDiscrete;
-import com.example.inzynierka.tunningControllers.AbstractController;
+import com.example.inzynierka.models.ParObiektRownaniaMIMO;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -55,7 +55,7 @@ public class MIMODiscrete extends MIMO {
         this.uMax = new double[parObiektRownaniaMIMOS.length];
         List<Double> uMinTemp = new ArrayList<>();
         List<Double> uMaxTemp = new ArrayList<>();
-        this.length = 50;
+        this.simulationLength = 50;
         setABMIMO(parObiektRownaniaMIMOS, uMinTemp, uMaxTemp);
         setLimitations(uMinTemp, uMaxTemp);
         outputNumber = parObiektRownaniaMIMOS.length;
@@ -103,51 +103,49 @@ public class MIMODiscrete extends MIMO {
         }
     }
 
-    public double simulateObjectRegulation(AbstractController abstractController, double[] cel) {
+    public double simulateObjectRegulation(AbstractController abstractController, double[] goal) {
 
         resetObject();
-        double wartoscBlad = 0.0;
+        double errValue = 0.0;
 
-        wartoscBlad = simulateObjectWithoutDisturbance(abstractController, cel, wartoscBlad);
+        errValue = simulateObjectWithoutDisturbance(abstractController, goal, errValue);
 
-        wartoscBlad = wartoscBlad / this.length * outputNumber * outputNumber;
+        errValue = errValue / this.simulationLength * outputNumber * outputNumber;
         resetObject();
-        return wartoscBlad;
+        return errValue;
     }
 
-    private double simulateObjectWithoutDisturbance(AbstractController abstractController, double[] cel, double blad) {
-        double[] tempCel = new double[outputNumber];
-        double[] Ymed = new double[outputNumber];
+    private double simulateObjectWithoutDisturbance(AbstractController abstractController, double[] goal, double err) {
+        double[] tempGoal = new double[outputNumber];
         for (int k = 0; k < outputNumber; k++) {
             for (int i = 0; i < outputNumber; i++) {
-                tempCel[i] = 0;
+                tempGoal[i] = 0;
             }
-            tempCel[k] = cel[k];
-            abstractController.setSetpoint(tempCel);
+            tempGoal[k] = goal[k];
+            abstractController.setSetpoint(tempGoal);
             resetObject();
             abstractController.resetController();
-            for (int i = 0; i < this.length; i++) {
+            for (int i = 0; i < this.simulationLength; i++) {
                 double[] Ytepm = simulateStep(abstractController.countControls(getOutput()));
-                for (int j = 0; j < Ytepm.length; j++) {
-                    if (this.typeOfError.equals("srednio")) {
-                        blad += Math.pow(Ytepm[j] - tempCel[j], 2);
-                    } else if (this.typeOfError.equals("absolutny")) {
-                        blad += Math.abs(Ytepm[j] - tempCel[j]);
-                    } else if (this.typeOfError.equals("mediana")) {
-                        if (i == Math.floorDiv(this.length, 16)) {
-                            Ymed = Ytepm;
-                        }
-                    }
-
-                }
+                err = calculateErrorWithoutDisturbance(err, tempGoal, i, Ytepm);
             }
-            if(this.typeOfError.equals("mediana")) {
-                for (int j = 0; j < outputNumber; j++) {
-                    blad += Math.abs(Ymed[j] - tempCel[j]);
+        }
+        return err;
+    }
+
+    private double calculateErrorWithoutDisturbance(double err, double[] tempGoal, int i, double[] Ytepm) {
+        for (int j = 0; j < Ytepm.length; j++) {
+            if (this.typeOfError.equals("srednio")) {
+                err += Math.pow(Ytepm[j] - tempGoal[j], 2);
+            } else if (this.typeOfError.equals("absolutny")) {
+                err += Math.abs(Ytepm[j] - tempGoal[j]);
+            } else if (this.typeOfError.equals("mediana") && i == Math.floorDiv(this.simulationLength, 16)) {
+                for (int out = 0; out < this.simulationLength; out++) {
+                    err += Math.abs(Ytepm[out] - tempGoal[out]);
                 }
             }
         }
-        return blad;
+        return err;
     }
 
     public double[] simulateStep(double[] du) {
@@ -287,7 +285,7 @@ public class MIMODiscrete extends MIMO {
         }
         double[] uMaxTemp = new double[entriesNumber];
         System.arraycopy(this.uMax, 0, uMaxTemp, 0, entriesNumber);
-        for (int i = 0; i < length * 2; i++) {
+        for (int i = 0; i < simulationLength * 2; i++) {
             simulateStep(uMaxTemp);
         }
         Ytemp = getOutput();

@@ -1,5 +1,5 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { FormArray, FormControl, FormGroup } from '@angular/forms';
+import {Component, EventEmitter, OnInit, Output} from '@angular/core';
+import {FormArray, FormControl, FormGroup} from '@angular/forms';
 
 @Component({
   selector: 'app-regulator-widok',
@@ -9,9 +9,9 @@ import { FormArray, FormControl, FormGroup } from '@angular/forms';
 export class RegulatorWidokComponent implements OnInit {
   @Output() updateEvent = new EventEmitter<FormArray>();
   typ = [
-    { id: 1, typ: 'PID' },
-    { id: 2, typ: 'DMC' },
-    { id: 3, typ: 'GPC' },
+    {id: 1, typ: 'PID'},
+    {id: 2, typ: 'DMC'},
+    {id: 3, typ: 'GPC'},
   ];
   regulatorForm = new FormGroup({
     regulator: new FormArray([
@@ -23,14 +23,15 @@ export class RegulatorWidokComponent implements OnInit {
       }),
     ]),
   });
-  constructor() {}
+
+  constructor() {
+  }
 
   ngOnInit(): void {
     this.updateEvent.emit(this.regulatorForm.controls.regulator);
 
     this.regulatorForm.valueChanges.subscribe((value) => {
       this.updateEvent.emit(this.regulatorForm.controls.regulator);
-      console.log(value);
     });
   }
 }

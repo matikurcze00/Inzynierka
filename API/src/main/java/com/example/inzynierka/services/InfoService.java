@@ -1,9 +1,9 @@
 package com.example.inzynierka.services;
 
+import com.example.inzynierka.models.DisturbanceDiscrete;
 import com.example.inzynierka.models.OdpowiedzInfoMIMO;
 import com.example.inzynierka.models.ParObiektDPAMIMO;
 import com.example.inzynierka.models.ParObiektRownaniaMIMO;
-import com.example.inzynierka.models.DisturbanceDiscrete;
 import com.example.inzynierka.objects.MIMODPA;
 import com.example.inzynierka.objects.MIMODiscrete;
 import com.fasterxml.jackson.databind.JsonNode;

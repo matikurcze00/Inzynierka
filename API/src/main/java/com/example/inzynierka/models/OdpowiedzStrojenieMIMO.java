@@ -6,7 +6,7 @@ import lombok.Data;
 public class OdpowiedzStrojenieMIMO {
     private double[] wspolczynniki;
     private double[][] wykres;
-    private double[][] cel;
+    private double[][] goal;
     private double[][] sterowanie;
     private double[][] sterowanieZaklocenia;
 }

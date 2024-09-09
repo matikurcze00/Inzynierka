@@ -1,9 +1,10 @@
 package com.example.inzynierka.services;
 
-import com.example.inzynierka.EA.EvolutionaryAlgorithm;
+import com.example.inzynierka.controllers.*;
+import com.example.inzynierka.ea.EvolutionaryAlgorithm;
+import com.example.inzynierka.exception.WrongDataException;
 import com.example.inzynierka.models.*;
 import com.example.inzynierka.objects.*;
-import com.example.inzynierka.tunningControllers.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
@@ -57,18 +58,18 @@ public class TuningService {
                 if (file.length == 3) {
                     JsonNode root = objectMapper.readTree(file[2].getInputStream());
                     ParObiektDPAMIMO[] obiekty = objectMapper.treeToValue(root.path("ParObiektDPAMIMO"), ParObiektDPAMIMO[].class);
-                    MIMODPA zaklocenie = new MIMODPA(obiekty, parWizualizacja.getBlad());
+                    MIMODPA zaklocenie = new MIMODPA(obiekty, parWizualizacja.getErr());
                     root = objectMapper.readTree(file[0].getInputStream());
                     obiekty = objectMapper.treeToValue(root.path("ParObiektDPAMIMO"), ParObiektDPAMIMO[].class);
-                    return new MIMODPA(obiekty, parWizualizacja.getBlad(), zaklocenie);
+                    return new MIMODPA(obiekty, parWizualizacja.getErr(), zaklocenie);
                 } else {
                     JsonNode root = objectMapper.readTree(file[0].getInputStream());
                     ParObiektDPAMIMO[] obiekty = objectMapper.treeToValue(root.path("ParObiektDPAMIMO"), ParObiektDPAMIMO[].class);
-                    return new MIMODPA(obiekty, parWizualizacja.getBlad());
+                    return new MIMODPA(obiekty, parWizualizacja.getErr());
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
-                return null;
+                throw WrongDataException.wrongObjectException(parRegulator.getTyp());
             }
         } else {
             try {
@@ -77,15 +78,15 @@ public class TuningService {
                     DisturbanceDiscrete[] disturbanceDiscrete = objectMapper.treeToValue(root.path("ZakloceniaRownania"), DisturbanceDiscrete[].class);
                     root = objectMapper.readTree(file[0].getInputStream());
                     ParObiektRownaniaMIMO[] obiekty = objectMapper.treeToValue(root.path("ParObiektRownaniaMIMO"), ParObiektRownaniaMIMO[].class);
-                    return new MIMODiscrete(obiekty, parWizualizacja.getBlad(), disturbanceDiscrete);
+                    return new MIMODiscrete(obiekty, parWizualizacja.getErr(), disturbanceDiscrete);
                 } else {
                     JsonNode root = objectMapper.readTree(file[0].getInputStream());
                     ParObiektRownaniaMIMO[] obiekty = objectMapper.treeToValue(root.path("ParObiektRownaniaMIMO"), ParObiektRownaniaMIMO[].class);
-                    return new MIMODiscrete(obiekty, parWizualizacja.getBlad());
+                    return new MIMODiscrete(obiekty, parWizualizacja.getErr());
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
-                return null;
+                throw WrongDataException.wrongObjectException(parRegulator.getTyp());
             }
         }
     }
@@ -110,14 +111,14 @@ public class TuningService {
             if (file.length == 3) {
                 root = objectMapper.readTree(file[2].getInputStream());
                 ParObiektDPAMIMO[] obiekty = objectMapper.treeToValue(root.path("ParObiektDPAMIMO"), ParObiektDPAMIMO[].class);
-                MIMODPA zaklocenie = new MIMODPA(obiekty, parWizualizacja.getBlad());
+                MIMODPA zaklocenie = new MIMODPA(obiekty, parWizualizacja.getErr());
                 root = objectMapper.readTree(file[1].getInputStream());
                 obiekty = objectMapper.treeToValue(root.path("ParObiektDPAMIMO"), ParObiektDPAMIMO[].class);
-                object = new MIMODPA(obiekty, parWizualizacja.getBlad(), zaklocenie);
+                object = new MIMODPA(obiekty, parWizualizacja.getErr(), zaklocenie);
             } else {
                 root = objectMapper.readTree(file[1].getInputStream());
                 ParObiektDPAMIMO[] obiekty = objectMapper.treeToValue(root.path("ParObiektDPAMIMO"), ParObiektDPAMIMO[].class);
-                object = new MIMODPA(obiekty, parWizualizacja.getBlad());
+                object = new MIMODPA(obiekty, parWizualizacja.getErr());
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -135,11 +136,11 @@ public class TuningService {
                 DisturbanceDiscrete[] disturbanceDiscrete = objectMapper.treeToValue(root.path("ZakloceniaRownania"), DisturbanceDiscrete[].class);
                 root = objectMapper.readTree(file[1].getInputStream());
                 ParObiektRownaniaMIMO[] obiekty = objectMapper.treeToValue(root.path("ParObiektRownaniaMIMO"), ParObiektRownaniaMIMO[].class);
-                object = new MIMODiscrete(obiekty, parWizualizacja.getBlad(), disturbanceDiscrete);
+                object = new MIMODiscrete(obiekty, parWizualizacja.getErr(), disturbanceDiscrete);
             } else {
                 root = objectMapper.readTree(file[1].getInputStream());
                 ParObiektRownaniaMIMO[] obiekty = objectMapper.treeToValue(root.path("ParObiektRownaniaMIMO"), ParObiektRownaniaMIMO[].class);
-                object = new MIMODiscrete(obiekty, parWizualizacja.getBlad());
+                object = new MIMODiscrete(obiekty, parWizualizacja.getErr());
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -148,52 +149,95 @@ public class TuningService {
         return object;
     }
 
-    public OdpowiedzStrojenie SISOTuning(ParStrojenie parStrojenie) {
-        ParObiektDPA parObiektDPA = parStrojenie.getParObiektDPA();
-        ParObiektRownania parObiektRownania = parStrojenie.getParObiektRownania();
-        ParRegulator parRegulator = parStrojenie.getParRegulator();
-        ParWizualizacja parWizualizacja = parStrojenie.getParWizualizacja();
-        ZakloceniaDPA zakloceniaDPA;
+    private static DisturbanceDiscrete setDisturbanceDiscrete(ParStrojenie parStrojenie) {
         DisturbanceDiscrete disturbanceDiscrete;
-        if (parStrojenie.getZakloceniaDPA().getGain() != null && parStrojenie.getZakloceniaDPA().getGain().length != 0) {
-            zakloceniaDPA = parStrojenie.getZakloceniaDPA();
-        } else {
-            zakloceniaDPA = null;
-        }
         if (parStrojenie.getZakloceniaRownania().getB1() != null && parStrojenie.getZakloceniaRownania().getB1().length != 0) {
             disturbanceDiscrete = parStrojenie.getZakloceniaRownania();
         } else {
             disturbanceDiscrete = null;
         }
+        return disturbanceDiscrete;
+    }
+
+    private static DisturbanceDPA setDisturbanceDPA(ParStrojenie parStrojenie) {
+        DisturbanceDPA disturbanceDPA;
+        if (parStrojenie.getDisturbanceDPA().getGain() != null && parStrojenie.getDisturbanceDPA().getGain().length != 0) {
+            disturbanceDPA = parStrojenie.getDisturbanceDPA();
+        } else {
+            disturbanceDPA = null;
+        }
+        return disturbanceDPA;
+    }
+
+    private static void setResponse(OdpowiedzStrojenie odpowiedzStrojenie, double[] Y, double[] U) {
+        odpowiedzStrojenie.setWykres(Y);
+        odpowiedzStrojenie.setSterowanie(U);
+    }
+
+    private static void setDifference(double[][] dUZ, double[][] Uz, int parWizualizacja) {
+        for (int j = 0; j < dUZ[0].length; j++) {
+            Uz[j][0] = dUZ[0][j];
+        }
+
+        for (int i = 1; i < parWizualizacja; i++) {
+            for (int j = 0; j < dUZ[0].length; j++) {
+                Uz[j][i] = Uz[j][i - 1] + dUZ[i][j];
+            }
+        }
+    }
+
+    private static void simulateSetPartSISO(ParWizualizacja parWizualizacja, SISO object, AbstractController abstractController, double[][] dUZ, double[] Y,
+                                            double[] U) {
+        abstractController.setSetpoint(new double[] {parWizualizacja.getYZad()[0]});
+        for (int i = parWizualizacja.getSkok()[0]; i < parWizualizacja.getDlugosc(); i++) {
+            {
+                Y[i] = object.simulateStep(abstractController.countControls(object.getOutput(), dUZ[i]), dUZ[i]);
+                U[i] = object.getU().get(0);
+            }
+        }
+    }
+
+    private static void simulateWaitingPartSISO(ParWizualizacja parWizualizacja, SISO object, AbstractController abstractController, double[][] dUZ, double[] Y,
+                                                double[] U) {
+        abstractController.setSetpoint(parWizualizacja.getYPP());
+        for (int i = 0; i < parWizualizacja.getSkok()[0]; i++) {
+            Y[i] = object.simulateStep(abstractController.countControls(object.getOutput(), dUZ[i]), dUZ[i]);
+            U[i] = object.getU().get(0);
+        }
+    }
+
+    private static void resetSISO(ParWizualizacja parWizualizacja, SISO object, AbstractController abstractController, double[] Y, double[] U) {
+        object.resetObject();
+        abstractController.resetController();
+        Y[0] = object.getYpp();
+        U[0] = parWizualizacja.getUPP()[0];
+    }
+
+    public OdpowiedzStrojenie SISOTuning(ParStrojenie parStrojenie) {
+        ParObiektDPA parObiektDPA = parStrojenie.getParObiektDPA();
+        ParObiektRownania parObiektRownania = parStrojenie.getParObiektRownania();
+        ParRegulator parRegulator = parStrojenie.getParRegulator();
+        ParWizualizacja parWizualizacja = parStrojenie.getParWizualizacja();
+        DisturbanceDPA disturbanceDPA = setDisturbanceDPA(parStrojenie);
+        DisturbanceDiscrete disturbanceDiscrete = setDisturbanceDiscrete(parStrojenie);
 
         Integer[] EAParameters = new Integer[3];
         OdpowiedzStrojenie odpowiedzStrojenie = new OdpowiedzStrojenie();
 
-        SISO object = getSISOObject(parObiektDPA, parObiektRownania, parRegulator, parWizualizacja, zakloceniaDPA, disturbanceDiscrete);
-        if (object == null) {
-            return null;
-        }
-        AbstractController abstractController;
-        abstractController = getSISOController(parObiektDPA, parRegulator, parWizualizacja, object, EAParameters);
-        if (abstractController == null) {
-            return null;
-        }
+        SISO object = getSISOObject(parObiektDPA, parObiektRownania, parRegulator, parWizualizacja, disturbanceDPA, disturbanceDiscrete);
+        AbstractController abstractController = getSISOController(parObiektDPA, parRegulator, parWizualizacja, object, EAParameters);
         if (abstractController.getNumberOfTuningParameters() != 0) {
             EvolutionaryAlgorithm GA = new EvolutionaryAlgorithm(EAParameters[0], EAParameters[1], EAParameters[2], 0.3, 0.2);
             getSISOTuning(parWizualizacja, object, abstractController, GA, odpowiedzStrojenie);
         } else {
-            double[] primitiveArray = new double[parWizualizacja.getStrojenie().length];
-            for (int i = 0; i < parWizualizacja.getStrojenie().length; i++) {
-                primitiveArray[i] = parWizualizacja.getStrojenie()[i];
-            }
-            odpowiedzStrojenie.setWspolczynniki(primitiveArray);
+            odpowiedzStrojenie.setWspolczynniki(Arrays.stream(parWizualizacja.getStrojenie()).mapToDouble(Double::doubleValue).toArray());
         }
         if (parStrojenie.getParObiektSymulacjiDPA() != null) {
-            if (zakloceniaDPA != null) {
-                object = new SISODPA(parStrojenie.getParObiektSymulacjiDPA(), parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad(),
-                    zakloceniaDPA);
+            if (disturbanceDPA != null) {
+                object = new SISODPA(parStrojenie.getParObiektSymulacjiDPA(), parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getErr(),
+                    disturbanceDPA);
             } else {
-                object = new SISODPA(parStrojenie.getParObiektSymulacjiDPA(), parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
+                object = new SISODPA(parStrojenie.getParObiektSymulacjiDPA(), parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getErr());
             }
         }
         double[] Y = simulateSISO(parWizualizacja, object, abstractController, odpowiedzStrojenie, parStrojenie.getWizualizacjaZaklocen());
@@ -211,17 +255,17 @@ public class TuningService {
             error += Math.pow(Y[i] - abstractController.getSetpoint()[0], 2);
         }
         error = error / parWizualizacja.getDlugosc();
-        System.out.println("BLAD:" + error);
+        System.out.println("err:" + error);
     }
 
     private double[] simulateSISO(ParWizualizacja parWizualizacja, SISO object, AbstractController abstractController,
                                   OdpowiedzStrojenie odpowiedzStrojenie, WizualizacjaZaklocen wizualizacjaZaklocen) {
         setSetpoint(parWizualizacja, abstractController, odpowiedzStrojenie);
         if (wizualizacjaZaklocen.getUSkok() != null && wizualizacjaZaklocen.getUSkok().length != 0) {
-            return simulationSISO(parWizualizacja, object, abstractController, odpowiedzStrojenie,
+            return simulateSISO(parWizualizacja, object, abstractController, odpowiedzStrojenie,
                 setDisturbanceTuning(parWizualizacja, wizualizacjaZaklocen));
         } else {
-            return simulationSISO(parWizualizacja, object, abstractController, odpowiedzStrojenie);
+            return simulateSISO(parWizualizacja, object, abstractController, odpowiedzStrojenie);
         }
 
     }
@@ -237,7 +281,7 @@ public class TuningService {
             }
 
         }
-        odpowiedzStrojenie.setCel(setpointTemp);
+        odpowiedzStrojenie.setGoal(setpointTemp);
     }
 
     private double[][] setDisturbanceTuning(ParWizualizacja parWizualizacja, WizualizacjaZaklocen wizualizacjaZaklocen) {
@@ -269,26 +313,20 @@ public class TuningService {
     }
 
     private SISO getSISOObject(ParObiektDPA parObiektDPA, ParObiektRownania parObiektRownania, ParRegulator parRegulator,
-                               ParWizualizacja parWizualizacja, ZakloceniaDPA zakloceniaDPA, DisturbanceDiscrete disturbanceDiscrete) {
-        try {
-            if (!parRegulator.getTyp().equals("gpc")) {
-
-                if (zakloceniaDPA != null) {
-                    return new SISODPA(parObiektDPA, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad(), zakloceniaDPA);
-                } else {
-                    return new SISODPA(parObiektDPA, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
-                }
+                               ParWizualizacja parWizualizacja, DisturbanceDPA disturbanceDPA, DisturbanceDiscrete disturbanceDiscrete) {
+        if (!parRegulator.getTyp().equals("gpc")) {
+            if (disturbanceDPA != null) {
+                return new SISODPA(parObiektDPA, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getErr(), disturbanceDPA);
             } else {
-                if (disturbanceDiscrete != null) {
-                    return new SISODiscrete(parObiektRownania, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad(),
-                        disturbanceDiscrete);
-                } else {
-                    return new SISODiscrete(parObiektRownania, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getBlad());
-                }
+                return new SISODPA(parObiektDPA, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getErr());
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return null;
+        } else {
+            if (disturbanceDiscrete != null) {
+                return new SISODiscrete(parObiektRownania, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getErr(),
+                    disturbanceDiscrete);
+            } else {
+                return new SISODiscrete(parObiektRownania, parRegulator.getUMax(), parRegulator.getUMin(), parWizualizacja.getErr());
+            }
         }
     }
 
@@ -296,8 +334,9 @@ public class TuningService {
                                                  Integer[] EAParameters) {
         AbstractController abstractController;
         if (parRegulator.getTyp().equals("pid")) {
-            abstractController = new PIDController(0.0, 0.0, 0.0, parObiektDPA.getTp(), new double[] {object.getYMax()}, parRegulator.getDuMax(), parRegulator.getUMax(),
-                parWizualizacja.getStrojenie());
+            abstractController =
+                new PIDController(0.0, 0.0, 0.0, parObiektDPA.getTp(), new double[] {object.getYMax()}, parRegulator.getDuMax(), parRegulator.getUMax(),
+                    parWizualizacja.getStrojenie());
             EAParameters[0] = 150;
             EAParameters[1] = 50;
             EAParameters[2] = 600;
@@ -312,19 +351,16 @@ public class TuningService {
             EAParameters[1] = 25;
             EAParameters[2] = 200;
         } else {
-            return null;
+            throw WrongDataException.wrongControllerException(parRegulator.getTyp());
         }
         return abstractController;
     }
 
-    private double[] simulationSISO(ParWizualizacja parWizualizacja, SISO object, AbstractController abstractController,
-                                    OdpowiedzStrojenie odpowiedzStrojenie) {
+    private double[] simulateSISO(ParWizualizacja parWizualizacja, SISO object, AbstractController abstractController,
+                                  OdpowiedzStrojenie odpowiedzStrojenie) {
         double[] Y = new double[parWizualizacja.getDlugosc()];
         double[] U = new double[parWizualizacja.getDlugosc()];
-        object.resetObject();
-        abstractController.resetController();
-        Y[0] = object.getYpp();
-        U[0] = parWizualizacja.getUPP()[0];
+        resetSISO(parWizualizacja, object, abstractController, Y, U);
         for (int i = 1; i < parWizualizacja.getSkok()[0]; i++) {
             U[i] = parWizualizacja.getUPP()[0];
             Y[i] = object.simulateStep(parWizualizacja.getUPP()[0]);
@@ -335,44 +371,21 @@ public class TuningService {
                 U[i] = object.getU().get(0);
             }
         }
-        odpowiedzStrojenie.setWykres(Y);
-        odpowiedzStrojenie.setSterowanie(U);
+        setResponse(odpowiedzStrojenie, Y, U);
         return Y;
     }
 
-    private double[] simulationSISO(ParWizualizacja parWizualizacja, SISO object, AbstractController abstractController,
-                                    OdpowiedzStrojenie odpowiedzStrojenie, double[][] dUZ) {
+    private double[] simulateSISO(ParWizualizacja parWizualizacja, SISO object, AbstractController abstractController,
+                                  OdpowiedzStrojenie odpowiedzStrojenie, double[][] dUZ) {
         double[] Y = new double[parWizualizacja.getDlugosc()];
         double[] U = new double[parWizualizacja.getDlugosc()];
         double[][] Uz = new double[dUZ[0].length][parWizualizacja.getDlugosc()];
-        object.resetObject();
-        abstractController.resetController();
-        Y[0] = object.getYpp();
-        U[0] = parWizualizacja.getUPP()[0];
+        resetSISO(parWizualizacja, object, abstractController, Y, U);
 
-        abstractController.setSetpoint(parWizualizacja.getYPP());
-        for (int i = 0; i < parWizualizacja.getSkok()[0]; i++) {
-            Y[i] = object.simulateStep(abstractController.countControls(object.getOutput(), dUZ[i]), dUZ[i]);
-            U[i] = object.getU().get(0);
-        }
-        abstractController.setSetpoint(new double[] {parWizualizacja.getYZad()[0]});
-        for (int i = parWizualizacja.getSkok()[0]; i < parWizualizacja.getDlugosc(); i++) {
-            {
-                Y[i] = object.simulateStep(abstractController.countControls(object.getOutput(), dUZ[i]), dUZ[i]);
-                U[i] = object.getU().get(0);
-            }
-        }
-        for (int j = 0; j < dUZ[0].length; j++) {
-            Uz[j][0] = dUZ[0][j];
-        }
-
-        for (int i = 1; i < parWizualizacja.getDlugosc(); i++) {
-            for (int j = 0; j < dUZ[0].length; j++) {
-                Uz[j][i] = Uz[j][i - 1] + dUZ[i][j];
-            }
-        }
-        odpowiedzStrojenie.setWykres(Y);
-        odpowiedzStrojenie.setSterowanie(U);
+        simulateWaitingPartSISO(parWizualizacja, object, abstractController, dUZ, Y, U);
+        simulateSetPartSISO(parWizualizacja, object, abstractController, dUZ, Y, U);
+        setDifference(dUZ, Uz, parWizualizacja.getDlugosc());
+        setResponse(odpowiedzStrojenie, Y, U);
         odpowiedzStrojenie.setSterowanieZaklocenia(Uz);
         return Y;
     }
@@ -394,34 +407,31 @@ public class TuningService {
     public OdpowiedzStrojenieMIMO MIMOTuning(MultipartFile[] file, ParRegulator parRegulator, ParWizualizacja parWizualizacja,
                                              WizualizacjaZaklocen wizualizacjaZaklocen) {
         ObjectMapper objectMapper = new ObjectMapper();
-        MIMO object;
-
         Integer[] EAParameters = new Integer[3];
+
         OdpowiedzStrojenieMIMO odpowiedz = new OdpowiedzStrojenieMIMO();
-        object = configureObject(file, parRegulator, parWizualizacja, objectMapper);
-        if (object == null) {
-            return null;
-        }
+        MIMO object = configureObject(file, parRegulator, parWizualizacja, objectMapper);
         AbstractController abstractController = getMIMOController(parRegulator, parWizualizacja, objectMapper, object, EAParameters, file);
-        if (abstractController == null) {
-            return null;
-        }
+        tuneMIMOController(parWizualizacja, EAParameters, odpowiedz, object, abstractController);
+
+        return testTunedMIMOController(file, parRegulator, parWizualizacja, wizualizacjaZaklocen, objectMapper, odpowiedz, object, abstractController);
+    }
+
+    private void tuneMIMOController(ParWizualizacja parWizualizacja, Integer[] EAParameters, OdpowiedzStrojenieMIMO odpowiedz, MIMO object,
+                                    AbstractController abstractController) {
         if (abstractController.getNumberOfTuningParameters() != 0) {
             EvolutionaryAlgorithm GA = new EvolutionaryAlgorithm(EAParameters[0], EAParameters[1], EAParameters[2], 0.5, 0.5);
             getMIMOTuning(parWizualizacja, object, abstractController, GA, odpowiedz);
         } else {
-            double[] tuningTemp = new double[parWizualizacja.getStrojenie().length];
-            for (int i = 0; i < parWizualizacja.getStrojenie().length; i++) {
-                tuningTemp[i] = parWizualizacja.getStrojenie()[i];
-            }
-            odpowiedz.setWspolczynniki(tuningTemp);
+            odpowiedz.setWspolczynniki(Arrays.stream(parWizualizacja.getStrojenie()).mapToDouble(Double::doubleValue).toArray());
         }
+    }
+
+    private OdpowiedzStrojenieMIMO testTunedMIMOController(MultipartFile[] file, ParRegulator parRegulator, ParWizualizacja parWizualizacja,
+                                                           WizualizacjaZaklocen wizualizacjaZaklocen, ObjectMapper objectMapper,
+                                                           OdpowiedzStrojenieMIMO odpowiedz, MIMO object, AbstractController abstractController) {
         object = configureSimulatedObject(file, parRegulator, parWizualizacja, objectMapper, object);
-        if (object == null) {
-            return null;
-        }
         double[][] Y = simulateMIMO(parWizualizacja, object, abstractController, odpowiedz, wizualizacjaZaklocen);
-        System.out.println("strojenie::OK");
         getMIMOError(abstractController, parWizualizacja.getDlugosc(), Y);
         return odpowiedz;
     }
@@ -429,7 +439,7 @@ public class TuningService {
     private double[][] simulateMIMO(ParWizualizacja parWizualizacja, MIMO object,
                                     AbstractController abstractController, OdpowiedzStrojenieMIMO odpowiedz, WizualizacjaZaklocen wizualizacjaZaklocen) {
         double[][] setpointTemp = getSetpointMIMO(parWizualizacja, object, parWizualizacja.getDlugosc());
-        odpowiedz.setCel(setpointTemp);
+        odpowiedz.setGoal(setpointTemp);
         if (wizualizacjaZaklocen.getUSkok() != null && wizualizacjaZaklocen.getUSkok().length != 0) {
             return simulationMIMO(object, abstractController, odpowiedz, parWizualizacja.getDlugosc(), setpointTemp,
                 setDisturbanceTuning(parWizualizacja, wizualizacjaZaklocen));
@@ -465,7 +475,7 @@ public class TuningService {
                 PV = objectMapper.treeToValue(root.path("PV"), Integer[].class);
             } catch (Exception ex) {
                 ex.printStackTrace();
-                return null;
+                throw WrongDataException.wrongControllerException(parRegulator.getTyp());
             }
             abstractController = new PIDCollection((MIMODPA) object, PV, parRegulator.getDuMax(), parWizualizacja.getStrojenie());
             EAParameters[0] = 50;
@@ -476,7 +486,8 @@ public class TuningService {
             for (int i = 0; i < object.getEntriesNumber(); i++) {
                 tempLambda[i] = 0.5;
             }
-            abstractController = new DMCController(4, tempLambda, (MIMODPA) object, object.getYMax(), parRegulator.getDuMax(), 11, parWizualizacja.getStrojenie());
+            abstractController =
+                new DMCController(4, tempLambda, (MIMODPA) object, object.getYMax(), parRegulator.getDuMax(), 11, parWizualizacja.getStrojenie());
             EAParameters[0] = 25;
             EAParameters[1] = 25;
             EAParameters[2] = 100;
@@ -485,28 +496,30 @@ public class TuningService {
             for (int i = 0; i < object.getEntriesNumber(); i++) {
                 tempLambda[i] = 0.5;
             }
-            abstractController = new GPCController((MIMODiscrete) object, 5, object.getYMax(), parRegulator.getDuMax(), parWizualizacja.getStrojenie(), tempLambda);
+            abstractController =
+                new GPCController((MIMODiscrete) object, 5, object.getYMax(), parRegulator.getDuMax(), parWizualizacja.getStrojenie(), tempLambda);
             EAParameters[0] = 25;
             EAParameters[1] = 25;
             EAParameters[2] = 100;
         } else {
-            throw new RuntimeException();
+            throw WrongDataException.wrongControllerException(parRegulator.getTyp());
         }
         return abstractController;
     }
 
-    private double[][] simulationMIMO(MIMO object, AbstractController abstractController, OdpowiedzStrojenieMIMO odpowiedz, int simulationLength, double[][] setpointTemp) {
+    private double[][] simulationMIMO(MIMO object, AbstractController abstractController, OdpowiedzStrojenieMIMO odpowiedz, int simulationLength,
+                                      double[][] setpointTemp) {
         object.resetObject();
         abstractController.resetController();
         double[][] Y = new double[object.getOutputNumber()][simulationLength];
         double[][] U = new double[object.getEntriesNumber()][simulationLength];
         for (int i = 0; i < simulationLength; i++) {
             double[] temp = new double[object.getOutputNumber()];
-            //przy każdej iteracji jest pobierane yzad
+            //put setPoint
             for (int m = 0; m < object.getOutputNumber(); m++) {
                 temp[m] = setpointTemp[m][i];
             }
-            //ustawiane
+            //setting
             abstractController.setSetpoint(temp);
             double[] tempY = object.simulateStep(abstractController.countControls(object.getOutput()));
             for (int j = 0; j < object.getOutputNumber(); j++) {
@@ -546,15 +559,7 @@ public class TuningService {
                 U[j][i] = object.getU().get(j).get(0);
             }
         }
-        for (int j = 0; j < dUZ[0].length; j++) {
-            Uz[j][0] = dUZ[0][j];
-        }
-
-        for (int i = 1; i < simulationLength; i++) {
-            for (int j = 0; j < dUZ[0].length; j++) {
-                Uz[j][i] = Uz[j][i - 1] + dUZ[i][j];
-            }
-        }
+        setDifference(dUZ, Uz, simulationLength);
         odpowiedz.setSterowanie(U);
         odpowiedz.setWykres(Y);
         odpowiedz.setSterowanieZaklocenia(Uz);

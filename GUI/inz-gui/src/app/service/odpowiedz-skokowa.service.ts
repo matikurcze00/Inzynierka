@@ -1,29 +1,31 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { OdpowiedzSkokowa } from '../model/odpowiedzSkokowa';
+import {HttpClient} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {Observable} from 'rxjs';
+import {OdpowiedzSkokowa} from '../model/odpowiedzSkokowa';
 
 @Injectable({
   providedIn: 'root',
 })
 export class OdpowiedzSkokowaService {
-  constructor(private http: HttpClient) {}
   private readonly api = 'http://localhost:8080/odpowiedz';
+
+  constructor(private http: HttpClient) {
+  }
+
   makeJSON(this: any, key: string, value: any) {
     if (value === '') {
       return null;
     }
     return value;
   }
+
   public wyznaczOdpowiedzSISO(form: any): Observable<OdpowiedzSkokowa> {
-    const headers = { 'Content-Type': 'application/json; charset=utf-8' };
-    console.log('service');
-    console.log(JSON.stringify(form.value, this.makeJSON));
+    const headers = {'Content-Type': 'application/json; charset=utf-8'};
 
     return this.http.post<OdpowiedzSkokowa>(
       this.api + '/SISO',
       JSON.stringify(form.value, this.makeJSON),
-      { headers: headers }
+      {headers: headers}
     );
   }
 

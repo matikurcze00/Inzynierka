@@ -6,8 +6,17 @@ import lombok.Data;
 public class ParStrojenie {
 
 
+    private ParRegulator parRegulator;
+    private ParObiektDPA parObiektDPA;
+    private ParObiektRownania parObiektRownania;
+    private ParWizualizacja parWizualizacja;
+    private ParObiektDPA parObiektSymulacjiDPA;
+    private ParObiektRownania parObiektSymulacjiRownania;
+    private DisturbanceDPA disturbanceDPA;
+    private DisturbanceDiscrete zakloceniaRownania;
+    private WizualizacjaZaklocen wizualizacjaZaklocen;
     public ParStrojenie(ParRegulator parRegulator, ParObiektDPA parObiektDPA, ParObiektRownania parObiektRownania, ParWizualizacja parWizualizacja,
-                        ParObiektDPA parObiektSymulacjiDPA, ParObiektRownania parObiektSymulacjiRownania, ZakloceniaDPA zakloceniaDPA,
+                        ParObiektDPA parObiektSymulacjiDPA, ParObiektRownania parObiektSymulacjiRownania, DisturbanceDPA disturbanceDPA,
                         DisturbanceDiscrete zakloceniaRownania, WizualizacjaZaklocen wizualizacjaZaklocen) {
         this.parRegulator = parRegulator;
         this.parObiektDPA = parObiektDPA;
@@ -15,19 +24,8 @@ public class ParStrojenie {
         this.parWizualizacja = parWizualizacja;
         this.parObiektSymulacjiDPA = parObiektSymulacjiDPA;
         this.parObiektSymulacjiRownania = parObiektSymulacjiRownania;
-        this.zakloceniaDPA = zakloceniaDPA;
+        this.disturbanceDPA = disturbanceDPA;
         this.zakloceniaRownania = zakloceniaRownania;
         this.wizualizacjaZaklocen = wizualizacjaZaklocen;
     }
-
-    private ParRegulator parRegulator;
-    private ParObiektDPA parObiektDPA;
-
-    private ParObiektRownania parObiektRownania;
-    private ParWizualizacja parWizualizacja;
-    private ParObiektDPA parObiektSymulacjiDPA;
-    private ParObiektRownania parObiektSymulacjiRownania;
-    private ZakloceniaDPA zakloceniaDPA;
-    private DisturbanceDiscrete zakloceniaRownania;
-    private WizualizacjaZaklocen wizualizacjaZaklocen;
 }

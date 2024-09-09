@@ -1,12 +1,12 @@
-package com.example.inzynierka.EA;
+package com.example.inzynierka.ea;
 
+import com.example.inzynierka.controllers.AbstractController;
+import com.example.inzynierka.controllers.DMCController;
+import com.example.inzynierka.controllers.PIDCollection;
+import com.example.inzynierka.controllers.PIDController;
 import com.example.inzynierka.models.ParObiektDPAMIMO;
 import com.example.inzynierka.objects.MIMODPA;
 import com.example.inzynierka.objects.SISODPA;
-import com.example.inzynierka.tunningControllers.DMCController;
-import com.example.inzynierka.tunningControllers.PIDController;
-import com.example.inzynierka.tunningControllers.AbstractController;
-import com.example.inzynierka.tunningControllers.PIDCollection;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
@@ -29,9 +29,9 @@ class EATest {
         assert (GA.getRecombinationNumber() == Math.floor(mu * 0.2));
         assert (GA.getMutationNumber() == GA.getMu() - GA.getRecombinationNumber());
         assert (GA.getMutationProbability() == 0.3);
-        double[] tempWartosciGA = GA.getTuningParameters(abstractController.getNumberOfTuningParameters(), abstractController, SISODPA);
-        assert (tempWartosciGA[0] != 0.0);
-        assert (tempWartosciGA.length == 3);
+        double[] tempvalueGA = GA.getTuningParameters(abstractController.getNumberOfTuningParameters(), abstractController, SISODPA);
+        assert (tempvalueGA[0] != 0.0);
+        assert (tempvalueGA.length == 3);
     }
 
     @Test
@@ -48,9 +48,9 @@ class EATest {
         assert (GA.getRecombinationNumber() == mu * 0.2);
         assert (GA.getMutationNumber() == GA.getMu() - GA.getRecombinationNumber());
         assert (GA.getMutationProbability() == 0.3);
-        double[] tempWartosciGA = GA.getTuningParameters(abstractController.getNumberOfTuningParameters(), abstractController, SISODPA);
-        assert (tempWartosciGA[0] != 0.0);
-        assert (tempWartosciGA.length == 1);
+        double[] tempvalueGA = GA.getTuningParameters(abstractController.getNumberOfTuningParameters(), abstractController, SISODPA);
+        assert (tempvalueGA[0] != 0.0);
+        assert (tempvalueGA.length == 1);
     }
 
     @Test
@@ -75,9 +75,9 @@ class EATest {
         assert (GA.getRecombinationNumber() == Math.floor(mu * 0.4));
         assert (GA.getMutationNumber() == GA.getMu() - GA.getRecombinationNumber());
         assert (GA.getMutationProbability() == 0.3);
-        double[] tempWartosciGA = GA.getTuningParameters(abstractController.getNumberOfTuningParameters(), abstractController, obiekt);
-        assert (tempWartosciGA[0] != 0.0);
-        assert (tempWartosciGA.length == 3);
+        double[] tempvalueGA = GA.getTuningParameters(abstractController.getNumberOfTuningParameters(), abstractController, obiekt);
+        assert (tempvalueGA[0] != 0.0);
+        assert (tempvalueGA.length == 3);
     }
 
     @Test
@@ -103,8 +103,8 @@ class EATest {
         assert (GA.getRecombinationNumber() == Math.floor(mu * 0.4));
         assert (GA.getMutationNumber() == mu - GA.getRecombinationNumber());
         assert (GA.getMutationProbability() == 0.3);
-        double[] tempWartosciGA = GA.getTuningParameters(abstractController.getNumberOfTuningParameters(), abstractController, obiekt);
-        assert (tempWartosciGA[0] != 0.0);
-        assert (tempWartosciGA.length == 1);
+        double[] tempvalueGA = GA.getTuningParameters(abstractController.getNumberOfTuningParameters(), abstractController, obiekt);
+        assert (tempvalueGA[0] != 0.0);
+        assert (tempvalueGA.length == 1);
     }
 }

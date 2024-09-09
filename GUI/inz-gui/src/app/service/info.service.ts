@@ -1,14 +1,16 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { OdpowiedzInfoMIMO } from '../model/odpowiedzInfoMIMO';
+import {HttpClient} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {Observable} from 'rxjs';
+import {OdpowiedzInfoMIMO} from '../model/odpowiedzInfoMIMO';
 
 @Injectable({
   providedIn: 'root',
 })
 export class InfoService {
-  constructor(private http: HttpClient) {}
   private readonly api = 'http://localhost:8080/info';
+
+  constructor(private http: HttpClient) {
+  }
 
   makeJSON(this: any, key: string, value: any) {
     if (value === '') {
@@ -33,6 +35,7 @@ export class InfoService {
       formData
     );
   }
+
   public infoMIMORownianiaInOut(file: any): Observable<OdpowiedzInfoMIMO> {
     const formData = new FormData();
     formData.append('file', file.value);

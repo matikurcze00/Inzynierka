@@ -1,4 +1,4 @@
-package com.example.inzynierka.EA;
+package com.example.inzynierka.ea;
 
 import lombok.Data;
 

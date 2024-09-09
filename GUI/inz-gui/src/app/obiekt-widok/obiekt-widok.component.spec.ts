@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { ObiektWidokComponent } from './obiekt-widok.component';
+import {ObiektWidokComponent} from './obiekt-widok.component';
 
 describe('ObiektWidokComponent', () => {
   let component: ObiektWidokComponent;

@@ -1,4 +1,4 @@
-package com.example.inzynierka.tunningControllers;
+package com.example.inzynierka.controllers;
 
 import com.example.inzynierka.objects.MIMODPA;
 

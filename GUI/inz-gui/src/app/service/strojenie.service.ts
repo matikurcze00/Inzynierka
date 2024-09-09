@@ -1,15 +1,17 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { Odpowiedz } from '../model/odpowiedz';
-import { OdpowiedzMIMO } from '../model/odpowiedzMIMO';
+import {Injectable} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {Observable} from 'rxjs';
+import {Odpowiedz} from '../model/odpowiedz';
+import {OdpowiedzMIMO} from '../model/odpowiedzMIMO';
 
 @Injectable({
   providedIn: 'root',
 })
 export class StrojenieService {
-  constructor(private http: HttpClient) {}
   private readonly api = 'http://localhost:8080/strojenie';
+
+  constructor(private http: HttpClient) {
+  }
 
   makeJSON(this: any, key: string, value: any) {
     if (value === '') {
@@ -17,17 +19,17 @@ export class StrojenieService {
     }
     return value;
   }
+
   public dobierzStrojenieSISO(form: any): Observable<Odpowiedz> {
-    const headers = { 'Content-Type': 'application/json; charset=utf-8' };
-    console.log('service');
-    console.log(JSON.stringify(form.value, this.makeJSON));
+    const headers = {'Content-Type': 'application/json; charset=utf-8'};
 
     return this.http.post<Odpowiedz>(
       this.api + '/SISO',
       JSON.stringify(form.value, this.makeJSON),
-      { headers: headers }
+      {headers: headers}
     );
   }
+
   public dobierzStrojenieMIMO(form: any): Observable<OdpowiedzMIMO> {
     const formData = new FormData();
     formData.append('file', form.controls.MIMO.controls['plik'].value);

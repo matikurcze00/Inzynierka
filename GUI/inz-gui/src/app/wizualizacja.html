@@ -3,42 +3,42 @@
   <form (ngSubmit)="onSubmit()" class="text-center" novalidate>
     <div class="btn-group mt-5">
       <input
-        mdbRadio
-        type="radio"
-        class="btn-check"
-        name="options"
-        id="option1"
-        autocomplete="off"
-        [checked]="true"
         (change)="zakladka = 'model'"
+        [checked]="true"
+        autocomplete="off"
+        class="btn-check"
+        id="option1"
+        mdbRadio
+        name="options"
+        type="radio"
       />
       <label class="btn btn-secondary" for="option1">Model</label>
       <input
-        mdbRadio
-        type="radio"
-        class="btn-check"
-        name="options"
-        id="option2"
-        autocomplete="off"
         (change)="zakladka = 'regulator'"
+        autocomplete="off"
+        class="btn-check"
+        id="option2"
+        mdbRadio
+        name="options"
+        type="radio"
       />
       <label class="btn btn-secondary" for="option2">Regulator</label>
       <input
-        mdbRadio
-        type="radio"
-        class="btn-check"
-        name="options"
-        id="option3"
-        autocomplete="off"
         (change)="zakladka = 'wizualizacja'"
+        autocomplete="off"
+        class="btn-check"
+        id="option3"
+        mdbRadio
+        name="options"
+        type="radio"
       />
       <label class="btn btn-secondary" for="option3">Wizualizacja</label>
     </div>
     <div class="dane">
       <app-obiekt-widok
-        [typRegulatora]="this.typRegulatora"
         (updateEvent)="updateObiekt($event)"
         [hidden]="zakladka !== 'model'"
+        [typRegulatora]="this.typRegulatora"
       ></app-obiekt-widok>
       <app-regulator-widok
         (updateEvent)="updateRegulator($event)"
@@ -50,120 +50,120 @@
       <div class="mt-5">
         <div class="btn-group">
           <input
-            mdbRadio
-            type="radio"
-            class="btn-check"
-            name="options-obiekt"
-            id="option2-wizualizacja"
-            autocomplete="off"
-            [checked]="zakladkaWizualizacja == 'odpowiedz'"
             (change)="zakladkaWizualizacja = 'odpowiedz'"
+            [checked]="zakladkaWizualizacja == 'odpowiedz'"
+            autocomplete="off"
+            class="btn-check"
+            id="option2-wizualizacja"
+            mdbRadio
+            name="options-obiekt"
+            type="radio"
           />
           <label class="btn btn-secondary" for="option2-wizualizacja"
-            >Odpowiedź skokowa</label
+          >Odpowiedź skokowa</label
           >
           <input
-            mdbRadio
-            type="radio"
-            class="btn-check"
-            name="options-obiekt"
-            id="option1-wizualizacja"
-            autocomplete="off"
-            [checked]="zakladkaWizualizacja == 'przebieg'"
             (change)="zakladkaWizualizacja = 'przebieg'"
+            [checked]="zakladkaWizualizacja == 'przebieg'"
+            autocomplete="off"
+            class="btn-check"
+            id="option1-wizualizacja"
+            mdbRadio
+            name="options-obiekt"
+            type="radio"
           />
           <label class="btn btn-secondary" for="option1-wizualizacja"
-            >Parametry wizualizacji</label
+          >Parametry wizualizacji</label
           >
           <input
-            mdbRadio
-            type="radio"
-            class="btn-check"
-            name="options-obiekt"
-            id="option3-wizualizacja"
-            autocomplete="off"
-            [checked]="zakladkaWizualizacja == 'parametry'"
             (change)="zakladkaWizualizacja = 'parametry'"
+            [checked]="zakladkaWizualizacja == 'parametry'"
+            autocomplete="off"
+            class="btn-check"
+            id="option3-wizualizacja"
+            mdbRadio
+            name="options-obiekt"
+            type="radio"
           />
           <label class="btn btn-secondary" for="option3-wizualizacja"
-            >Parametry strojenia</label
+          >Parametry strojenia</label
           >
           <input
-            mdbRadio
-            type="radio"
-            class="btn-check"
-            name="options-obiekt"
-            id="option4-zaklocenia"
-            autocomplete="off"
-            [checked]="zakladkaWizualizacja == 'zaklocenia'"
             (change)="zakladkaWizualizacja = 'zaklocenia'"
+            [checked]="zakladkaWizualizacja == 'zaklocenia'"
+            autocomplete="off"
+            class="btn-check"
+            id="option4-zaklocenia"
+            mdbRadio
+            name="options-obiekt"
+            type="radio"
           />
           <label class="btn btn-secondary" for="option4-zaklocenia"
-            >Zakłócenia mierzalne</label
+          >Zakłócenia mierzalne</label
           >
         </div>
       </div>
       <div
-        class="text-center mt-5 mb-3"
         [hidden]="
           (this.zakladkaWizualizacja != 'przebieg' &&
             this.zakladkaWizualizacja != 'przebieg') ||
           zakladka != 'wizualizacja'
         "
+        class="text-center mt-5 mb-3"
       >
         <b class="title">Wybierz sposób liczenia błędu</b>
         <div class="btn-group mb-3 align-items-center">
           <input
-            mdbRadio
-            type="radio"
-            class="btn-check"
-            name="options-blad"
-            id="option1-blad"
-            autocomplete="off"
-            [checked]="true"
             (change)="setBlad('srednio')"
+            [checked]="true"
+            autocomplete="off"
+            class="btn-check"
+            id="option1-blad"
+            mdbRadio
+            name="options-blad"
+            type="radio"
           />
           <label class="btn btn-secondary" for="option1-blad"
-            >Średniokwadratowy</label
+          >Średniokwadratowy</label
           >
           <input
-            mdbRadio
-            type="radio"
-            class="btn-check"
-            name="options-blad"
-            id="option2-blad"
-            autocomplete="off"
             (change)="setBlad('absolutny')"
+            autocomplete="off"
+            class="btn-check"
+            id="option2-blad"
+            mdbRadio
+            name="options-blad"
+            type="radio"
           />
           <label class="btn btn-secondary" for="option2-blad">Absolutny</label>
           <input
-            mdbRadio
-            type="radio"
-            class="btn-check"
-            name="options-blad"
-            id="option3-blad"
-            autocomplete="off"
             (change)="setBlad('mediana')"
+            autocomplete="off"
+            class="btn-check"
+            id="option3-blad"
+            mdbRadio
+            name="options-blad"
+            type="radio"
           />
           <label class="btn btn-secondary" for="option3-blad"
-            >Mediana błędu</label
+          >Mediana błędu</label
           >
         </div>
       </div>
       <div
-        class="zaklocenia"
         [hidden]="this.zakladkaWizualizacja != 'zaklocenia'"
+        class="zaklocenia"
       >
         <div *ngIf="this.file==null">
           <b>Ustaw proszę liczbę zakłóceń mierzalnych</b>
           <div class="row mx-auto mb-3" style="width: 50%">
             <div class="input-group">
               <label class="input-group-text col-9"
-                >Liczba zakłóceń mierzalnych
+              >Liczba zakłóceń mierzalnych
               </label>
               <select
-                class="form-control col-1"
                 (change)="zmienLiczbeZaklocen($event)"
+                class="form-control col-1"
               >
                 <option
                   *ngFor="let option of optionsZaklocenia"
@@ -174,76 +174,76 @@
               </select>
             </div>
           </div>
-          <div class="mb-3" *ngIf="this.liczbaZaklocen.length!=0">
+          <div *ngIf="this.liczbaZaklocen.length!=0" class="mb-3">
             <h5 class="mt-5">Wprowadź wartości transmitancji:</h5>
             <div *ngFor="let zaklocenie of this.liczbaZaklocen">
-              <b>Zakłócenie nr {{zaklocenie+1}}</b>
+              <b>Zakłócenie nr {{zaklocenie + 1}}</b>
               <div class="container ml-0 mr-0 mx-auto">
                 <div
-                  class="form-row align-items-center"
                   *ngIf="typRegulatora=='gpc'"
+                  class="form-row align-items-center"
                 >
                   <div class="input-group col-3">
                     <label class="input-group-text">B1</label>
                     <input
-                      class="form-control"
-                      type="number"
                       (input)="updateZaklocenieRownaniaValue(zaklocenie, 'b1', $event.target)"
+                      class="form-control"
                       placeholder="1.0"
+                      type="number"
                     />
                     <label class="input-group-text">B2</label>
                     <input
-                      class="form-control"
-                      type="number"
                       (input)="updateZaklocenieRownaniaValue(zaklocenie, 'b2', $event.target)"
+                      class="form-control"
                       placeholder="1.0"
+                      type="number"
                     />
                     <label class="input-group-text">B3</label>
                     <input
-                      class="form-control"
-                      type="number"
                       (input)="updateZaklocenieRownaniaValue(zaklocenie, 'b3', $event.target)"
+                      class="form-control"
                       placeholder="1.0"
+                      type="number"
                     />
                     <label class="input-group-text">B4</label>
                     <input
-                      class="form-control"
-                      type="number"
                       (input)="updateZaklocenieRownaniaValue(zaklocenie, 'b4', $event.target)"
+                      class="form-control"
                       placeholder="1.0"
+                      type="number"
                     />
                     <label class="input-group-text">B5</label>
                     <input
-                      class="form-control"
-                      type="number"
                       (input)="updateZaklocenieRownaniaValue(zaklocenie, 'b5', $event.target)"
+                      class="form-control"
                       placeholder="1.0"
+                      type="number"
                     />
                   </div>
                 </div>
                 <div
-                  class="form-row align-items-center"
                   *ngIf="typRegulatora!='gpc'"
+                  class="form-row align-items-center"
                 >
                   <div class="input-group col">
                     <label class="input-group-text"> Gain &nbsp; </label>
                     <input
-                      class="form-control"
-                      type="number"
                       (input)="updateZaklocenieDPAValue(zaklocenie, 'gain', $event.target)"
+                      class="form-control"
                       placeholder="1.0"
+                      type="number"
                     />
                     <label class="input-group-text">R1</label>
                     <input
-                      class="form-control"
-                      type="number"
                       (input)="updateZaklocenieDPAValue(zaklocenie, 'r1', $event.target)"
+                      class="form-control"
                       placeholder="1.0"
+                      type="number"
                     />
                     <label class="input-group-text">Q1</label>
                     <select
-                      class="form-control"
                       (input)="updateZaklocenieDPAValue(zaklocenie, 'q1', $event.target)"
+                      class="form-control"
                       placeholder="1"
                     >
                       <option *ngFor="let option of optionsQ" [value]="option">
@@ -252,15 +252,15 @@
                     </select>
                     <label class="input-group-text">R2</label>
                     <input
-                      class="form-control"
-                      type="number"
                       (input)="updateZaklocenieDPAValue(zaklocenie, 'r2', $event.target)"
+                      class="form-control"
                       placeholder="1.0"
+                      type="number"
                     />
                     <label class="input-group-text">Q2</label>
                     <select
-                      class="form-control"
                       (input)="updateZaklocenieDPAValue(zaklocenie, 'q2', $event.target)"
+                      class="form-control"
                       placeholder="1"
                     >
                       <option *ngFor="let option of optionsQ" [value]="option">
@@ -271,31 +271,31 @@
                   <div class="input-group col-3">
                     <label class="input-group-text">T1</label>
                     <input
-                      class="form-control"
-                      type="number"
                       (input)="updateZaklocenieDPAValue(zaklocenie, 't1', $event.target)"
+                      class="form-control"
                       placeholder="1.0"
+                      type="number"
                     />
                     <label class="input-group-text">T2</label>
                     <input
-                      class="form-control"
-                      type="number"
                       (input)="updateZaklocenieDPAValue(zaklocenie, 't2', $event.target)"
+                      class="form-control"
                       placeholder="1.0"
+                      type="number"
                     />
                     <label class="input-group-text">T3</label>
                     <input
-                      class="form-control"
-                      type="number"
                       (input)="updateZaklocenieDPAValue(zaklocenie, 't3', $event.target)"
+                      class="form-control"
                       placeholder="1.0"
+                      type="number"
                     />
                     <label class="input-group-text">Delay</label>
                     <input
-                      class="form-control"
-                      type="number"
                       (input)="updateZaklocenieDPAValue(zaklocenie, 'delay', $event.target)"
+                      class="form-control"
                       placeholder="1.0"
+                      type="number"
                     />
                   </div>
                 </div>
@@ -313,16 +313,16 @@
             upuść ' }}</span
           >
           <input
-            class="file-input"
-            type="file"
             #fileInput
             (change)="onFileZaklocenChange($event)"
+            class="file-input"
+            type="file"
           />
           <div class="container ml-0 mr-0 mt-5 mx-auto">
             <button
-              class="btn btn-secondary"
               (click)="infoZaklocenie()"
               [disabled]="fileZaklocen==null"
+              class="btn btn-secondary"
               type="button"
             >
               Wyślij obiekt
@@ -332,7 +332,7 @@
         <div *ngIf="liczbaZaklocen.length!=0">
           <div class="text-center mt-5">
             <b
-              >Ustaw proszę na jaką wartość ma być ustawione sterowanie
+            >Ustaw proszę na jaką wartość ma być ustawione sterowanie
               zakłócenia:
             </b>
             <div class="form-row align-items-center mb-3">
@@ -346,9 +346,9 @@
                     Zakłócenie {{ i + 1 }}
                   </label>
                   <input
-                    placeholder="0"
-                    class="form-control mx-auto d-block text-center"
                     (input)="updateWizualizacjiaZaklocenieValue(zaklocenie, 'uSkok', $event.target)"
+                    class="form-control mx-auto d-block text-center"
+                    placeholder="0"
                   />
                 </div>
               </div>
@@ -356,7 +356,7 @@
           </div>
           <div class="text-center mt-5">
             <b
-              >Ustaw proszę maksymalną wartość zmiany sterowania zakłócenia w
+            >Ustaw proszę maksymalną wartość zmiany sterowania zakłócenia w
               jednym kroku:
             </b>
             <div class="form-row align-items-center mb-3">
@@ -370,9 +370,9 @@
                     Zakłócenie {{ i + 1 }}
                   </label>
                   <input
-                    placeholder="1"
-                    class="form-control mx-auto d-block text-center"
                     (input)="updateWizualizacjiaZaklocenieValue(zaklocenie, 'deltaU', $event.target)"
+                    class="form-control mx-auto d-block text-center"
+                    placeholder="1"
                   />
                 </div>
               </div>
@@ -380,7 +380,7 @@
           </div>
           <div class="text-center mt-5">
             <b
-              >Ustaw proszę krok w którym ma nastąpić skok wartości sterowania
+            >Ustaw proszę krok w którym ma nastąpić skok wartości sterowania
               zakłócenia:
             </b>
             <div class="form-row align-items-center mb-3">
@@ -394,9 +394,9 @@
                     Zakłócenie {{ i + 1 }}
                   </label>
                   <input
-                    placeholder="0"
-                    class="form-control mx-auto d-block text-center"
                     (input)="updateWizualizacjiaZaklocenieValue(zaklocenie, 'skokZaklocenia', $event.target)"
+                    class="form-control mx-auto d-block text-center"
+                    placeholder="0"
                   />
                 </div>
               </div>
@@ -404,7 +404,7 @@
           </div>
           <div class="text-center mt-5">
             <b
-              >Ustaw proszę krok w którym ma nastąpić koniec skoku sterowania
+            >Ustaw proszę krok w którym ma nastąpić koniec skoku sterowania
               zakłócenia:
             </b>
             <div class="form-row align-items-center mb-3">
@@ -418,9 +418,9 @@
                     Zakłócenie {{ i + 1 }}
                   </label>
                   <input
-                    placeholder="100"
-                    class="form-control mx-auto d-block text-center"
                     (input)="updateWizualizacjiaZaklocenieValue(zaklocenie, 'skokPowrotnyZaklocenia', $event.target)"
+                    class="form-control mx-auto d-block text-center"
+                    placeholder="100"
                   />
                 </div>
               </div>
@@ -429,8 +429,8 @@
         </div>
       </div>
       <div
-        class="przebiegClass"
         [hidden]="this.zakladkaWizualizacja != 'przebieg'"
+        class="przebiegClass"
       >
         <div class="text-center mt-5">
           <b>Ustaw proszę wartość początkową wyjść: </b>
@@ -446,10 +446,10 @@
                     Wyjście {{ i + 1 }}
                   </label>
                   <input
-                    class="form-control mx-auto d-block text-center"
-                    [(ngModel)]="yPPTemp[i]"
-                    name="yPPTemp"
                     (ngModelChange)="onYPPChange(i, $event)"
+                    [(ngModel)]="yPPTemp[i]"
+                    class="form-control mx-auto d-block text-center"
+                    name="yPPTemp"
                   />
                 </div>
               </div>
@@ -470,10 +470,10 @@
                     Wyjście {{ i + 1 }}
                   </label>
                   <input
-                    class="form-control mx-auto d-block text-center"
-                    [(ngModel)]="yZadTemp[i]"
-                    name="yZadTemp"
                     (ngModelChange)="onYZadChange(i, $event)"
+                    [(ngModel)]="yZadTemp[i]"
+                    class="form-control mx-auto d-block text-center"
+                    name="yZadTemp"
                   />
                 </div>
               </div>
@@ -494,10 +494,10 @@
                     Wyjście {{ i + 1 }}
                   </label>
                   <input
-                    class="form-control d-block text-center"
-                    [(ngModel)]="skokTemp[i]"
-                    name="skokTemp"
                     (ngModelChange)="onSkokChange(i, $event)"
+                    [(ngModel)]="skokTemp[i]"
+                    class="form-control d-block text-center"
+                    name="skokTemp"
                   />
                 </div>
               </div>
@@ -518,10 +518,10 @@
                     Wejście {{ i + 1 }}
                   </label>
                   <input
-                    class="form-control d-block text-center"
-                    [(ngModel)]="uPPTemp[i]"
-                    name="uPPTemp"
                     (ngModelChange)="onUPPChange(i, $event)"
+                    [(ngModel)]="uPPTemp[i]"
+                    class="form-control d-block text-center"
+                    name="uPPTemp"
                   />
                 </div>
               </div>
@@ -539,32 +539,32 @@
                 Długość
               </label>
               <input
-                class="form-control col-12 d-block text-center"
-                [(ngModel)]="dlugoscTemp"
-                name="dlugoscTemp"
                 (ngModelChange)="updateDlugosc($event)"
+                [(ngModel)]="dlugoscTemp"
+                class="form-control col-12 d-block text-center"
+                name="dlugoscTemp"
               />
             </div>
           </div>
         </div>
       </div>
       <div
-        class="text-center mt-5"
         [hidden]="this.zakladkaWizualizacja != 'parametry'"
+        class="text-center mt-5"
       >
         <b
           *ngIf="
             !this.strojenie.get('MIMO.plik')?.value ||
-            typRegulatora == 'dmc' || typRegulatora 
+            typRegulatora == 'dmc' || typRegulatora
           "
-          >Ustaw proszę wybrane wartości strojenia regulatora:</b
+        >Ustaw proszę wybrane wartości strojenia regulatora:</b
         >
         <b
           *ngIf="
             this.strojenie.get('MIMO.plik')?.value &&
             this.strojenie.get('parRegulator.typ')?.value == 'pid'
           "
-          >Ustaw proszę wybrane wartości strojenia regulatorów:</b
+        >Ustaw proszę wybrane wartości strojenia regulatorów:</b
         >
         <div *ngIf="strojenieTemp">
           <div
@@ -587,17 +587,17 @@
                       Lambda
                     </label>
                     <input
-                      class="form-control d-block text-center"
-                      [(ngModel)]="strojenieTemp[i]"
-                      name="strojenieTemp"
                       (ngModelChange)="onStrojenieChange(i, $event)"
+                      [(ngModel)]="strojenieTemp[i]"
                       [disabled]="isDisabled(i)"
+                      class="form-control d-block text-center"
+                      name="strojenieTemp"
                     />
                     <label class="input-group-text d-block text-center">
                       <input
-                        type="checkbox"
                         (change)="onCheckboxChange(i, $event)"
                         [defaultChecked]="true"
+                        type="checkbox"
                       />
                     </label>
                   </div>
@@ -621,51 +621,51 @@
                         P
                       </label>
                       <input
-                        class="form-control d-block text-center"
-                        [(ngModel)]="strojenieTemp[0]"
-                        name="strojenieTemp1"
                         (ngModelChange)="onStrojenieChange(0, $event)"
+                        [(ngModel)]="strojenieTemp[0]"
                         [disabled]="isDisabled(0)"
+                        class="form-control d-block text-center"
+                        name="strojenieTemp1"
                       />
                       <label class="input-group-text d-block text-center">
                         <input
-                          type="checkbox"
                           (change)="onCheckboxChange(0, $event)"
                           [checked]="!isDisabled(0)"
+                          type="checkbox"
                         />
                       </label>
                       <label class="input-group-text d-block text-center">
                         I
                       </label>
                       <input
-                        class="form-control d-block text-center"
-                        [(ngModel)]="strojenieTemp[1]"
-                        name="strojenieTemp2"
                         (ngModelChange)="onStrojenieChange(1, $event)"
+                        [(ngModel)]="strojenieTemp[1]"
                         [disabled]="isDisabled(1)"
+                        class="form-control d-block text-center"
+                        name="strojenieTemp2"
                       />
                       <label class="input-group-text d-block text-center">
                         <input
-                          type="checkbox"
                           (change)="onCheckboxChange(1, $event)"
                           [checked]="!isDisabled(1)"
+                          type="checkbox"
                         />
                       </label>
                       <label class="input-group-text d-block text-center">
                         D
                       </label>
                       <input
-                        class="form-control d-block text-center"
-                        [(ngModel)]="strojenieTemp[2]"
-                        name="strojenieTemp3"
                         (ngModelChange)="onStrojenieChange(2, $event)"
+                        [(ngModel)]="strojenieTemp[2]"
                         [disabled]="isDisabled(2)"
+                        class="form-control d-block text-center"
+                        name="strojenieTemp3"
                       />
                       <label class="input-group-text d-block text-center">
                         <input
-                          type="checkbox"
                           (change)="onCheckboxChange(2, $event)"
                           [checked]="!isDisabled(2)"
+                          type="checkbox"
                         />
                       </label>
                     </div>
@@ -692,17 +692,17 @@
                       Lambda {{ i + 1 }}
                     </label>
                     <input
-                      class="form-control d-block text-center col-12"
-                      [(ngModel)]="strojenieTemp[i]"
-                      name="strojenieTemp{{ i }}"
                       (ngModelChange)="onStrojenieChange(i, $event)"
+                      [(ngModel)]="strojenieTemp[i]"
                       [disabled]="isDisabled(i)"
+                      class="form-control d-block text-center col-12"
+                      name="strojenieTemp{{ i }}"
                     />
                     <label class="input-group-text d-block text-center">
                       <input
-                        type="checkbox"
                         (change)="onCheckboxChange(i, $event)"
                         [checked]="!isDisabled(i)"
+                        type="checkbox"
                       />
                     </label>
                   </div>
@@ -719,8 +719,8 @@
                   style="margin-left: 20%; margin-right: 20%"
                 >
                   <b
-                    >Wartości strojenia regulatora podłączonego do wyjścia {{ i
-                    + 1 }}</b
+                  >Wartości strojenia regulatora podłączonego do wyjścia {{ i
+                  + 1 }}</b
                   >
                   <div class="form-row align-items-center mb-3">
                     <div class="input-group col-2 align-items-center">
@@ -728,51 +728,51 @@
                         P
                       </label>
                       <input
-                        class="form-control d-block text-center"
-                        [(ngModel)]="strojenieTemp[i * 3]"
-                        name="strojenieTemp{{ i * 3 }}"
                         (ngModelChange)="onStrojenieChange(i * 3, $event)"
+                        [(ngModel)]="strojenieTemp[i * 3]"
                         [disabled]="isDisabled(i * 3)"
+                        class="form-control d-block text-center"
+                        name="strojenieTemp{{ i * 3 }}"
                       />
                       <label class="input-group-text d-block text-center">
                         <input
-                          type="checkbox"
                           (change)="onCheckboxChange(i * 3, $event)"
                           [checked]="!isDisabled(i * 3)"
+                          type="checkbox"
                         />
                       </label>
                       <label class="input-group-text d-block text-center">
                         I
                       </label>
                       <input
-                        class="form-control d-block text-center"
-                        [(ngModel)]="strojenieTemp[i * 3 + 1]"
-                        name="strojenieTemp{{ i * 3 + 1 }}"
                         (ngModelChange)="onStrojenieChange(i * 3 + 1, $event)"
+                        [(ngModel)]="strojenieTemp[i * 3 + 1]"
                         [disabled]="isDisabled(i * 3 + 1)"
+                        class="form-control d-block text-center"
+                        name="strojenieTemp{{ i * 3 + 1 }}"
                       />
                       <label class="input-group-text d-block text-center">
                         <input
-                          type="checkbox"
                           (change)="onCheckboxChange(i * 3 + 1, $event)"
                           [checked]="!isDisabled(i * 3 + 1)"
+                          type="checkbox"
                         />
                       </label>
                       <label class="input-group-text d-block text-center">
                         D
                       </label>
                       <input
-                        class="form-control d-block text-center"
-                        [(ngModel)]="strojenieTemp[i * 3 + 2]"
-                        name="strojenieTemp{{ i * 3 + 2 }}"
                         (ngModelChange)="onStrojenieChange(i * 3 + 2, $event)"
+                        [(ngModel)]="strojenieTemp[i * 3 + 2]"
                         [disabled]="isDisabled(i * 3 + 2)"
+                        class="form-control d-block text-center"
+                        name="strojenieTemp{{ i * 3 + 2 }}"
                       />
                       <label class="input-group-text d-block text-center">
                         <input
-                          type="checkbox"
                           (change)="onCheckboxChange(i * 3 + 2, $event)"
                           [checked]="!isDisabled(i * 3 + 2)"
+                          type="checkbox"
                         />
                       </label>
                     </div>
@@ -792,9 +792,9 @@
           </label>
           <label class="input-group-text d-block text-center">
             <input
-              type="checkbox"
               (change)="obiektSymulacjiInputs()"
               [checked]="czyInnyObiekt"
+              type="checkbox"
             />
           </label>
         </div>
@@ -806,7 +806,7 @@
           <div [hidden]="this.typRegulatora=='gpc'">
             <h5 class="mt-5">Wprowadź wartości transmitancji:</h5>
             <div class="container ml-0 mr-0 mx-auto">
-              <div class="form-group mb-3" [formGroup]="strojenie">
+              <div [formGroup]="strojenie" class="form-group mb-3">
                 <div
                   class="form-row align-items-center"
                   formGroupName="parObiektSymulacjiDPA"
@@ -814,23 +814,23 @@
                   <div class="input-group col">
                     <label class="input-group-text"> Gain &nbsp; </label>
                     <input
-                      class="form-control"
-                      type="number"
-                      formControlName="gain"
                       [disabled]="czyInnyObiekt"
+                      class="form-control"
+                      formControlName="gain"
+                      type="number"
                     />
                     <label class="input-group-text">R1</label>
                     <input
-                      class="form-control"
-                      type="number"
-                      formControlName="r1"
                       [disabled]="czyInnyObiekt"
+                      class="form-control"
+                      formControlName="r1"
+                      type="number"
                     />
                     <label class="input-group-text">Q1</label>
                     <select
+                      [disabled]="czyInnyObiekt"
                       class="form-control"
                       formControlName="q1"
-                      [disabled]="czyInnyObiekt"
                     >
                       <option *ngFor="let option of optionsQ" [value]="option">
                         {{ option }}
@@ -838,16 +838,16 @@
                     </select>
                     <label class="input-group-text">R2</label>
                     <input
-                      class="form-control"
-                      type="number"
-                      formControlName="r2"
                       [disabled]="czyInnyObiekt"
+                      class="form-control"
+                      formControlName="r2"
+                      type="number"
                     />
                     <label class="input-group-text">Q2</label>
                     <select
+                      [disabled]="czyInnyObiekt"
                       class="form-control"
                       formControlName="q2"
-                      [disabled]="czyInnyObiekt"
                     >
                       <option *ngFor="let option of optionsQ" [value]="option">
                         {{ option }}
@@ -856,49 +856,49 @@
                   </div>
                   <div class="input-group col-3">
                     <label class="input-group-text"
-                      >{{ zmienne[5].nazwa }}</label
+                    >{{ zmienne[5].nazwa }}</label
                     >
                     <input
+                      [disabled]="czyInnyObiekt"
                       class="form-control"
-                      type="number"
                       formControlName="t1"
-                      [disabled]="czyInnyObiekt"
+                      type="number"
                     />
                     <label class="input-group-text"
-                      >{{ zmienne[6].nazwa }}</label
+                    >{{ zmienne[6].nazwa }}</label
                     >
                     <input
+                      [disabled]="czyInnyObiekt"
                       class="form-control"
-                      type="number"
                       formControlName="t2"
-                      [disabled]="czyInnyObiekt"
+                      type="number"
                     />
                     <label class="input-group-text"
-                      >{{ zmienne[7].nazwa }}</label
+                    >{{ zmienne[7].nazwa }}</label
                     >
                     <input
+                      [disabled]="czyInnyObiekt"
                       class="form-control"
-                      type="number"
                       formControlName="t3"
-                      [disabled]="czyInnyObiekt"
+                      type="number"
                     />
                     <label class="input-group-text"
-                      >{{ zmienne[8]!.nazwa }}</label
+                    >{{ zmienne[8]!.nazwa }}</label
                     >
                     <input
+                      [disabled]="czyInnyObiekt"
                       class="form-control"
-                      type="number"
                       formControlName="delay"
-                      [disabled]="czyInnyObiekt"
+                      type="number"
                     />
                     <label class="input-group-text"
-                      >{{ zmienne[9]!.nazwa }}</label
+                    >{{ zmienne[9]!.nazwa }}</label
                     >
                     <input
-                      class="form-control"
-                      type="number"
-                      formControlName="tp"
                       [disabled]="czyInnyObiekt"
+                      class="form-control"
+                      formControlName="tp"
+                      type="number"
                     />
                   </div>
                 </div>
@@ -907,7 +907,7 @@
           </div>
           <div [hidden]="this.typRegulatora!='gpc'">
             <div class="container ml-0 mr-0 mx-auto">
-              <div class="form-group mb-3" [formGroup]="strojenie">
+              <div [formGroup]="strojenie" class="form-group mb-3">
                 <div
                   class="form-row align-items-center"
                   formGroupName="parObiektSymulacjiRownania"
@@ -915,75 +915,75 @@
                   <div class="input-group col">
                     <label class="input-group-text">A1</label>
                     <input
-                      class="form-control"
-                      type="number"
-                      formControlName="a1"
                       [disabled]="czyInnyObiekt"
+                      class="form-control"
+                      formControlName="a1"
+                      type="number"
                     />
                     <label class="input-group-text">A2</label>
                     <input
-                      class="form-control"
-                      type="number"
-                      formControlName="a2"
                       [disabled]="czyInnyObiekt"
+                      class="form-control"
+                      formControlName="a2"
+                      type="number"
                     />
                     <label class="input-group-text">A3</label>
                     <input
-                      class="form-control"
-                      type="number"
-                      formControlName="a3"
                       [disabled]="czyInnyObiekt"
+                      class="form-control"
+                      formControlName="a3"
+                      type="number"
                     />
                     <label class="input-group-text">A4</label>
                     <input
-                      class="form-control"
-                      type="number"
-                      formControlName="a4"
                       [disabled]="czyInnyObiekt"
+                      class="form-control"
+                      formControlName="a4"
+                      type="number"
                     />
                     <label class="input-group-text">A5</label>
                     <input
-                      class="form-control"
-                      type="number"
-                      formControlName="a5"
                       [disabled]="czyInnyObiekt"
+                      class="form-control"
+                      formControlName="a5"
+                      type="number"
                     />
                   </div>
                   <div class="input-group col-3">
                     <label class="input-group-text">B1</label>
                     <input
-                      class="form-control"
-                      type="number"
-                      formControlName="b1"
                       [disabled]="czyInnyObiekt"
+                      class="form-control"
+                      formControlName="b1"
+                      type="number"
                     />
                     <label class="input-group-text">B2</label>
                     <input
-                      class="form-control"
-                      type="number"
-                      formControlName="b2"
                       [disabled]="czyInnyObiekt"
+                      class="form-control"
+                      formControlName="b2"
+                      type="number"
                     />
                     <label class="input-group-text">B3</label>
                     <input
-                      class="form-control"
-                      type="number"
-                      formControlName="b3"
                       [disabled]="czyInnyObiekt"
+                      class="form-control"
+                      formControlName="b3"
+                      type="number"
                     />
                     <label class="input-group-text">B4</label>
                     <input
-                      class="form-control"
-                      type="number"
-                      formControlName="b4"
                       [disabled]="czyInnyObiekt"
+                      class="form-control"
+                      formControlName="b4"
+                      type="number"
                     />
                     <label class="input-group-text">B5</label>
                     <input
-                      class="form-control"
-                      type="number"
-                      formControlName="b5"
                       [disabled]="czyInnyObiekt"
+                      class="form-control"
+                      formControlName="b5"
+                      type="number"
                     />
                   </div>
                 </div>
@@ -992,39 +992,39 @@
           </div>
         </div>
         <div *ngIf="this.file!=null">
-          <h5 class="mt-5" [ngClass]="{'text-muted': !czyInnyObiekt}">
+          <h5 [ngClass]="{'text-muted': !czyInnyObiekt}" class="mt-5">
             Wprowadź plik przedstawiający obiekt symulacji:
           </h5>
-          <span class="p-3" [ngClass]="{'text-muted': !czyInnyObiekt}">
+          <span [ngClass]="{'text-muted': !czyInnyObiekt}" class="p-3">
             {{ strojenie.get('MIMO.plikWizualizacji')?.value?.name ? 'Wybrany
             plik to: ' +fileWizualizacji!.name : 'Wybierz plik lub go tu
             przyciągnij i upuść ' }}</span
           >
           <input
+            #fileInput
+            (change)="onFileWizualizacjiChange($event)"
+            [disabled]="!czyInnyObiekt"
             class="file-input"
             type="file"
-            #fileInput
-            [disabled]="!czyInnyObiekt"
-            (change)="onFileWizualizacjiChange($event)"
           />
         </div>
       </div>
       <div
-        class="mt-5"
         [hidden]="
           this.zakladkaWizualizacja != 'przebieg' &&
           this.zakladkaWizualizacja != 'parametry'
         "
+        class="mt-5"
       >
         <button class="btn btn-success" type="submit">Dobierz Strojenie</button>
       </div>
     </div>
   </form>
   <div
-    class="odpowiedz"
     [hidden]="
       this.zakladkaWizualizacja != 'odpowiedz' || zakladka !== 'wizualizacja'
     "
+    class="odpowiedz"
   >
     <div class="text-center">
       <b>Wyznacz przebieg odpowiedzi skokowej na model:</b>
@@ -1039,40 +1039,40 @@
               Długość
             </label>
             <input
-              class="form-control col-12 d-block text-center"
-              [(ngModel)]="dlugoscTemp"
-              name="dlugoscTemp"
               (ngModelChange)="updateDlugosc($event)"
+              [(ngModel)]="dlugoscTemp"
+              class="form-control col-12 d-block text-center"
+              name="dlugoscTemp"
             />
           </div>
         </div>
       </div>
       <div class="mt-5">
-        <button class="btn btn-success" (click)="WyznaczOdpowiedz()">
+        <button (click)="WyznaczOdpowiedz()" class="btn btn-success">
           Wyznacz odpowiedź skokową
         </button>
       </div>
       <div class="odp-skokowa-wykres">
         <canvas
-          id="odpSkokowaChart"
           [hidden]="
             zakladka !== 'wizualizacja' ||
             zakladkaWizualizacja != 'odpowiedz' ||
             czyLaduje
           "
-          >{{ this.odpSkokowaChart }}</canvas
+          id="odpSkokowaChart"
+        >{{ this.odpSkokowaChart }}</canvas
         >
       </div>
     </div>
   </div>
   <div
-    class="wykres-odp"
     *ngIf="odpowiedz"
     [hidden]="
       (this.zakladkaWizualizacja != 'parametry' &&
         this.zakladkaWizualizacja != 'przebieg') ||
       zakladka != 'wizualizacja'
     "
+    class="wykres-odp"
   >
     <div *ngIf="liczbaRegulatorow">
       <div *ngIf="odpowiedz.typRegulatora == 'pid'">
@@ -1099,8 +1099,8 @@
       <div *ngIf="odpowiedzMIMO.typRegulatora == 'pid'">
         <div *ngFor="let regulator of this.liczbaRegulatorow">
           <b
-            >Wartości parametrów regulatora podłączonego do wyjścia {{ regulator
-            + 1 }}</b
+          >Wartości parametrów regulatora podłączonego do wyjścia {{ regulator
+          + 1 }}</b
           >
 
           <p><b>P</b> = {{ odpowiedzMIMO.wspolczynniki[regulator * 3 + 0] }}</p>
@@ -1122,13 +1122,13 @@
     </div>
   </div>
   <div
-    class="text-center mt-5 mx-auto"
     [hidden]="
       zakladka != 'wizualizacja' ||
       (zakladkaWizualizacja != 'przebieg' &&
         zakladkaWizualizacja != 'parametry') ||
       czyLaduje
     "
+    class="text-center mt-5 mx-auto"
   >
     <div style="margin-left: 20%; margin-right: 20%">
       <b *ngIf="odpowiedz">Przebieg symulacji regulowanego obiektu</b>

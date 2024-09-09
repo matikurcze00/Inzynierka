@@ -1,6 +1,6 @@
 package com.example.inzynierka.objects;
 
-import com.example.inzynierka.tunningControllers.AbstractController;
+import com.example.inzynierka.controllers.AbstractController;
 import lombok.Data;
 
 import java.util.List;
@@ -20,7 +20,7 @@ public abstract class SISO {
 
     public abstract void resetObject();
 
-    public abstract double simulateObjectRegulation(AbstractController abstractController, double[] cel);
+    public abstract double simulateObjectRegulation(AbstractController abstractController, double[] goal);
 
     public abstract double simulateStep(double du);
 

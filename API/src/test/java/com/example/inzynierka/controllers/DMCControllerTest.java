@@ -1,4 +1,4 @@
-package com.example.inzynierka.tunningControllers;
+package com.example.inzynierka.controllers;
 
 import com.example.inzynierka.models.ParObiektDPAMIMO;
 import com.example.inzynierka.objects.MIMODPA;
@@ -14,7 +14,7 @@ import static org.junit.Assert.assertArrayEquals;
 class DMCControllerTest {
 
     @Test
-     void SISOTest() {
+    void SISOTest() {
         SISODPA SISODPA = new SISODPA(10.0, 1.0, 1, 1.0, 0, 1.0, 3.0, 5.0, 0, 1, 100.0, -100.0, "srednio");
         AbstractController abstractController = new DMCController(4, 0.1, SISODPA, SISODPA.getYMax() / 2, 3.0, 11);
         abstractController.setSetpoint(new double[] {30.0});
@@ -42,8 +42,8 @@ class DMCControllerTest {
         double[] tempLambda = {0.5, 0.5};
         Double[] tempStrojenie = new Double[] {1.0, 1.0};
         AbstractController abstractController = new DMCController(5, tempLambda, obiekt, obiekt.getYMax(), 3.0, 11, tempStrojenie);
-        double[] tempCel = {30.0, 30.0};
-        abstractController.setSetpoint(tempCel);
+        double[] tempGoal = {30.0, 30.0};
+        abstractController.setSetpoint(tempGoal);
         assert (abstractController.getSetpoint()[0] == 30.0);
         double[] tempY = obiekt.simulateStep(abstractController.countControls(obiekt.getOutput()));
         double[] tempExpectedY = {26.23965651834505, 26.23965651834505};

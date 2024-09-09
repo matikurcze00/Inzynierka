@@ -1,13 +1,13 @@
-package com.example.inzynierka.tunningControllers;
+package com.example.inzynierka.controllers;
 
 import lombok.Data;
 
 @Data
-abstract public class AbstractController {
-    double[] setpoint;
+public abstract class AbstractController {
     protected double duMax;
     protected Double[] presetControls;
     protected int presetControlsNumbers = 0;
+    double[] setpoint;
 
     public abstract double countControls(double previousOutput);
 

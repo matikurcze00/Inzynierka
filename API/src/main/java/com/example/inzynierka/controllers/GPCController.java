@@ -1,4 +1,4 @@
-package com.example.inzynierka.tunningControllers;
+package com.example.inzynierka.controllers;
 
 import Jama.Matrix;
 import com.example.inzynierka.objects.MIMODiscrete;
@@ -23,9 +23,9 @@ public class GPCController extends AbstractMPCController {
     private Integer IN;
     private Integer OUT;
 
-    public GPCController(SISODiscrete sisoDiscrete, double lambda, double cel,
+    public GPCController(SISODiscrete sisoDiscrete, double lambda, double goal,
                          double duMax, Double[] presetTuning) {
-        this(sisoDiscrete, lambda, cel, duMax);
+        this(sisoDiscrete, lambda, goal, duMax);
         if (presetTuning[0] != null) {
             presetControlsNumbers = 1;
             this.presetControls = presetTuning;
@@ -34,16 +34,16 @@ public class GPCController extends AbstractMPCController {
         calculateK();
     }
 
-    public GPCController(SISODiscrete sisoDiscrete, double lambda, double cel, double duMax) {
+    public GPCController(SISODiscrete sisoDiscrete, double lambda, double goal, double duMax) {
         this.Lambda = new ArrayList<>(List.of(lambda));
-        this.setpoint = new double[] {cel};
+        this.setpoint = new double[] {goal};
         this.duMax = duMax;
         calculateParameters(sisoDiscrete);
     }
 
-    public GPCController(MIMODiscrete mimoDiscrete, int Nu, double[] cel, double duMax, Double[] presetTuning, double[] lambda) {
+    public GPCController(MIMODiscrete mimoDiscrete, int Nu, double[] goal, double duMax, Double[] presetTuning, double[] lambda) {
         this.presetControls = presetTuning;
-        this.setpoint = cel;
+        this.setpoint = goal;
         this.duMax = duMax;
         this.Nu = Nu;
         this.IN = mimoDiscrete.getEntriesNumber();
@@ -234,10 +234,10 @@ public class GPCController extends AbstractMPCController {
             for (int j = 0; j < IN; j++) {
                 List<Double> Stemp = new ArrayList<>();
                 int k = 2;
-                obliczSk(i, j, Stemp, 0);
-                obliczSk(i, j, Stemp, 1);
-                while (!(Math.abs(Stemp.get(k - 1) - Stemp.get(k - 2)) <= 0.05) || Stemp.get(k - 2) == 0.0) {
-                    obliczSk(i, j, Stemp, k);
+                calculateSk(i, j, Stemp, 0);
+                calculateSk(i, j, Stemp, 1);
+                while ((Math.abs(Stemp.get(k - 1) - Stemp.get(k - 2)) > 0.05) || Stemp.get(k - 2) == 0.0) {
+                    calculateSk(i, j, Stemp, k);
                     k++;
                 }
                 S.add(Stemp);
@@ -256,7 +256,7 @@ public class GPCController extends AbstractMPCController {
         }
     }
 
-    private void obliczSk(int out, int in, List<Double> Stemp, int k) {
+    private void calculateSk(int out, int in, List<Double> Stemp, int k) {
         Double Sk = 0.0;
         for (int m = 0; m < Math.min(k + 1, B.get(out).size()); m++) {
             Sk += B.get(out).get(m)[in];
@@ -395,11 +395,11 @@ public class GPCController extends AbstractMPCController {
     }
 
     protected Matrix setMatrixYset() {
-        double[] celTemp = new double[N * OUT];
+        double[] goalTemp = new double[N * OUT];
         for (int i = 0; i < N * OUT; i++) {
-            celTemp[i] = setpoint[i % OUT];
+            goalTemp[i] = setpoint[i % OUT];
         }
-        return new Matrix(celTemp, 1);
+        return new Matrix(goalTemp, 1);
     }
 
     private Matrix setMatrixYSISO() {
@@ -418,8 +418,8 @@ public class GPCController extends AbstractMPCController {
         Matrix YMatrix = new Matrix(1, N * OUT);
         for (int i = 0; i < N - 1; i++) {
             double[] yTemp = addBUMIMO(i);
-            yTemp = addDisturbanceMIMO(i, yTemp);
-            yTemp = addYMIMO(i, yTemp);
+            addDisturbanceMIMO(i, yTemp);
+            addYMIMO(i, yTemp);
             for (int j = 0; j < OUT; j++) {
                 YMatrix.set(0, i * OUT + j, yTemp[j]);
             }
@@ -427,24 +427,27 @@ public class GPCController extends AbstractMPCController {
         return YMatrix;
     }
 
-    private double[] addDisturbanceMIMO(int i, double[] yTemp) {
+    private void addDisturbanceMIMO(int i, double[] yTemp) {
         for (int k = 0; k < OUT; k++) {
             for (int l = 0; l < disturbanceNumber; l++) {
-                if (Bz.get(k).size() > i) {
-                    for (int j = 0; j < Bz.get(k).size() - i; j++) {
-                        yTemp[k] += Uz.get(l).get(Bz.get(k).size() - 1 - i - j) * Bz.get(k).get(Bz.get(k).size() - 1 - j)[l];
-                    }
-                    for (int j = Bz.get(k).size() - i; j < Bz.get(k).size(); j++) {
-                        yTemp[k] += Uz.get(l).get(0) * Bz.get(k).get(Bz.get(k).size() - 1 - j)[l];
-                    }
-                } else {
-                    for (int j = 0; j < Bz.get(k).size(); j++) {
-                        yTemp[k] += Uz.get(l).get(0) * Bz.get(k).get(j)[l];
-                    }
-                }
+                addDisturbanceRow(Bz, k, i, yTemp[k], Uz, l);
             }
         }
-        return yTemp;
+    }
+
+    private void addDisturbanceRow(List<List<Double[]>> bz, int k, int i, double yTemp, List<List<Double>> uz, int l) {
+        if (bz.get(k).size() > i) {
+            for (int j = 0; j < bz.get(k).size() - i; j++) {
+                yTemp += uz.get(l).get(bz.get(k).size() - 1 - i - j) * bz.get(k).get(bz.get(k).size() - 1 - j)[l];
+            }
+            for (int j = bz.get(k).size() - i; j < bz.get(k).size(); j++) {
+                yTemp += uz.get(l).get(0) * bz.get(k).get(bz.get(k).size() - 1 - j)[l];
+            }
+        } else {
+            for (int j = 0; j < bz.get(k).size(); j++) {
+                yTemp += uz.get(l).get(0) * bz.get(k).get(j)[l];
+            }
+        }
     }
 
     private double[] addYMIMO(int i, double[] yTemp) {
@@ -469,18 +472,7 @@ public class GPCController extends AbstractMPCController {
         double[] yTemp = new double[OUT];
         for (int k = 0; k < OUT; k++) {
             for (int l = 0; l < IN; l++) {
-                if (B.get(k).size() > i) {
-                    for (int j = 0; j < B.get(k).size() - i; j++) {
-                        yTemp[k] += U.get(l).get(B.get(k).size() - 1 - i - j) * B.get(k).get(B.get(k).size() - 1 - j)[l];
-                    }
-                    for (int j = B.get(k).size() - i; j < B.get(k).size(); j++) {
-                        yTemp[k] += U.get(l).get(0) * B.get(k).get(B.get(k).size() - 1 - j)[l];
-                    }
-                } else {
-                    for (int j = 0; j < B.get(k).size(); j++) {
-                        yTemp[k] += U.get(l).get(0) * B.get(k).get(j)[l];
-                    }
-                }
+                addDisturbanceRow(B, k, i, yTemp[k], U, l);
             }
         }
         return yTemp;
@@ -506,36 +498,14 @@ public class GPCController extends AbstractMPCController {
     private double addDisturbanceSISO(int i) {
         double yTemp = 0.0;
         for (int l = 0; l < disturbanceNumber; l++) {
-            if (Bz.get(0).size() > i) {
-                for (int j = 0; j < Bz.get(0).size() - i; j++) {
-                    yTemp += Uz.get(l).get(Bz.get(0).size() - 1 - i - j) * Bz.get(0).get(Bz.get(0).size() - 1 - j)[l];
-                }
-                for (int j = Bz.get(0).size() - i; j < Bz.get(0).size(); j++) {
-                    yTemp += Uz.get(l).get(0) * Bz.get(0).get(Bz.get(0).size() - 1 - j)[l];
-                }
-            } else {
-                for (int j = 0; j < Bz.get(0).size(); j++) {
-                    yTemp += Uz.get(l).get(0) * Bz.get(0).get(j)[l];
-                }
-            }
+            addDisturbanceRow(Bz, 0, i, yTemp, Uz, l);
         }
         return yTemp;
     }
 
     private double addBUSISO(int i) {
         double yTemp = 0.0;
-        if (B.get(0).size() > i) {
-            for (int j = 0; j < B.get(0).size() - i; j++) {
-                yTemp += U.get(0).get(B.get(0).size() - 1 - i - j) * B.get(0).get(B.get(0).size() - 1 - j)[0];
-            }
-            for (int j = B.get(0).size() - i; j < B.get(0).size(); j++) {
-                yTemp += U.get(0).get(0) * B.get(0).get(B.get(0).size() - 1 - j)[0];
-            }
-        } else {
-            for (int j = 0; j < B.get(0).size(); j++) {
-                yTemp += U.get(0).get(0) * B.get(0).get(j)[0];
-            }
-        }
+        addDisturbanceRow(B, 0, i, yTemp, U, 0);
         return yTemp;
     }
 

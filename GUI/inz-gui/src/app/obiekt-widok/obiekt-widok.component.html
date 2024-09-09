@@ -3,41 +3,41 @@
   <div class="mt-5">
     <div class="btn-group">
       <input
-        mdbRadio
-        type="radio"
-        class="btn-check"
-        name="options-obiekt"
-        id="option1-model"
-        autocomplete="off"
-        [checked]="true"
         (change)="typ = 'SISO'; resetMIMO()"
+        [checked]="true"
+        autocomplete="off"
+        class="btn-check"
+        id="option1-model"
+        mdbRadio
+        name="options-obiekt"
+        type="radio"
       />
       <label class="btn btn-secondary" for="option1-model">SISO</label>
       <input
-        mdbRadio
-        type="radio"
-        class="btn-check"
-        name="options-obiekt"
-        id="option2-model"
-        autocomplete="off"
         (change)="typ = 'MIMO'"
+        autocomplete="off"
+        class="btn-check"
+        id="option2-model"
+        mdbRadio
+        name="options-obiekt"
+        type="radio"
       />
       <label class="btn btn-secondary" for="option2-model">MIMO</label>
     </div>
   </div>
-  <div class="mt-5" *ngIf="typ == 'MIMO'">
+  <div *ngIf="typ == 'MIMO'" class="mt-5">
     <div class="form-row align-items-center mb-3">
       <span class="p-3">{{
         file
           ? "Wybrany plik to: " + file.name
           : "Wybierz plik lub go tu przyciągnij i upuść "
-      }}</span>
-      <input class="file-input" type="file" />
+        }}</span>
+      <input class="file-input" type="file"/>
       <div class="container ml-0 mr-0 mt-5 mx-auto">
         <button
-          class="btn btn-secondary"
           (click)="infoWejscieWyjscia()"
           [disabled]="this.obiektForm.get('obiekt.1.plik')?.value == null"
+          class="btn btn-secondary"
           type="button"
         >
           Wyślij obiekt
@@ -67,33 +67,33 @@
       </div>
     </div>
   </div>
-  <div class="mt-5" *ngIf="typ == 'SISO'">
+  <div *ngIf="typ == 'SISO'" class="mt-5">
     <div [hidden]="this.typRegulatora == 'gpc'">
       {{ pierwszeRownanie }}
       <h5 class="mt-5">Wprowadź wartości transmitancji:</h5>
       <form [formGroup]="obiektForm">
         <div class="container ml-0 mr-0 mx-auto">
           <div class="form-group mb-3" formArrayName="obiekt">
-            <div class="form-row align-items-center" [formGroupName]="0">
+            <div [formGroupName]="0" class="form-row align-items-center">
               <div class="input-group col">
                 <label class="input-group-text">
                   {{ zmienne[0].nazwa }} &nbsp;
                 </label>
                 <input
                   class="form-control"
-                  type="number"
-                  placeholder="1.0"
                   formControlName="gain"
+                  placeholder="1.0"
+                  type="number"
                 />
                 <label class="input-group-text">{{ zmienne[1].nazwa }}</label>
                 <input
                   class="form-control"
-                  type="number"
-                  placeholder="0.0"
                   formControlName="r1"
+                  placeholder="0.0"
+                  type="number"
                 />
                 <label class="input-group-text">{{ zmienne[2].nazwa }}</label>
-                <select class="form-control" [(ngModel)]="optionsQ[2]" formControlName="q1">
+                <select [(ngModel)]="optionsQ[2]" class="form-control" formControlName="q1">
                   <option *ngFor="let option of optionsQ" [value]="option">
                     {{ option }}
                   </option>
@@ -101,12 +101,12 @@
                 <label class="input-group-text">{{ zmienne[3].nazwa }}</label>
                 <input
                   class="form-control"
-                  type="number"
-                  placeholder="0.0"
                   formControlName="r2"
+                  placeholder="0.0"
+                  type="number"
                 />
                 <label class="input-group-text">{{ zmienne[4].nazwa }}</label>
-                <select class="form-control" [(ngModel)]="optionsQ[1]" formControlName="q2">
+                <select [(ngModel)]="optionsQ[1]" class="form-control" formControlName="q2">
                   <option *ngFor="let option of optionsQ" [value]="option">
                     {{ option }}
                   </option>
@@ -116,37 +116,37 @@
                 <label class="input-group-text">{{ zmienne[5].nazwa }}</label>
                 <input
                   class="form-control"
-                  type="number"
-                  placeholder="10.0"
                   formControlName="t1"
+                  placeholder="10.0"
+                  type="number"
                 />
                 <label class="input-group-text">{{ zmienne[6].nazwa }}</label>
                 <input
                   class="form-control"
-                  type="number"
-                  placeholder="2.0"
                   formControlName="t2"
+                  placeholder="2.0"
+                  type="number"
                 />
                 <label class="input-group-text">{{ zmienne[7].nazwa }}</label>
                 <input
                   class="form-control"
-                  type="number"
-                  placeholder="0.0"
                   formControlName="t3"
+                  placeholder="0.0"
+                  type="number"
                 />
                 <label class="input-group-text">{{ zmienne[8].nazwa }}</label>
                 <input
                   class="form-control"
-                  type="number"
-                  placeholder="0.0"
                   formControlName="delay"
+                  placeholder="0.0"
+                  type="number"
                 />
                 <label class="input-group-text">{{ zmienne[9].nazwa }}</label>
                 <input
                   class="form-control"
-                  type="number"
-                  placeholder="1.0"
                   formControlName="tp"
+                  placeholder="1.0"
+                  type="number"
                 />
               </div>
             </div>
@@ -158,79 +158,79 @@
       <form [formGroup]="obiektForm">
         <div class="container ml-0 mr-0 mx-auto">
           <div class="form-group mb-3" formArrayName="obiekt">
-            <div class="form-row align-items-center" [formGroupName]="2">
+            <div [formGroupName]="2" class="form-row align-items-center">
               <div class="input-group col">
                 <label class="input-group-text">A1</label>
                 <input
                   class="form-control"
-                  type="number"
-                  placeholder="-0.8"
                   formControlName="a1"
+                  placeholder="-0.8"
+                  type="number"
                 />
                 <label class="input-group-text">A2</label>
                 <input
                   class="form-control"
-                  type="number"
-                  placeholder="0.0"
                   formControlName="a2"
+                  placeholder="0.0"
+                  type="number"
                 />
                 <label class="input-group-text">A3</label>
                 <input
                   class="form-control"
-                  type="number"
-                  placeholder="0.0"
                   formControlName="a3"
+                  placeholder="0.0"
+                  type="number"
                 />
                 <label class="input-group-text">A4</label>
                 <input
                   class="form-control"
-                  type="number"
-                  placeholder="0.0"
                   formControlName="a4"
+                  placeholder="0.0"
+                  type="number"
                 />
                 <label class="input-group-text">A5</label>
                 <input
                   class="form-control"
-                  type="number"
-                  placeholder="0.0"
                   formControlName="a5"
+                  placeholder="0.0"
+                  type="number"
                 />
               </div>
               <div class="input-group col">
                 <label class="input-group-text">B1</label>
                 <input
                   class="form-control"
-                  type="number"
-                  placeholder="1.0"
                   formControlName="b1"
+                  placeholder="1.0"
+                  type="number"
                 />
                 <label class="input-group-text">B2</label>
                 <input
                   class="form-control"
-                  type="number"
-                  placeholder="0.5"
                   formControlName="b2"
+                  placeholder="0.5"
+                  type="number"
                 />
                 <label class="input-group-text">B3</label>
                 <input
                   class="form-control"
-                  type="number"
-                  placeholder="0.2"
                   formControlName="b3"
+                  placeholder="0.2"
+                  type="number"
                 />
                 <label class="input-group-text">B5</label>
                 <input
                   class="form-control"
-                  type="number"
-                  placeholder="0.0"
                   formControlName="b4"
+                  placeholder="0.0"
+                  type="number"
                 />
                 <label class="input-group-text">B5</label>
                 <input
                   class="form-control"
-                  type="number"
-                  placeholder="0.0"
                   formControlName="b5"
+                  placeholder="0.0"
+                  type="number"
                 />
               </div>
             </div>

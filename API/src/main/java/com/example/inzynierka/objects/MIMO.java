@@ -1,6 +1,6 @@
 package com.example.inzynierka.objects;
 
-import com.example.inzynierka.tunningControllers.AbstractController;
+import com.example.inzynierka.controllers.AbstractController;
 import lombok.Data;
 
 import java.util.List;
@@ -11,7 +11,7 @@ public abstract class MIMO {
     int entriesNumber;
     int delayMax;
     String typeOfError;
-    int length;
+    int simulationLength;
     List<List<Double>> U;
     List<List<Double>> Y;
     double[] YMax;
@@ -28,7 +28,7 @@ public abstract class MIMO {
 
     public abstract double[] getOutput();
 
-    public abstract double simulateObjectRegulation(AbstractController abstractController, double[] cel);
+    public abstract double simulateObjectRegulation(AbstractController abstractController, double[] goal);
 
     public abstract void resetObject();
 

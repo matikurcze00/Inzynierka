@@ -1,4 +1,4 @@
-package com.example.inzynierka.tunningControllers;
+package com.example.inzynierka.controllers;
 
 import com.example.inzynierka.models.ParObiektDPAMIMO;
 import com.example.inzynierka.objects.MIMODPA;
@@ -40,8 +40,8 @@ class PIDControllerTest {
         MIMODPA obiekt = new MIMODPA(Obiekty, "srednio");
         Double[] tempStrojenie = new Double[] {1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
         AbstractController abstractController = new PIDCollection(obiekt, PV, 3.0, tempStrojenie);
-        double[] tempCel = {30.0, 30.0};
-        abstractController.setSetpoint(tempCel);
+        double[] tempGoal = {30.0, 30.0};
+        abstractController.setSetpoint(tempGoal);
         assert (abstractController.getSetpoint()[0] == 30.0);
         double[] tempY = obiekt.simulateStep(abstractController.countControls(obiekt.getOutput()));
         double[] tempExpectedY = {26.23965651834505, 26.23965651834505};

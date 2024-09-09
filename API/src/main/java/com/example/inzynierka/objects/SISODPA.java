@@ -1,8 +1,8 @@
 package com.example.inzynierka.objects;
 
+import com.example.inzynierka.controllers.AbstractController;
+import com.example.inzynierka.models.DisturbanceDPA;
 import com.example.inzynierka.models.ParObiektDPA;
-import com.example.inzynierka.models.ZakloceniaDPA;
-import com.example.inzynierka.tunningControllers.AbstractController;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -20,16 +20,17 @@ public class SISODPA extends SISO {
     public SISODPA() {
     }
 
-    public SISODPA(ParObiektDPA parObiektDPA, double uMax, double uMin, String typeOfError, ZakloceniaDPA zakloceniaDPAMierzalne) {
+    public SISODPA(ParObiektDPA parObiektDPA, double uMax, double uMin, String typeOfError, DisturbanceDPA disturbanceDPAMierzalne) {
         this(parObiektDPA.getGain(), parObiektDPA.getR1(), parObiektDPA.getQ1(), parObiektDPA.getR2(),
             parObiektDPA.getQ2(), parObiektDPA.getT1(), parObiektDPA.getT2(), parObiektDPA.getT3()
             , parObiektDPA.getDelay(), parObiektDPA.getTp(), uMax, uMin, typeOfError);
         this.disturbance = new ArrayList<>();
-        if (zakloceniaDPAMierzalne.getGain() != null) {
-            for (int i = 0; i < zakloceniaDPAMierzalne.getGain().length; i++) {
-                this.disturbance.add(new DPA(zakloceniaDPAMierzalne.getGain()[i], zakloceniaDPAMierzalne.getR1()[i], zakloceniaDPAMierzalne.getQ1()[i],
-                    zakloceniaDPAMierzalne.getR2()[i], zakloceniaDPAMierzalne.getQ2()[i], zakloceniaDPAMierzalne.getT1()[i], zakloceniaDPAMierzalne.getT2()[i],
-                    zakloceniaDPAMierzalne.getT3()[i], zakloceniaDPAMierzalne.getDelay()[i], zakloceniaDPAMierzalne.getTp()[i]));
+        if (disturbanceDPAMierzalne.getGain() != null) {
+            for (int i = 0; i < disturbanceDPAMierzalne.getGain().length; i++) {
+                this.disturbance.add(new DPA(disturbanceDPAMierzalne.getGain()[i], disturbanceDPAMierzalne.getR1()[i], disturbanceDPAMierzalne.getQ1()[i],
+                    disturbanceDPAMierzalne.getR2()[i], disturbanceDPAMierzalne.getQ2()[i], disturbanceDPAMierzalne.getT1()[i],
+                    disturbanceDPAMierzalne.getT2()[i],
+                    disturbanceDPAMierzalne.getT3()[i], disturbanceDPAMierzalne.getDelay()[i], disturbanceDPAMierzalne.getTp()[i]));
             }
         }
         resetObject();
@@ -199,11 +200,11 @@ public class SISODPA extends SISO {
         resetObject();
         double USkok = getUMax() / 2;
         int i = 2;
-        List<Double> Stemp = new ArrayList<Double>();
+        List<Double> Stemp = new ArrayList<>();
         double Utemp = 0;
         Stemp.add((simulateStep(USkok) - getYpp()) / USkok);
         Stemp.add((simulateStep(Utemp) - getYpp()) / USkok);
-        while (!(Math.abs(Stemp.get(i - 1) - Stemp.get(i - 2)) < 0.001) || Stemp.get(i - 2) == 0.0) {
+        while ((Math.abs(Stemp.get(i - 1) - Stemp.get(i - 2)) >= 0.001) || Stemp.get(i - 2) == 0.0) {
             Stemp.add((simulateStep(Utemp) - getYpp()) / USkok);
             i++;
         }

@@ -33,11 +33,9 @@ public class Controller {
         System.out.println("strojenieSISO::start ");
         OdpowiedzStrojenie odpowiedz = tuningService.SISOTuning(parStrojenie);
 
-        if (odpowiedz == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } else {
-            return ResponseEntity.ok(odpowiedz);
-        }
+
+        return ResponseEntity.ok(odpowiedz);
+
 
     }
 
@@ -57,9 +55,7 @@ public class Controller {
     @PostMapping(value = "/info/MIMO/Rownania", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
     public ResponseEntity<OdpowiedzInfoMIMO> infoMIMODiscrete(@RequestPart("file") MultipartFile file) {
-        System.out.println("infoMIMO:: start ");
         OdpowiedzInfoMIMO odpowiedz = infoService.InfoMIMODiscrete(file);
-        System.out.println("infoMIMO:: koniec");
         if (odpowiedz == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } else {

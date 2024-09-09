@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { RegulatorWidokComponent } from './regulator-widok.component';
+import {RegulatorWidokComponent} from './regulator-widok.component';
 
 describe('RegulatorWidokComponent', () => {
   let component: RegulatorWidokComponent;

@@ -1,10 +1,13 @@
-package com.example.inzynierka.EA;
+package com.example.inzynierka.ea;
 
+import com.example.inzynierka.controllers.AbstractController;
+import com.example.inzynierka.exception.SecureRandomAlgorithmException;
 import com.example.inzynierka.objects.MIMO;
 import com.example.inzynierka.objects.SISO;
-import com.example.inzynierka.tunningControllers.AbstractController;
 import lombok.Data;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -20,7 +23,14 @@ public class EvolutionaryAlgorithm {
     private List<Individual> population;
     private int changeFactor = 0;
 
+    private Random rand;
+
     public EvolutionaryAlgorithm(int populationNumber, int iterationNumber, int mu, double mutationProbability, double recombinationFrequency) {
+        try {
+            rand = SecureRandom.getInstanceStrong();
+        } catch (NoSuchAlgorithmException e) {
+            throw SecureRandomAlgorithmException.assigningSecureRandomException(e.getMessage());
+        }
         this.populationNumber = populationNumber;
         this.iterationNumber = iterationNumber;
         this.mu = mu;
@@ -31,10 +41,9 @@ public class EvolutionaryAlgorithm {
 
     public double[] getTuningParameters(int argumentsNumber, AbstractController abstractController, SISO object) {
         population = new ArrayList<>();
-        Random r = new Random();
         double[] setpoint = new double[] {object.getYMax() / 5};
         abstractController.setSetpoint(setpoint);
-        Initialization(argumentsNumber, abstractController, object, r, setpoint);
+        Initialization(argumentsNumber, abstractController, object, setpoint);
         Collections.sort(population);
         for (int k = 0; k < iterationNumber; k++) {
             evolution(argumentsNumber, abstractController, object, setpoint, k);
@@ -42,11 +51,11 @@ public class EvolutionaryAlgorithm {
         return population.get(0).getParameters();
     }
 
-    private void Initialization(int argumentsNumber, AbstractController abstractController, SISO object, Random r, double[] setpoint) {
+    private void Initialization(int argumentsNumber, AbstractController abstractController, SISO object, double[] setpoint) {
         for (int i = 0; i < populationNumber; i++) {
             Individual individualTemp = new Individual(argumentsNumber);
             for (int j = 0; j < argumentsNumber; j++) {
-                individualTemp.setParameter(j, r.nextDouble(5.0));
+                individualTemp.setParameter(j, rand.nextDouble(5.0));
             }
             abstractController.changeTuning(individualTemp.getParameters());
             object.resetObject();
@@ -57,10 +66,9 @@ public class EvolutionaryAlgorithm {
     }
 
     private void evolution(int argumentsNumber, AbstractController abstractController, SISO object, double[] setpoint, int iteration) {
-        Random r = new Random();
         List<Individual> reproduction = new ArrayList<>(population);
-        recombination(argumentsNumber, abstractController, object, setpoint, r, reproduction);
-        mutations(argumentsNumber, abstractController, object, setpoint, r, reproduction);
+        recombination(argumentsNumber, abstractController, object, setpoint, reproduction);
+        mutations(argumentsNumber, abstractController, object, setpoint, reproduction);
         Collections.sort(reproduction);
         if (reproduction.get(0).getValue() < population.get(0).getValue()) {
             changeFactor += 1;
@@ -72,13 +80,13 @@ public class EvolutionaryAlgorithm {
         population = reproduction.stream().limit(populationNumber).collect(Collectors.toList());
     }
 
-    private void mutations(int argumentsNumber, AbstractController abstractController, SISO object, double[] setpoint, Random r, List<Individual> reproduction) {
+    private void mutations(int argumentsNumber, AbstractController abstractController, SISO object, double[] setpoint, List<Individual> reproduction) {
         for (int i = 0; i < mutationNumber; i++) {
-            int parent = r.nextInt(populationNumber);
+            int parent = rand.nextInt(populationNumber);
             Individual individualTemp = new Individual(argumentsNumber);
             for (int j = 0; j < argumentsNumber; j++) {
                 individualTemp.getParameters()[j] =
-                    (r.nextDouble() < getMutationProbability()) ? Math.abs(r.nextGaussian(population.get(parent).getParameters()[j], 0.4)) :
+                    (rand.nextDouble() < getMutationProbability()) ? Math.abs(rand.nextGaussian(population.get(parent).getParameters()[j], 0.4)) :
                         population.get(parent).getParameters()[j];
             }
             abstractController.changeTuning(individualTemp.getParameters());
@@ -89,13 +97,14 @@ public class EvolutionaryAlgorithm {
         }
     }
 
-    private void recombination(int argumentsNumber, AbstractController abstractController, SISO object, double[] setpoint, Random r, List<Individual> reproduction) {
+    private void recombination(int argumentsNumber, AbstractController abstractController, SISO object, double[] setpoint, List<Individual> reproduction) {
         for (int i = 0; i < recombinationNumber; i++) {
-            int individual1 = r.nextInt(populationNumber);
-            int individual2 = r.nextInt(populationNumber);
+            int individual1 = rand.nextInt(populationNumber);
+            int individual2 = rand.nextInt(populationNumber);
             Individual individualTemp = new Individual(argumentsNumber);
             for (int j = 0; j < argumentsNumber; j++) {
-                individualTemp.getParameters()[j] = (r.nextBoolean()) ? population.get(individual1).getParameters()[j] : population.get(individual2).getParameters()[j];
+                individualTemp.getParameters()[j] =
+                    (rand.nextBoolean()) ? population.get(individual1).getParameters()[j] : population.get(individual2).getParameters()[j];
             }
             abstractController.changeTuning(individualTemp.getParameters());
             object.resetObject();
@@ -107,7 +116,6 @@ public class EvolutionaryAlgorithm {
 
     public double[] getTuningParameters(int argumentsNumber, AbstractController abstractController, MIMO object) {
         population = new ArrayList<>();
-        Random r = new Random();
         double[] setpoint = Arrays.copyOf(object.getYMax(), object.getYMax().length);
         for (int i = 0; i < setpoint.length; i++) {
             setpoint[i] = setpoint[i] / 5;
@@ -117,7 +125,7 @@ public class EvolutionaryAlgorithm {
         for (int i = 0; i < populationNumber; i++) {
             Individual individualTemp = new Individual(argumentsNumber);
             for (int j = 0; j < argumentsNumber; j++) {
-                individualTemp.setParameter(j, r.nextDouble(3.0));
+                individualTemp.setParameter(j, rand.nextDouble(3.0));
             }
             abstractController.changeTuning(individualTemp.getParameters());
             object.resetObject();
@@ -133,10 +141,9 @@ public class EvolutionaryAlgorithm {
     }
 
     private void evolution(int argumentsNumber, AbstractController abstractController, MIMO object, double[] setpoint, int iteration) {
-        Random r = new Random();
         List<Individual> reproduction = new ArrayList<>(population);
-        recombination(argumentsNumber, abstractController, object, setpoint, r, reproduction);
-        mutations(argumentsNumber, abstractController, object, setpoint, r, reproduction);
+        recombination(argumentsNumber, abstractController, object, setpoint, reproduction);
+        mutations(argumentsNumber, abstractController, object, setpoint, reproduction);
         Collections.sort(reproduction);
         if (reproduction.get(0).getValue() < population.get(0).getValue()) {
             changeFactor += 1;
@@ -148,13 +155,13 @@ public class EvolutionaryAlgorithm {
         population = reproduction.stream().limit(populationNumber).collect(Collectors.toList());
     }
 
-    private void mutations(int argumentsNumber, AbstractController abstractController, MIMO object, double[] setpoint, Random r, List<Individual> reproduction) {
+    private void mutations(int argumentsNumber, AbstractController abstractController, MIMO object, double[] setpoint, List<Individual> reproduction) {
         for (int i = 0; i < mutationNumber; i++) {
-            int parent = r.nextInt(populationNumber);
+            int parent = rand.nextInt(populationNumber);
             Individual individualTemp = new Individual(argumentsNumber);
             for (int j = 0; j < argumentsNumber; j++) {
                 individualTemp.getParameters()[j] =
-                    (r.nextDouble() < getMutationProbability()) ? Math.abs(r.nextGaussian(population.get(parent).getParameters()[j], 0.6)) :
+                    (rand.nextDouble() < getMutationProbability()) ? Math.abs(rand.nextGaussian(population.get(parent).getParameters()[j], 0.6)) :
                         population.get(parent).getParameters()[j];
             }
             abstractController.changeTuning(individualTemp.getParameters());
@@ -164,13 +171,14 @@ public class EvolutionaryAlgorithm {
         }
     }
 
-    private void recombination(int argumentsNumber, AbstractController abstractController, MIMO obiekt, double[] setpoint, Random r, List<Individual> reproduction) {
+    private void recombination(int argumentsNumber, AbstractController abstractController, MIMO obiekt, double[] setpoint, List<Individual> reproduction) {
         for (int i = 0; i < recombinationNumber; i++) {
-            int individual1 = r.nextInt(populationNumber);
-            int individual2 = r.nextInt(populationNumber);
+            int individual1 = rand.nextInt(populationNumber);
+            int individual2 = rand.nextInt(populationNumber);
             Individual individualTemp = new Individual(argumentsNumber);
             for (int j = 0; j < argumentsNumber; j++) {
-                individualTemp.getParameters()[j] = (r.nextBoolean()) ? population.get(individual1).getParameters()[j] : population.get(individual2).getParameters()[j];
+                individualTemp.getParameters()[j] =
+                    (rand.nextBoolean()) ? population.get(individual1).getParameters()[j] : population.get(individual2).getParameters()[j];
             }
             abstractController.changeTuning(individualTemp.getParameters());
             obiekt.resetObject();

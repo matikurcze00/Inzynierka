@@ -2,10 +2,10 @@
   <form [formGroup]="regulatorForm">
     <div class="container m2-5 mx-auto">
       <div class="form-group mb-3" formArrayName="regulator">
-        <div class="form-row align-items-center" [formGroupName]="0">
+        <div [formGroupName]="0" class="form-row align-items-center">
           <h4>Wybierz Regulator:</h4>
           <select formControlName="typ">
-            <option value="pid" selected>PID</option>
+            <option selected value="pid">PID</option>
             <option value="dmc">DMC</option>
             <option value="gpc">GPC</option>
           </select>
@@ -13,23 +13,23 @@
             <label class="input-group-text col-1"> U Min </label>
             <input
               class="form-control col-2"
-              type="number"
-              placeholder="0.0"
               formControlName="uMin"
+              placeholder="0.0"
+              type="number"
             />
             <label class="input-group-text col-1"> U Max </label>
             <input
               class="form-control col-2"
-              type="number"
-              placeholder="100.0"
               formControlName="uMax"
+              placeholder="100.0"
+              type="number"
             />
             <label class="input-group-text col-1">dU Max</label>
             <input
               class="form-control col-2"
-              type="number"
-              placeholder="1.0"
               formControlName="duMax"
+              placeholder="1.0"
+              type="number"
             />
           </div>
         </div>

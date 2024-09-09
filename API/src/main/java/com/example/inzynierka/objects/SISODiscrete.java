@@ -1,9 +1,9 @@
 package com.example.inzynierka.objects;
 
 
-import com.example.inzynierka.models.ParObiektRownania;
+import com.example.inzynierka.controllers.AbstractController;
 import com.example.inzynierka.models.DisturbanceDiscrete;
-import com.example.inzynierka.tunningControllers.AbstractController;
+import com.example.inzynierka.models.ParObiektRownania;
 import lombok.Data;
 
 import java.util.ArrayList;

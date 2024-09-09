@@ -1,20 +1,14 @@
-import {
-  Component,
-  ChangeDetectorRef,
-  ViewChild,
-  ElementRef,
-} from '@angular/core';
-import { FormArray, FormControl, FormGroup } from '@angular/forms';
-import { Chart, registerables } from 'chart.js';
-import { Odpowiedz } from './model/odpowiedz';
-import { OdpowiedzMIMO } from './model/odpowiedzMIMO';
-import { WykresDane } from './model/wykresDane';
-import { datasetsMIMO } from './model/datasetsMIMO';
-import { StrojenieService } from './service/strojenie.service';
-import { OdpowiedzSkokowaService } from './service/odpowiedz-skokowa.service';
-import { OdpowiedzSkokowa } from './model/odpowiedzSkokowa';
-import { HttpErrorResponse } from '@angular/common/http';
-import { InfoService } from './service/info.service';
+import {ChangeDetectorRef, Component, ElementRef, ViewChild,} from '@angular/core';
+import {FormArray, FormControl, FormGroup} from '@angular/forms';
+import {Chart, registerables} from 'chart.js';
+import {Odpowiedz} from './model/odpowiedz';
+import {OdpowiedzMIMO} from './model/odpowiedzMIMO';
+import {WykresDane} from './model/wykresDane';
+import {datasetsMIMO} from './model/datasetsMIMO';
+import {StrojenieService} from './service/strojenie.service';
+import {OdpowiedzSkokowaService} from './service/odpowiedz-skokowa.service';
+import {OdpowiedzSkokowa} from './model/odpowiedzSkokowa';
+import {InfoService} from './service/info.service';
 
 @Component({
   selector: 'app-root',
@@ -24,21 +18,6 @@ import { InfoService } from './service/info.service';
 export class WizualizacjaComponent {
   zakladka = 'model';
   @ViewChild('fileInput') fileInput: ElementRef<HTMLInputElement>;
-
-  constructor(
-    private strojenieService: StrojenieService,
-    private infoService: InfoService,
-    private odpowiedzSkokowaService: OdpowiedzSkokowaService,
-    private cdRef: ChangeDetectorRef
-  ) {
-    Chart.register(...registerables);
-    this.fileInput = new ElementRef(document.createElement('input'));
-    this.fileInput.nativeElement.type = 'file';
-    this.fileInput.nativeElement.style.display = 'none';
-    for (let i = 0; i < 10; i++) {
-      this.optionsZaklocenia.push(i);
-    }
-  }
   odpowiedz?: Odpowiedz | null;
   OdpowiedzSkokowa?: OdpowiedzSkokowa | null;
   odpowiedzMIMO?: OdpowiedzMIMO | null;
@@ -49,33 +28,33 @@ export class WizualizacjaComponent {
   file: File | null = null;
   fileWizualizacji: File | null = null;
   fileZaklocen: File | null = null;
-  primaryXAxis = { valueType: 'krok' };
+  primaryXAxis = {valueType: 'krok'};
   title = 'Symulacje obiektu regulowanego';
   rownanie =
     ' $ \\large G(s) = Gain * \\frac{(R1*s + Q1)(R2*s + Q2)}{(T1*s+1)(T2*s+1)(T3+3)}*e^{Delay}$  ';
   zmienne = [
-    { id: 1, nazwa: 'Gain' },
-    { id: 2, nazwa: 'R1' },
-    { id: 3, nazwa: 'Q1' },
-    { id: 4, nazwa: 'R2' },
-    { id: 5, nazwa: 'Q2' },
-    { id: 6, nazwa: 'T1' },
-    { id: 7, nazwa: 'T2' },
-    { id: 8, nazwa: 'T3' },
-    { id: 9, nazwa: 'Delay' },
-    { id: 10, nazwa: 'Tp' },
+    {id: 1, nazwa: 'Gain'},
+    {id: 2, nazwa: 'R1'},
+    {id: 3, nazwa: 'Q1'},
+    {id: 4, nazwa: 'R2'},
+    {id: 5, nazwa: 'Q2'},
+    {id: 6, nazwa: 'T1'},
+    {id: 7, nazwa: 'T2'},
+    {id: 8, nazwa: 'T3'},
+    {id: 9, nazwa: 'Delay'},
+    {id: 10, nazwa: 'Tp'},
   ];
   zmienneGPC = [
-    { id: 1, nazwa: 'A1' },
-    { id: 2, nazwa: 'A2' },
-    { id: 3, nazwa: 'A3' },
-    { id: 4, nazwa: 'A4' },
-    { id: 5, nazwa: 'A5' },
-    { id: 6, nazwa: 'B1' },
-    { id: 7, nazwa: 'B2' },
-    { id: 8, nazwa: 'B3' },
-    { id: 9, nazwa: 'B4' },
-    { id: 10, nazwa: 'B5' },
+    {id: 1, nazwa: 'A1'},
+    {id: 2, nazwa: 'A2'},
+    {id: 3, nazwa: 'A3'},
+    {id: 4, nazwa: 'A4'},
+    {id: 5, nazwa: 'A5'},
+    {id: 6, nazwa: 'B1'},
+    {id: 7, nazwa: 'B2'},
+    {id: 8, nazwa: 'B3'},
+    {id: 9, nazwa: 'B4'},
+    {id: 10, nazwa: 'B5'},
   ];
   optionsQ = [-1, 0, 1];
   optionsZaklocenia: number[] = [];
@@ -195,9 +174,23 @@ export class WizualizacjaComponent {
   czyError = true;
   errorInfo = 'Wystapil blad';
   czyInnyObiekt = false;
+
+  constructor(
+    private strojenieService: StrojenieService,
+    private infoService: InfoService,
+    private odpowiedzSkokowaService: OdpowiedzSkokowaService,
+    private cdRef: ChangeDetectorRef
+  ) {
+    Chart.register(...registerables);
+    this.fileInput = new ElementRef(document.createElement('input'));
+    this.fileInput.nativeElement.type = 'file';
+    this.fileInput.nativeElement.style.display = 'none';
+    for (let i = 0; i < 10; i++) {
+      this.optionsZaklocenia.push(i);
+    }
+  }
+
   updateObiekt(updatedObiekt: FormArray) {
-    console.log('updateObiekt');
-    console.log(updatedObiekt);
     if (updatedObiekt.controls['0'] != undefined) {
       this.strojenie.controls.parObiektDPA.patchValue(
         updatedObiekt.controls['0'].value
@@ -214,16 +207,13 @@ export class WizualizacjaComponent {
       }
       if (
         this.strojenie.controls.MIMO.controls.liczbaWyjsc.value !=
-          this.liczbaWyjscArray.length ||
+        this.liczbaWyjscArray.length ||
         this.strojenie.controls.MIMO.controls.liczbaWejsc.value !=
-          this.liczbaWejsc
+        this.liczbaWejsc
       ) {
         if (this.strojenie.controls.MIMO.controls.liczbaWyjsc.value != null)
           this.liczbaWejsc =
             this.strojenie.controls.MIMO.controls.liczbaWejsc.value;
-        console.log('wchodzi');
-        console.log(this.strojenie.controls.MIMO.controls.liczbaWyjsc.value);
-        console.log(this.strojenie.controls.MIMO.controls.liczbaWejsc.value);
 
         this.strojenie.controls.parWizualizacja.controls.yZad.setValue(
           new Array(
@@ -255,7 +245,6 @@ export class WizualizacjaComponent {
           this.strojenie.controls.MIMO.controls.liczbaWyjsc.value &&
           this.strojenie.controls.MIMO.controls.liczbaWejsc.value
         ) {
-          console.log('wchodzi');
           if (this.strojenie.controls.parRegulator.controls.typ.value == 'pid')
             this.strojenie.controls.parWizualizacja.controls.strojenie.setValue(
               new Array(
@@ -268,16 +257,15 @@ export class WizualizacjaComponent {
                 this.strojenie.controls.MIMO.controls.liczbaWejsc.value
               ).fill(null)
             );
-          console.log(this.strojenie.controls.MIMO.controls.liczbaWejsc.value);
           this.strojenieTemp = this.strojenie.get(
             'parWizualizacja.strojenie'
           )?.value;
           this.liczbaWyjscArray = Array.from(
-            { length: this.strojenie.controls.MIMO.controls.liczbaWyjsc.value },
+            {length: this.strojenie.controls.MIMO.controls.liczbaWyjsc.value},
             (_, i) => i
           );
           this.liczbaWejscArray = Array.from(
-            { length: this.strojenie.controls.MIMO.controls.liczbaWejsc.value },
+            {length: this.strojenie.controls.MIMO.controls.liczbaWejsc.value},
             (_, i) => i
           );
         }
@@ -287,9 +275,9 @@ export class WizualizacjaComponent {
           this.liczbaZaklocen = [];
         }
       }
-      console.log(this.strojenie.controls.parWizualizacja);
     }
   }
+
   updateRegulator(updatedRegulator: FormArray) {
     if (updatedRegulator.controls['0'] != undefined) {
       this.strojenie.controls.parRegulator.patchValue(
@@ -323,9 +311,11 @@ export class WizualizacjaComponent {
       }
     }
   }
+
   setBlad(nazwa: string) {
     (<FormControl>this.strojenie.get('parWizualizacja.blad')).setValue(nazwa);
   }
+
   zmienLiczbeZaklocen(event: any) {
     const liczbaZaklocenTemp: number = event.target.value;
     this.strojenie
@@ -338,66 +328,67 @@ export class WizualizacjaComponent {
     for (let i = 0; i < liczbaZaklocenTemp; i++) {
       this.liczbaZaklocen.push(i);
     }
-    const tablicaZaklocen = Array.from({ length: liczbaZaklocenTemp }, () => 1);
+    const tablicaZaklocen = Array.from({length: liczbaZaklocenTemp}, () => 1);
     this.strojenie.controls.zakloceniaDPA.controls.gain.setValue(
-      Array.from({ length: liczbaZaklocenTemp }, () => 1)
+      Array.from({length: liczbaZaklocenTemp}, () => 1)
     );
     this.strojenie
       .get('zakloceniaDPA.r1')
-      ?.setValue(Array.from({ length: liczbaZaklocenTemp }, () => 1.0));
+      ?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0));
     this.strojenie
       .get('zakloceniaDPA.q1')
-      ?.setValue(Array.from({ length: liczbaZaklocenTemp }, () => -1));
+      ?.setValue(Array.from({length: liczbaZaklocenTemp}, () => -1));
     this.strojenie
       .get('zakloceniaDPA.r2')
-      ?.setValue(Array.from({ length: liczbaZaklocenTemp }, () => 1.0));
+      ?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0));
     this.strojenie
       .get('zakloceniaDPA.q2')
-      ?.setValue(Array.from({ length: liczbaZaklocenTemp }, () => -1));
+      ?.setValue(Array.from({length: liczbaZaklocenTemp}, () => -1));
     this.strojenie
       .get('zakloceniaDPA.t1')
-      ?.setValue(Array.from({ length: liczbaZaklocenTemp }, () => 1.0));
+      ?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0));
     this.strojenie
       .get('zakloceniaDPA.t2')
-      ?.setValue(Array.from({ length: liczbaZaklocenTemp }, () => 1.0));
+      ?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0));
     this.strojenie
       .get('zakloceniaDPA.t3')
-      ?.setValue(Array.from({ length: liczbaZaklocenTemp }, () => 1.0));
+      ?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0));
     this.strojenie
       .get('zakloceniaDPA.tp')
-      ?.setValue(Array.from({ length: liczbaZaklocenTemp }, () => this.strojenie.controls.parObiektDPA.controls.tp.value));
+      ?.setValue(Array.from({length: liczbaZaklocenTemp}, () => this.strojenie.controls.parObiektDPA.controls.tp.value));
     this.strojenie
       .get('zakloceniaDPA.delay')
-      ?.setValue(Array.from({ length: liczbaZaklocenTemp }, () => 1.0));
+      ?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0));
     this.strojenie
       .get('zakloceniaRownania.b1')
-      ?.setValue(Array.from({ length: liczbaZaklocenTemp }, () => 1.0));
+      ?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0));
     this.strojenie
       .get('zakloceniaRownania.b2')
-      ?.setValue(Array.from({ length: liczbaZaklocenTemp }, () => 1.0));
+      ?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0));
     this.strojenie
       .get('zakloceniaRownania.b3')
-      ?.setValue(Array.from({ length: liczbaZaklocenTemp }, () => 1.0));
+      ?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0));
     this.strojenie
       .get('zakloceniaRownania.b4')
-      ?.setValue(Array.from({ length: liczbaZaklocenTemp }, () => 1.0));
+      ?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0));
     this.strojenie
       .get('zakloceniaRownania.b5')
-      ?.setValue(Array.from({ length: liczbaZaklocenTemp }, () => 1.0));
+      ?.setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0));
 
     this.strojenie
       .get('wizualizacjaZaklocen.uSkok')!
-      .setValue(Array.from({ length: liczbaZaklocenTemp }, () => 0.0));
+      .setValue(Array.from({length: liczbaZaklocenTemp}, () => 0.0));
     this.strojenie
       .get('wizualizacjaZaklocen.skokZaklocenia')!
-      .setValue(Array.from({ length: liczbaZaklocenTemp }, () => 0.0));
+      .setValue(Array.from({length: liczbaZaklocenTemp}, () => 0.0));
     this.strojenie
       .get('wizualizacjaZaklocen.skokPowrotnyZaklocenia')!
-      .setValue(Array.from({ length: liczbaZaklocenTemp }, () => 100.0));
+      .setValue(Array.from({length: liczbaZaklocenTemp}, () => 100.0));
     this.strojenie
       .get('wizualizacjaZaklocen.deltaU')!
-      .setValue(Array.from({ length: liczbaZaklocenTemp }, () => 1.0));
+      .setValue(Array.from({length: liczbaZaklocenTemp}, () => 1.0));
   }
+
   updateZaklocenieDPAValue(zaklocenie: number, fieldName: string, target: any) {
     const currentValue = this.strojenie.get(
       'zakloceniaDPA.' + fieldName
@@ -406,6 +397,7 @@ export class WizualizacjaComponent {
     currentValue[zaklocenie] = nowaWartosc;
     this.strojenie.get('zakloceniaDPA.' + fieldName)!.setValue(currentValue);
   }
+
   updateZaklocenieRownaniaValue(
     zaklocenie: number,
     fieldName: string,
@@ -420,6 +412,7 @@ export class WizualizacjaComponent {
       .get('zakloceniaRownania.' + fieldName)!
       .setValue(currentValue);
   }
+
   updateWizualizacjiaZaklocenieValue(
     zaklocenie: number,
     fieldName: string,
@@ -433,8 +426,8 @@ export class WizualizacjaComponent {
     this.strojenie
       .get('wizualizacjaZaklocen.' + fieldName)!
       .setValue(currentValue);
-    console.log(this.strojenie.get('wizualizacjaZaklocen.' + fieldName)!.value);
   }
+
   infoZaklocenie(): void {
     if (this.typRegulatora == 'pid' || this.typRegulatora == 'dmc') {
       this.infoService
@@ -442,22 +435,21 @@ export class WizualizacjaComponent {
         .subscribe({
           next: (response) => {
             this.liczbaZaklocen = [];
-            console.log(response);
             for (let i = 0; i < response.wejscia; i++) {
               this.liczbaZaklocen.push(i);
             }
             this.strojenie
               .get('wizualizacjaZaklocen.uSkok')!
-              .setValue(Array.from({ length: response.wejscia }, () => 0.0));
+              .setValue(Array.from({length: response.wejscia}, () => 0.0));
             this.strojenie
               .get('wizualizacjaZaklocen.skokZaklocenia')!
-              .setValue(Array.from({ length: response.wejscia }, () => 0.0));
+              .setValue(Array.from({length: response.wejscia}, () => 0.0));
             this.strojenie
               .get('wizualizacjaZaklocen.skokPowrotnyZaklocenia')!
-              .setValue(Array.from({ length: response.wejscia }, () => 100.0));
+              .setValue(Array.from({length: response.wejscia}, () => 100.0));
             this.strojenie
               .get('wizualizacjaZaklocen.deltaU')!
-              .setValue(Array.from({ length: response.wejscia }, () => 1.0));
+              .setValue(Array.from({length: response.wejscia}, () => 1.0));
           },
           error: () => {
             this.fileZaklocen = null;
@@ -472,22 +464,21 @@ export class WizualizacjaComponent {
         .subscribe({
           next: (response) => {
             this.liczbaZaklocen = [];
-            console.log(response);
             for (let i = 0; i < response.wejscia; i++) {
               this.liczbaZaklocen.push(i);
             }
             this.strojenie
               .get('wizualizacjaZaklocen.uSkok')!
-              .setValue(Array.from({ length: response.wejscia }, () => 0.0));
+              .setValue(Array.from({length: response.wejscia}, () => 0.0));
             this.strojenie
               .get('wizualizacjaZaklocen.skokZaklocenia')!
-              .setValue(Array.from({ length: response.wejscia }, () => 0.0));
+              .setValue(Array.from({length: response.wejscia}, () => 0.0));
             this.strojenie
               .get('wizualizacjaZaklocen.skokPowrotnyZaklocenia')!
-              .setValue(Array.from({ length: response.wejscia }, () => 100.0));
+              .setValue(Array.from({length: response.wejscia}, () => 100.0));
             this.strojenie
               .get('wizualizacjaZaklocen.deltaU')!
-              .setValue(Array.from({ length: response.wejscia }, () => 1.0));
+              .setValue(Array.from({length: response.wejscia}, () => 1.0));
           },
           error: () => {
             this.fileZaklocen = null;
@@ -496,6 +487,7 @@ export class WizualizacjaComponent {
         });
     }
   }
+
   onYZadChange(index: number, value: any) {
     let yZad = this.strojenie.get('parWizualizacja.yZad')?.value;
     if (value && yZad) {
@@ -503,6 +495,7 @@ export class WizualizacjaComponent {
       this.strojenie.get('parWizualizacja.yZad')!.setValue(yZad);
     }
   }
+
   onYPPChange(index: number, value: any) {
     let yPP = this.strojenie.get('parWizualizacja.yPP')?.value;
     if (value && yPP) {
@@ -510,6 +503,7 @@ export class WizualizacjaComponent {
       this.strojenie.get('parWizualizacja.yPP')!.setValue(yPP);
     }
   }
+
   onUPPChange(index: number, value: any) {
     let uPP = this.strojenie.get('parWizualizacja.uPP')?.value;
     if (value && uPP) {
@@ -517,6 +511,7 @@ export class WizualizacjaComponent {
       this.strojenie.get('parWizualizacja.uPP')!.setValue(uPP);
     }
   }
+
   onSkokChange(index: number, value: any) {
     let skok = this.strojenie.get('parWizualizacja.skok')?.value;
     if (value && skok) {
@@ -524,6 +519,7 @@ export class WizualizacjaComponent {
       this.strojenie.get('parWizualizacja.skok')!.setValue(skok);
     }
   }
+
   onStrojenieChange(index: number, value: any) {
     let strojenie = this.strojenie.get('parWizualizacja.strojenie')?.value;
     if (value && strojenie) {
@@ -532,13 +528,12 @@ export class WizualizacjaComponent {
     }
     this.strojenieTemp = this.strojenie.get('parWizualizacja.strojenie')!.value;
   }
+
   updateDlugosc(value: number) {
     this.strojenie.get('parWizualizacja.dlugosc')!.setValue(value);
   }
 
   onSubmit() {
-    console.log('click');
-    console.log(this.strojenie);
     this.odpowiedzMIMO = null;
     this.odpowiedz = null;
     this.czyLaduje = true;
@@ -548,16 +543,13 @@ export class WizualizacjaComponent {
         next: (response) => {
           this.czyLaduje = false;
           this.odpowiedz = response;
-          for(let i = 0; i <  this.odpowiedz.wspolczynniki.length; i++) {
+          for (let i = 0; i < this.odpowiedz.wspolczynniki.length; i++) {
             this.odpowiedz.wspolczynniki[i] = parseFloat(this.odpowiedz.wspolczynniki[i].toFixed(4))
           }
           this.liczbaRegulatorow = [0];
-          console.log(this.liczbaRegulatorow);
           if (this.odpowiedz != null)
             this.odpowiedz.typRegulatora =
               this.strojenie.controls.parRegulator.value['typ'];
-          console.log('odpowiedz');
-          console.log(this.odpowiedz);
 
           this.createChartData();
           this.createChart();
@@ -566,13 +558,9 @@ export class WizualizacjaComponent {
         error: (error) => {
           this.czyError = true;
           this.errorInfo = error.message;
-          console.log(error.message);
-          console.error('There was an error!', error);
-          console.log(error);
         },
       });
     } else {
-      console.log('ok');
       this.strojenieService.dobierzStrojenieMIMO(this.strojenie).subscribe({
         next: (response) => {
           this.czyLaduje = false;
@@ -580,29 +568,24 @@ export class WizualizacjaComponent {
           if (this.odpowiedzMIMO != null)
             this.odpowiedzMIMO.typRegulatora =
               this.strojenie.controls.parRegulator.value['typ'];
-          console.log('odpowiedz');
-          console.log(this.odpowiedzMIMO);
-          for(let i = 0; i <  this.odpowiedzMIMO.wspolczynniki.length; i++) {
+          for (let i = 0; i < this.odpowiedzMIMO.wspolczynniki.length; i++) {
             this.odpowiedzMIMO.wspolczynniki[i] = parseFloat(this.odpowiedzMIMO.wspolczynniki[i].toFixed(4))
           }
           this.liczbaRegulatorow = Array.from(
-            { length: this.odpowiedzMIMO.cel.length },
+            {length: this.odpowiedzMIMO.cel.length},
             (_, i) => i
           );
-          console.log(this.liczbaRegulatorow);
           this.createChartDataMIMO();
           this.createChartSterowaniaMIMO();
         },
         error: (error) => {
           this.czyError = true;
           this.errorInfo = error.message;
-          console.log(error.message);
-          console.error('There was an error!', error);
-          console.log(error);
         },
       });
     }
   }
+
   createChartData() {
     if (this.odpowiedz) {
       var arrKroki: number[] = new Array(this.odpowiedz.wykres.length);
@@ -611,15 +594,13 @@ export class WizualizacjaComponent {
       }
       this.chartData = {
         kroki: arrKroki,
-        cel: this.odpowiedz.cel,
+        cel: this.odpowiedz.goal,
         obiekt: this.odpowiedz.wykres,
       };
-      console.log(this.chartData);
     }
   }
+
   createChart() {
-    console.log('createChart');
-    console.log(this.chartData);
     if (this.chartData) {
       if (this.myChart) this.myChart.destroy();
       this.myChart = new Chart('myChart', {
@@ -644,6 +625,7 @@ export class WizualizacjaComponent {
       });
     }
   }
+
   createChartDataMIMO() {
     if (this.odpowiedzMIMO) {
       var arrKroki: number[] = new Array(this.odpowiedzMIMO.wykres[0].length);
@@ -651,14 +633,12 @@ export class WizualizacjaComponent {
         arrKroki[i] = i;
       }
 
-      console.log('createChart');
-
       if (this.myChart) this.myChart.destroy();
-      var chartDataSet: datasetsMIMO[] = new Array();
-      for (let i = 1; i < this.odpowiedzMIMO.cel.length + 1; i++) {
+      var chartDataSet: datasetsMIMO[] = [];
+      for (let i = 1; i < this.odpowiedzMIMO.goal.length + 1; i++) {
         chartDataSet.push({
           label: 'Wartość zadana wyjścia ' + i,
-          data: this.odpowiedzMIMO.cel[i - 1],
+          data: this.odpowiedzMIMO.goal[i - 1],
           borderColor: this.randomRGB(),
           pointRadius: 3,
         });
@@ -669,7 +649,6 @@ export class WizualizacjaComponent {
           pointRadius: 3,
         });
       }
-      console.log(chartDataSet);
       let chartData = {
         labels: arrKroki,
         datasets: chartDataSet,
@@ -680,11 +659,12 @@ export class WizualizacjaComponent {
       });
     }
   }
+
   randomNum = () => Math.floor(Math.random() * (235 - 52 + 1) + 52);
   randomRGB = () =>
     `rgb(${this.randomNum()}, ${this.randomNum()}, ${this.randomNum()})`;
+
   WyznaczOdpowiedz() {
-    console.log('click');
     this.czyLaduje = true;
     this.czyError = false;
     if (this.strojenie.controls.MIMO.controls['plik'].value == null) {
@@ -699,9 +679,6 @@ export class WizualizacjaComponent {
           error: (error) => {
             this.czyError = true;
             this.errorInfo = error.message;
-            console.log(error.message);
-            console.error('There was an error!', error);
-            console.log(error);
           },
         });
     } else {
@@ -711,28 +688,24 @@ export class WizualizacjaComponent {
           next: (response) => {
             this.czyLaduje = false;
             this.OdpowiedzSkokowa = response;
-            console.log(this.OdpowiedzSkokowa);
             this.createChartOdpSkokMIMO();
           },
           error: (error) => {
             this.czyError = true;
             this.errorInfo = error.message;
-            console.log(error.message);
-            console.error('There was an error!', error);
-            console.log(error);
           },
         });
     }
   }
+
   createChartSterowania() {
-    console.log('sterowanieSISOChart');
     if (this.odpowiedz) {
       var arrKroki: number[] = new Array(this.odpowiedz.sterowanie.length);
       for (var i = 0; i < this.odpowiedz.sterowanie.length; i++) {
         arrKroki[i] = i;
       }
       if (this.sterowanieChart) this.sterowanieChart.destroy();
-      var chartDataSet: datasetsMIMO[] = new Array();
+      var chartDataSet: datasetsMIMO[] = [];
       chartDataSet.push(
         {
           label: 'Wejście obiektu',
@@ -741,13 +714,13 @@ export class WizualizacjaComponent {
           pointRadius: 3,
         }
       )
-      if(this.odpowiedz.sterowanieZaklocenia != null && this.odpowiedz.sterowanieZaklocenia.length > 0) {
-        for(let i = 1; i < this.odpowiedz.sterowanieZaklocenia.length + 1; i++) {
+      if (this.odpowiedz.sterowanieZaklocenia != null && this.odpowiedz.sterowanieZaklocenia.length > 0) {
+        for (let i = 1; i < this.odpowiedz.sterowanieZaklocenia.length + 1; i++) {
           chartDataSet.push({
             label: 'Wejście zakłócenia ' + i,
-          data: this.odpowiedz.sterowanieZaklocenia[i - 1],
-          borderColor: this.randomRGB(),
-          pointRadius: 2,
+            data: this.odpowiedz.sterowanieZaklocenia[i - 1],
+            borderColor: this.randomRGB(),
+            pointRadius: 2,
           })
         }
       }
@@ -761,8 +734,8 @@ export class WizualizacjaComponent {
       });
     }
   }
+
   createChartSterowaniaMIMO() {
-    console.log('createChartSterowaniaMIMO');
     if (this.odpowiedzMIMO) {
       var arrKroki: number[] = new Array(
         this.odpowiedzMIMO.sterowanie[0].length
@@ -774,7 +747,7 @@ export class WizualizacjaComponent {
 
       let liczbaWyjsc = this.strojenie.controls.MIMO.controls.liczbaWyjsc.value;
       let liczbaWejsc = this.strojenie.controls.MIMO.controls.liczbaWejsc.value;
-      var chartDataSet: datasetsMIMO[] = new Array();
+      var chartDataSet: datasetsMIMO[] = [];
       if (liczbaWejsc != null)
         if (liczbaWyjsc != null)
           for (let i = 1; i < liczbaWejsc + 1; i++) {
@@ -785,17 +758,16 @@ export class WizualizacjaComponent {
               pointRadius: 3,
             });
           }
-    if(this.odpowiedzMIMO.sterowanieZaklocenia != null && this.odpowiedzMIMO.sterowanieZaklocenia.length > 0) {
-      for(let i = 1; i < this.odpowiedzMIMO.sterowanieZaklocenia.length + 1; i++) {
-        chartDataSet.push({
-          label: 'Wejście zakłócenia ' + i,
-        data: this.odpowiedzMIMO.sterowanieZaklocenia[i - 1],
-        borderColor: this.randomRGB(),
-        pointRadius: 2,
-        })
+      if (this.odpowiedzMIMO.sterowanieZaklocenia != null && this.odpowiedzMIMO.sterowanieZaklocenia.length > 0) {
+        for (let i = 1; i < this.odpowiedzMIMO.sterowanieZaklocenia.length + 1; i++) {
+          chartDataSet.push({
+            label: 'Wejście zakłócenia ' + i,
+            data: this.odpowiedzMIMO.sterowanieZaklocenia[i - 1],
+            borderColor: this.randomRGB(),
+            pointRadius: 2,
+          })
+        }
       }
-    }
-      console.log(chartDataSet);
       let chartData = {
         labels: arrKroki,
         datasets: chartDataSet,
@@ -807,8 +779,8 @@ export class WizualizacjaComponent {
       });
     }
   }
+
   createChartOdpSkok() {
-    console.log('OdpSkokChart');
     if (this.OdpowiedzSkokowa) {
       var arrKroki: number[] = new Array(
         this.OdpowiedzSkokowa.przebieg[0].length
@@ -833,8 +805,8 @@ export class WizualizacjaComponent {
       });
     }
   }
+
   createChartOdpSkokMIMO() {
-    console.log('OdpSkokMIMOChart');
     if (this.OdpowiedzSkokowa) {
       var arrKroki: number[] = new Array(
         this.OdpowiedzSkokowa.przebieg[0].length
@@ -846,7 +818,7 @@ export class WizualizacjaComponent {
 
       let liczbaWyjsc = this.strojenie.controls.MIMO.controls.liczbaWyjsc.value;
       let liczbaWejsc = this.strojenie.controls.MIMO.controls.liczbaWejsc.value;
-      var chartDataSet: datasetsMIMO[] = new Array();
+      var chartDataSet: datasetsMIMO[] = [];
       if (liczbaWejsc != null)
         if (liczbaWyjsc != null)
           for (let i = 1; i < liczbaWejsc + 1; i++)
@@ -854,13 +826,12 @@ export class WizualizacjaComponent {
               chartDataSet.push({
                 label: 'u-' + i + 'y-' + j,
                 data: this.OdpowiedzSkokowa.przebieg[
-                  (i - 1) * liczbaWejsc + j - 1
-                ],
+                (i - 1) * liczbaWejsc + j - 1
+                  ],
                 borderColor: this.randomRGB(),
                 pointRadius: 3,
               });
             }
-      console.log(chartDataSet);
       let chartData = {
         labels: arrKroki,
         datasets: chartDataSet,
@@ -872,6 +843,7 @@ export class WizualizacjaComponent {
       });
     }
   }
+
   onCheckboxChange(index: number, event: any) {
     let strojenie: (number | null)[] | null | undefined = this.strojenie.get(
       'parWizualizacja.strojenie'
@@ -885,27 +857,29 @@ export class WizualizacjaComponent {
       this.strojenie.get('parWizualizacja.strojenie')!.setValue(strojenie);
     }
   }
+
   isDisabled(index: number) {
     let strojenie = this.strojenie.get('parWizualizacja.strojenie')?.value;
     if (strojenie) return strojenie[index] == null;
     else return true;
   }
+
   onFileWizualizacjiChange(event: any) {
     const file = event.target.files[0];
     this.fileWizualizacji = file;
     this.strojenie.get('MIMO.plikWizualizacji')?.patchValue(file);
     this.cdRef.detectChanges();
   }
+
   onFileZaklocenChange(event: any) {
     const file = event.target.files[0];
     this.fileZaklocen = file;
     this.strojenie.get('MIMO.plikZaklocen')?.patchValue(file);
     this.cdRef.detectChanges();
   }
+
   obiektSymulacjiInputs() {
-    console.log(this.file);
     if (this.czyInnyObiekt) {
-      console.log('pierwsze');
       this.strojenie.get('parObiektSymulacjiDPA')?.reset();
       this.strojenie.get('parObiektSymulacjiDPA')?.disable();
       this.strojenie.get('parObiektSymulacjiRownania')?.reset();
@@ -918,7 +892,6 @@ export class WizualizacjaComponent {
         this.fileInput.nativeElement.value = '';
       }
     } else {
-      console.log('drugie');
       this.strojenie.get('parObiektSymulacjiDPA')?.enable();
       this.strojenie
         .get('parObiektSymulacjiDPA')
@@ -930,10 +903,12 @@ export class WizualizacjaComponent {
     }
     this.czyInnyObiekt = !this.czyInnyObiekt;
   }
+
   ngOnInit(): void {
     this.strojenie.get('parObiektSymulacjiDPA')?.disable();
     this.strojenie.get('parObiektSymulacjiRownania')?.disable();
   }
+
   ngAfterViewInit() {
     this.cdRef.detectChanges();
   }
